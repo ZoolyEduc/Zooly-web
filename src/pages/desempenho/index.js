@@ -7,49 +7,20 @@ import { apiRequest, downloadApiFile } from "../../services/api";
 import { getId, formatDate } from "../../services/session";
 import styles from "./desempenho.module.css";
 
-const anoAtual = new Date().getFullYear();
-
-// Função que calcula qual é o bimestre atual baseado no mês e dia
-function obterBimestreAtual() {
+function dataLocalISO() {
   const hoje = new Date();
-  const mes = hoje.getMonth() + 1; // 1 a 12
-  const dia = hoje.getDate();
-
-  // Datas do Calendário Escolar 2026 (baseado no PDF)
-  if ((mes === 2 && dia >= 4) || mes === 3 || (mes === 4 && dia <= 22)) return "1";
-  if ((mes === 4 && dia >= 23) || mes === 5 || mes === 6 || (mes === 7 && dia <= 6)) return "2";
-  if ((mes === 7 && dia >= 24) || mes === 8 || mes === 9 || (mes === 10 && dia <= 2)) return "3";
-  
-  // Se não cair em nenhum dos anteriores (ex: férias de julho ou janeiro), 
-  // assume o próximo ou o último. Para outubro (dia 31) cai no 4º.
-  if (mes >= 10 || mes === 11 || mes === 12) return "4"; 
-  
-  return "1"; // Fallback (ex: janeiro)
-}
-
-// Define as datas exatas do calendário escolar para o Back-end/Exibição
-function calcularPeriodoBimestre(bimestre, ano) {
-  const periodos = {
-    1: { inicio: `${ano}-02-04`, fim: `${ano}-04-22` },
-    2: { inicio: `${ano}-04-23`, fim: `${ano}-07-06` },
-    3: { inicio: `${ano}-07-24`, fim: `${ano}-10-02` },
-    4: { inicio: `${ano}-10-05`, fim: `${ano}-12-18` },
-  };
-  return periodos[bimestre] || periodos[1];
+  const mes = String(hoje.getMonth() + 1).padStart(2, "0");
+  const dia = String(hoje.getDate()).padStart(2, "0");
+  return `${hoje.getFullYear()}-${mes}-${dia}`;
 }
 
 export default function Desempenho() {
   const [turmas, setTurmas] = useState([]);
   const [turmaId, setTurmaId] = useState("");
-  
-  // Inicia com o bimestre atual detectado automaticamente
-  const [bimestre, setBimestre] = useState(obterBimestreAtual()); 
-  
+  const [dataReferencia, setDataReferencia] = useState(dataLocalISO);
   const [relatorio, setRelatorio] = useState(null);
-  
   const [loadingTurmas, setLoadingTurmas] = useState(true);
   const [buscandoRelatorio, setBuscandoRelatorio] = useState(false);
-  
   const [erro, setErro] = useState("");
   const [baixando, setBaixando] = useState(false);
   const [mostrarTodos, setMostrarTodos] = useState(false);
@@ -77,45 +48,19 @@ export default function Desempenho() {
   }, []);
 
   useEffect(() => {
-    if (!turmaId || !bimestre) return undefined;
-    
+    if (!turmaId || !dataReferencia) return undefined;
     let ativo = true;
-    
     const timer = window.setTimeout(() => {
       setBuscandoRelatorio(true);
       setErro("");
+      setRelatorio(null);
       setMostrarTodos(false);
-
-      // Instrução para quando o Back-end estiver pronto:
-      // Substitua a chamada apiRequest atual por esta e remova a sobrescrita de periodo:
-      // apiRequest(`/api/desempenho/turmas/${turmaId}/bimestral?ano=${anoAtual}&bimestre=${bimestre}`)
-      //   .then((resposta) => { if (ativo) setRelatorio(resposta); })
-      
-      apiRequest(
-        `/api/desempenho/turmas/${turmaId}/semanal?data=${anoAtual}-06-15` 
-      )
+      apiRequest(`/api/desempenho/turmas/${turmaId}/semanal?data=${dataReferencia}`)
         .then((resposta) => {
-          if (!ativo) return;
-          
-          const periodoCalculado = calcularPeriodoBimestre(bimestre, anoAtual);
-          
-          setRelatorio({
-            ...resposta,
-            turma: resposta?.turma || turmas.find(t => getId(t) === turmaId),
-            periodo: periodoCalculado,
-          });
+          if (ativo) setRelatorio(resposta);
         })
         .catch((error) => {
-          if (ativo) {
-            const periodoCalculado = calcularPeriodoBimestre(bimestre, anoAtual);
-            setRelatorio({
-              turma: turmas.find(t => getId(t) === turmaId),
-              periodo: periodoCalculado,
-              indicadores: { percentualAcerto: 0, atividadesIniciadas: 0 },
-              alunos: []
-            });
-            setErro(""); 
-          }
+          if (ativo) setErro(error.message);
         })
         .finally(() => {
           if (ativo) setBuscandoRelatorio(false);
@@ -126,20 +71,16 @@ export default function Desempenho() {
       ativo = false;
       window.clearTimeout(timer);
     };
-  }, [turmaId, bimestre, turmas]);
+  }, [turmaId, dataReferencia]);
 
   async function baixarPdf() {
     if (!turmaId) return;
     setErro("");
     setBaixando(true);
     try {
-      // Instrução para quando o Back-end estiver pronto:
-      // Substitua a URL abaixo por: 
-      // `/api/desempenho/turmas/${turmaId}/bimestral/pdf?ano=${anoAtual}&bimestre=${bimestre}`
-      
       await downloadApiFile(
-        `/api/desempenho/turmas/${turmaId}/semanal/pdf?data=${anoAtual}-06-15`,
-        `relatorio-zooly-bim${bimestre}.pdf`
+        `/api/desempenho/turmas/${turmaId}/semanal/pdf?data=${dataReferencia}`,
+        `relatorio-zooly-semanal-${dataReferencia}.pdf`,
       );
     } catch (error) {
       setErro(error.message);
@@ -151,7 +92,9 @@ export default function Desempenho() {
   const indicadores = relatorio?.indicadores || {};
   const alunos = relatorio?.alunos || [];
   const dificuldades = alunos.filter(
-    (item) => (item.indicadores?.percentualAcerto ?? 80) < 50
+    (item) =>
+      item.indicadores?.percentualAcerto != null &&
+      item.indicadores.percentualAcerto < 50,
   ).length;
 
   return (
@@ -183,17 +126,14 @@ export default function Desempenho() {
           </label>
           
           <label>
-            <span>Bimestre ({anoAtual}):</span>
-            <select
-              value={bimestre}
-              onChange={(e) => setBimestre(e.target.value)}
+            <span>Data de referência:</span>
+            <input
+              type="date"
+              value={dataReferencia}
+              onChange={(event) => setDataReferencia(event.target.value)}
               disabled={loadingTurmas}
-            >
-              <option value="1">1º Bimestre</option>
-              <option value="2">2º Bimestre</option>
-              <option value="3">3º Bimestre</option>
-              <option value="4">4º Bimestre</option>
-            </select>
+              required
+            />
           </label>
         </div>
 
@@ -212,16 +152,20 @@ export default function Desempenho() {
                 <span className={`${styles.metricIcon} ${styles.green}`}>↗</span>
                 <div>
                   <small>MÉDIA DA TURMA</small>
-                  <strong>{indicadores.percentualAcerto ?? 0}%</strong>
+                    <strong>
+                      {indicadores.percentualAcerto == null
+                        ? "—"
+                        : `${indicadores.percentualAcerto}%`}
+                    </strong>
                 </div>
               </article>
               <article>
                 <span className={`${styles.metricIcon} ${styles.blue}`}>☑</span>
                 <div>
-                  <small>ATIVIDADES</small>
+                    <small>ATIVIDADES INICIADAS</small>
                   <strong>
                     {indicadores.atividadesIniciadas ?? 0}
-                    <em> total</em>
+                      <em> no período</em>
                   </strong>
                 </div>
               </article>
@@ -249,9 +193,10 @@ export default function Desempenho() {
                     <thead>
                       <tr>
                         <th>Aluno</th>
-                        <th>Nível de leitura</th>
-                        <th>Progresso</th>
-                        <th>Última atividade</th>
+                        <th>Iniciadas</th>
+                        <th>Concluídas</th>
+                        <th>Respostas</th>
+                        <th>Acerto</th>
                         <th>Ações</th>
                       </tr>
                     </thead>
@@ -259,13 +204,7 @@ export default function Desempenho() {
                       {(mostrarTodos ? alunos : alunos.slice(0, 4)).map(
                         (item, index) => {
                           const aluno = item.aluno || {};
-                          const percent = item.indicadores?.percentualAcerto ?? 0;
-                          const nivel =
-                            percent >= 85
-                              ? "Avançado"
-                              : percent < 50
-                              ? "Em Alerta"
-                              : "Intermediário";
+                          const percent = item.indicadores?.percentualAcerto ?? null;
                           return (
                             <tr key={aluno.id || aluno.ra || index}>
                               <td>
@@ -280,31 +219,13 @@ export default function Desempenho() {
                                   <strong>{aluno.nomeCompleto || "Aluno"}</strong>
                                 </div>
                               </td>
+                              <td>{item.indicadores?.atividadesIniciadas ?? 0}</td>
+                              <td>{item.indicadores?.atividadesConcluidas ?? 0}</td>
+                              <td>{item.indicadores?.respostasRegistradas ?? 0}</td>
+                              <td>{percent == null ? "Sem respostas" : `${percent}%`}</td>
                               <td>
-                                <span
-                                  className={`${styles.level} ${
-                                    nivel === "Avançado"
-                                      ? styles.levelAdvanced
-                                      : nivel === "Em Alerta"
-                                      ? styles.levelAlert
-                                      : styles.levelMiddle
-                                  }`}
-                                >
-                                  {nivel}
-                                </span>
-                              </td>
-                              <td>
-                                <div className={styles.progress}>
-                                  <span>
-                                    <i style={{ width: `${percent}%` }} />
-                                  </span>
-                                  <strong>{percent}%</strong>
-                                </div>
-                              </td>
-                              <td>{item.ultimoAcesso || "Sem registro"}</td>
-                              <td>
-                                <Link href={`/turmas/${turmaId}/alunos`}>
-                                  Ver Detalhes
+                                <Link href={`/desempenho/alunos/${aluno.id}`}>
+                                  Detalhes
                                 </Link>
                               </td>
                             </tr>
@@ -316,7 +237,7 @@ export default function Desempenho() {
                 </div>
               ) : (
                 <p className={styles.emptyTable}>
-                  Nenhum dado cadastrado para esta turma neste bimestre.
+                  Nenhum aluno cadastrado nesta turma.
                 </p>
               )}
               
@@ -333,14 +254,15 @@ export default function Desempenho() {
 
             <div className={styles.reportFooter}>
               <span>
-                Período do {bimestre}º Bimestre: {formatDate(relatorio.periodo?.inicio)} a{" "}
-                {formatDate(relatorio.periodo?.fim)}
+                Semana de {formatDate(relatorio.periodo?.inicio)} a{" "}
+                {formatDate(relatorio.periodo?.fim)} ({relatorio.periodo?.fuso})
+                {relatorio.periodo?.disponivel ? " · período encerrado" : " · período em andamento"}
               </span>
               <button
                 type="button"
                 className={styles.primary}
                 onClick={baixarPdf}
-                disabled={baixando || alunos.length === 0}
+                disabled={baixando || buscandoRelatorio || !relatorio}
               >
                 {baixando ? "Preparando PDF..." : "⇩ Gerar Relatório PDF"}
               </button>

@@ -6,22 +6,18 @@ import { useRouter } from "next/router";
 import TeacherLayout from "../../../components/TeacherLayout";
 import Notice from "../../../components/Notice";
 import { apiRequest } from "../../../services/api";
-import { demoEnabled } from "../../../services/demo";
 import { getId, formatDate } from "../../../services/session";
 import styles from "./alunos.module.css";
 
 const vazio = {
-  nomeCompleto: "",
-  idade: "",
   ra: "",
-  responsavel: "",
-  email: "",
 };
 
 export default function AlunosDaTurma() {
   const router = useRouter();
   const turmaId = router.query.id;
   const [turma, setTurma] = useState(null);
+  const [turmas, setTurmas] = useState([]);
   const [alunos, setAlunos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [mostrarForm, setMostrarForm] = useState(false);
@@ -30,22 +26,28 @@ export default function AlunosDaTurma() {
   const [sucesso, setSucesso] = useState("");
   const [salvando, setSalvando] = useState(false);
   const [alunoSelecionado, setAlunoSelecionado] = useState(null);
+  const [alunoEmEdicao, setAlunoEmEdicao] = useState(null);
+  const [formEdicao, setFormEdicao] = useState({ ra: "", turmaId: "" });
+  const [salvandoEdicao, setSalvandoEdicao] = useState(false);
 
   const carregar = useCallback(async () => {
-    if (!turmaId) return;
+    const id = router.query.id;
+    if (!id) return;
     try {
-      const [turmaResposta, alunosResposta] = await Promise.all([
-        apiRequest(`/api/turmas/${turmaId}`),
-        apiRequest(`/api/alunos/turma/${turmaId}`),
+      const [turmaResposta, alunosResposta, turmasResposta] = await Promise.all([
+        apiRequest(`/api/turmas/${id}`),
+        apiRequest(`/api/alunos/turma/${id}`),
+        apiRequest("/api/turmas"),
       ]);
       setTurma(turmaResposta?.turma || null);
       setAlunos(alunosResposta?.alunos || []);
+      setTurmas(turmasResposta?.turmas || []);
     } catch (error) {
       setErro(error.message);
     } finally {
       setLoading(false);
     }
-  }, [turmaId]);
+  }, [router]);
 
   useEffect(() => {
     if (!router.isReady) return undefined;
@@ -59,12 +61,9 @@ export default function AlunosDaTurma() {
     setSucesso("");
     setSalvando(true);
     try {
-      const body = demoEnabled()
-        ? { ...form, turmaId, ra: form.ra.trim() }
-        : { ra: form.ra.trim(), turmaId };
       const resposta = await apiRequest("/api/alunos", {
         method: "POST",
-        body,
+        body: { ra: form.ra.trim(), turmaId },
       });
       setSucesso(
         resposta?.mensagem ||
@@ -77,6 +76,41 @@ export default function AlunosDaTurma() {
       setErro(error.message);
     } finally {
       setSalvando(false);
+    }
+  }
+
+  function iniciarEdicao(aluno) {
+    setAlunoSelecionado(null);
+    setAlunoEmEdicao(aluno);
+    setFormEdicao({ ra: "", turmaId: "" });
+    setErro("");
+  }
+
+  async function atualizarAluno(event) {
+    event.preventDefault();
+    setErro("");
+    setSucesso("");
+    const body = {};
+    if (formEdicao.ra.trim()) body.ra = formEdicao.ra.trim();
+    if (formEdicao.turmaId) body.turmaId = formEdicao.turmaId;
+    if (Object.keys(body).length === 0) {
+      setErro("Informe um novo RA ou escolha uma turma de destino.");
+      return;
+    }
+
+    setSalvandoEdicao(true);
+    try {
+      const resposta = await apiRequest(
+        `/api/alunos/${getId(alunoEmEdicao)}`,
+        { method: "PUT", body },
+      );
+      setSucesso(resposta?.mensagem || "Aluno atualizado com sucesso.");
+      setAlunoEmEdicao(null);
+      await carregar();
+    } catch (error) {
+      setErro(error.message);
+    } finally {
+      setSalvandoEdicao(false);
     }
   }
 
@@ -112,21 +146,13 @@ export default function AlunosDaTurma() {
           </article>
           <article>
             <div>
-              <span>MISSÕES</span>
-              <strong>10</strong>
-              <small>Ativas</small>
+              <span>CADASTROS PENDENTES</span>
+              <strong>
+                {alunos.filter((aluno) => !aluno.cadastroInicialConcluido).length}
+              </strong>
+              <small>Precisam concluir o primeiro acesso</small>
             </div>
-            <div className={styles.missionProgress}>
-              <i />
-            </div>
-          </article>
-          <article>
-            <div>
-              <span>CONCLUÍDAS</span>
-              <strong>5</strong>
-              <small>Finalizadas</small>
-            </div>
-            <span className={styles.award}>✿</span>
+            <span className={styles.metricIcon}>…</span>
           </article>
         </section>
         <section className={styles.tableCard}>
@@ -154,16 +180,13 @@ export default function AlunosDaTurma() {
                 <thead>
                   <tr>
                     <th>Aluno</th>
-                    <th>Status</th>
-                    <th>Progresso</th>
-                    <th>Último acesso</th>
+                    <th>Cadastro</th>
+                    <th>Data do cadastro</th>
                     <th>Ações</th>
                   </tr>
                 </thead>
                 <tbody>
                   {alunos.map((aluno, index) => {
-                    const progresso =
-                      aluno.progresso ?? [85, 40, 92, 15][index % 4];
                     return (
                       <tr key={getId(aluno)}>
                         <td>
@@ -180,9 +203,6 @@ export default function AlunosDaTurma() {
                                 {aluno.nomeCompleto ||
                                   "Cadastro inicial pendente"}
                               </strong>
-                              <small>
-                                {aluno.email || "E-mail não informado"}
-                              </small>
                             </div>
                           </div>
                         </td>
@@ -194,21 +214,13 @@ export default function AlunosDaTurma() {
                           </span>
                         </td>
                         <td>
-                          <div className={styles.progress}>
-                            <span>
-                              <i style={{ width: `${progresso}%` }} />
-                            </span>
-                            <strong>{progresso}%</strong>
-                          </div>
-                        </td>
-                        <td>
-                          {aluno.ultimoAcesso || formatDate(aluno.createdAt)}
+                          {formatDate(aluno.createdAt)}
                         </td>
                         <td>
                           <button
                             className={styles.more}
                             type="button"
-                            aria-label={`Ver ${aluno.nomeCompleto}`}
+                            aria-label={`Consultar ${aluno.nomeCompleto || "aluno"}`}
                             onClick={() => setAlunoSelecionado(aluno)}
                           >
                             ⋮
@@ -268,59 +280,14 @@ export default function AlunosDaTurma() {
               <h2 id="student-modal-title">Novo Aluno</h2>
               <form onSubmit={cadastrar}>
                 <label>
-                  Nome do Aluno
+                  RA do aluno
                   <input
-                    value={form.nomeCompleto}
+                    value={form.ra}
                     onChange={(e) =>
-                      setForm({ ...form, nomeCompleto: e.target.value })
+                      setForm({ ...form, ra: e.target.value })
                     }
-                    placeholder="Ex.: Sarah do Nascimento"
+                    placeholder="RA informado pela escola"
                     required
-                  />
-                </label>
-                <div className={styles.formRow}>
-                  <label>
-                    Idade
-                    <input
-                      type="number"
-                      min="3"
-                      max="18"
-                      value={form.idade}
-                      onChange={(e) =>
-                        setForm({ ...form, idade: e.target.value })
-                      }
-                      placeholder="Ex.: 5 anos"
-                    />
-                  </label>
-                  <label>
-                    RA do aluno
-                    <input
-                      value={form.ra}
-                      onChange={(e) => setForm({ ...form, ra: e.target.value })}
-                      placeholder="Ex.: 154542026"
-                      required
-                    />
-                  </label>
-                </div>
-                <label>
-                  Nome do responsável
-                  <input
-                    value={form.responsavel}
-                    onChange={(e) =>
-                      setForm({ ...form, responsavel: e.target.value })
-                    }
-                    placeholder="Nome do responsável"
-                  />
-                </label>
-                <label>
-                  E-mail do responsável
-                  <input
-                    type="email"
-                    value={form.email}
-                    onChange={(e) =>
-                      setForm({ ...form, email: e.target.value })
-                    }
-                    placeholder="responsavel@email.com"
                   />
                 </label>
                 <div className={styles.modalActions}>
@@ -370,9 +337,86 @@ export default function AlunosDaTurma() {
               </span>
               <h2>{alunoSelecionado.nomeCompleto}</h2>
               <p>{alunoSelecionado.email || "E-mail não informado"}</p>
+              <p>Cadastro criado em {formatDate(alunoSelecionado.createdAt)}</p>
               <strong>
-                Progresso da turma: {alunoSelecionado.progresso ?? 0}%
+                {alunoSelecionado.cadastroInicialConcluido
+                  ? "Cadastro inicial concluído"
+                  : "Cadastro inicial pendente"}
               </strong>
+              <button
+                type="button"
+                className={styles.primary}
+                onClick={() => iniciarEdicao(alunoSelecionado)}
+              >
+                Editar RA ou transferir
+              </button>
+            </section>
+          </div>
+        ) : null}
+        {alunoEmEdicao ? (
+          <div
+            className={styles.modalBackdrop}
+            role="presentation"
+            onMouseDown={(event) => {
+              if (event.target === event.currentTarget) setAlunoEmEdicao(null);
+            }}
+          >
+            <section
+              className={styles.modal}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="student-edit-title"
+            >
+              <h2 id="student-edit-title">Editar aluno</h2>
+              <form onSubmit={atualizarAluno}>
+                <label>
+                  Novo RA
+                  <input
+                    value={formEdicao.ra}
+                    onChange={(event) =>
+                      setFormEdicao({ ...formEdicao, ra: event.target.value })
+                    }
+                    placeholder="Deixe em branco para manter"
+                  />
+                </label>
+                <label>
+                  Transferir para outra turma
+                  <select
+                    value={formEdicao.turmaId}
+                    onChange={(event) =>
+                      setFormEdicao({
+                        ...formEdicao,
+                        turmaId: event.target.value,
+                      })
+                    }
+                  >
+                    <option value="">Manter turma atual</option>
+                    {turmas
+                      .filter((item) => getId(item) !== turmaId)
+                      .map((item) => (
+                        <option key={getId(item)} value={getId(item)}>
+                          {item.nome}
+                        </option>
+                      ))}
+                  </select>
+                </label>
+                <div className={styles.modalActions}>
+                  <button
+                    type="button"
+                    className={styles.cancel}
+                    onClick={() => setAlunoEmEdicao(null)}
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    className={styles.primary}
+                    disabled={salvandoEdicao}
+                  >
+                    {salvandoEdicao ? "Salvando..." : "Salvar alterações"}
+                  </button>
+                </div>
+              </form>
             </section>
           </div>
         ) : null}

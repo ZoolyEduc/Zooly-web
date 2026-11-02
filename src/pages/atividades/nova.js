@@ -22,20 +22,6 @@ function novaQuestao() {
   };
 }
 
-const HABILIDADES_DISPONIVEIS = [
-  "EF01LP05", "EF02LP26", "EF35LP01", 
-  "EF12LP01", "EF15LP03", "EF01LP17"
-];
-
-// Lista inicial de missões
-const MISSOES_INICIAIS = [
-  { id: "ler", label: "Ler um texto", selecionado: true },
-  { id: "completar", label: "Completar palavras", selecionado: true },
-  { id: "escutar", label: "Escutar e escrever", selecionado: false },
-  { id: "sons", label: "Identificar sons", selecionado: true },
-  { id: "perguntas", label: "Responder perguntas", selecionado: true },
-];
-
 export default function NovaAtividade() {
   const router = useRouter();
   const [turmas, setTurmas] = useState([]);
@@ -49,33 +35,33 @@ export default function NovaAtividade() {
     recompensaMoedas: "10",
     prazo: "",
   });
-  const [questoes, setQuestoes] = useState([novaQuestao()]);
+  const [questoes, setQuestoes] = useState(() => [novaQuestao()]);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState("");
   const [salvando, setSalvando] = useState(false);
   const [rascunho, setRascunho] = useState(null);
   const [publicando, setPublicando] = useState(false);
 
-  // Estados para as Habilidades BNCC
-  const [habilidadesBNCC, setHabilidadesBNCC] = useState([
-    "EF01LP05", "EF02LP26", "EF35LP01"
-  ]);
-  const [mostrarListaBNCC, setMostrarListaBNCC] = useState(false);
-
-  // NOVO: Estados para as Missões do Aluno
-  const [missoes, setMissoes] = useState(MISSOES_INICIAIS);
-  const [missaoCustomizada, setMissaoCustomizada] = useState("");
-
   useEffect(() => {
+    if (!router.isReady) return undefined;
     let ativo = true;
+    const historiaInicial =
+      typeof router.query.historiaId === "string"
+        ? router.query.historiaId
+        : "";
     Promise.all([apiRequest("/api/turmas"), apiRequest("/api/historias")])
       .then(([turmasResponse, historiasResponse]) => {
         if (!ativo) return;
         const listaTurmas = turmasResponse?.turmas || [];
         setTurmas(listaTurmas);
         setHistorias(historiasResponse?.historias || []);
-        if (listaTurmas[0])
-          setForm((atual) => ({ ...atual, turma: getId(listaTurmas[0]) }));
+        setForm((atual) => ({
+          ...atual,
+          turma: atual.turma || (listaTurmas[0] ? getId(listaTurmas[0]) : ""),
+          ...(historiaInicial
+            ? { historiaTipo: "oficial", historiaId: historiaInicial }
+            : {}),
+        }));
       })
       .catch((error) => {
         if (ativo) setErro(error.message);
@@ -86,13 +72,7 @@ export default function NovaAtividade() {
     return () => {
       ativo = false;
     };
-  }, []);
-
-  function toggleMissao(id) {
-    setMissoes((current) =>
-      current.map((m) => (m.id === id ? { ...m, selecionado: !m.selecionado } : m))
-    );
-  }
+  }, [router.isReady, router.query.historiaId]);
 
   function updateQuestion(index, changes) {
     setQuestoes((current) =>
@@ -147,13 +127,6 @@ export default function NovaAtividade() {
     );
   }
 
-  function adicionarHabilidade(hab) {
-    if (!habilidadesBNCC.includes(hab)) {
-      setHabilidadesBNCC([...habilidadesBNCC, hab]);
-    }
-    setMostrarListaBNCC(false);
-  }
-
   async function criar(event) {
     event.preventDefault();
     setErro("");
@@ -179,9 +152,6 @@ export default function NovaAtividade() {
         prazo: form.prazo
           ? new Date(`${form.prazo}T23:59:00`).toISOString()
           : null,
-        habilidadesBNCC, // Enviando as habilidades (se o backend aceitar)
-        missoes: missoes.filter(m => m.selecionado).map(m => m.label), // Enviando as missões selecionadas
-        missaoCustomizada, // Enviando o texto manual
       };
       const resposta = await apiRequest("/api/atividades", {
         method: "POST",
@@ -470,87 +440,24 @@ export default function NovaAtividade() {
             </section>
             <aside className={styles.editorAside}>
               <section>
-                <h2>◎ Missão do Aluno</h2>
-                <p className={styles.asideHint}>O aluno irá:</p>
-                
-                {/* NOVO: Botões de missão interativos */}
-                <div className={styles.missionTags}>
-                  {missoes.map((missao) => (
-                    <button
-                      key={missao.id}
-                      type="button"
-                      onClick={() => toggleMissao(missao.id)}
-                      style={{
-                        cursor: "pointer",
-                        background: missao.selecionado ? "#f4f9f4" : "transparent",
-                        border: missao.selecionado ? "1px solid #dcebdc" : "1px solid #e4e9eb",
-                        color: missao.selecionado ? "#3c6746" : "#747d80",
-                        fontWeight: missao.selecionado ? "650" : "500",
-                      }}
-                    >
-                      {missao.selecionado ? "✓" : "◯"} {missao.label}
-                    </button>
-                  ))}
-                </div>
-
-                <label className={styles.fullField}>
-                  Ou descreva manualmente
-                  <textarea
-                    rows={5}
-                    maxLength={300}
-                    value={missaoCustomizada}
-                    onChange={(e) => setMissaoCustomizada(e.target.value)}
-                    placeholder="O aluno irá ler, compreender e responder perguntas sobre a história."
-                  />
-                </label>
+                <h2>Resumo da atividade</h2>
+                <p className={styles.asideHint}>
+                  Turma: {turmas.find((turma) => getId(turma) === form.turma)?.nome || "—"}
+                </p>
+                <p className={styles.asideHint}>
+                  História: {form.historiaTipo === "oficial" ? "Biblioteca" : "Texto próprio"}
+                </p>
+                <p className={styles.asideHint}>
+                  Questões: {questoes.length}
+                </p>
+                <p className={styles.asideHint}>
+                  Recompensa: {form.recompensaMoedas || "—"} moedas
+                </p>
               </section>
-              <section>
-                <h2>▤ BNCC</h2>
-                <p className={styles.asideHint}>Habilidades selecionadas</p>
-                
-                <div className={`${styles.missionTags} ${styles.bnccTags}`}>
-                  {habilidadesBNCC.map((hab) => (
-                    <span key={hab}>{hab}</span>
-                  ))}
-                </div>
-
-                <button 
-                  type="button" 
-                  className={styles.addAlternative}
-                  onClick={() => setMostrarListaBNCC(!mostrarListaBNCC)}
-                >
-                  ＋ Adicionar habilidade
-                </button>
-
-                {mostrarListaBNCC && (
-                  <div style={{ marginTop: "12px", background: "#fff", border: "1px solid #e4e9eb", borderRadius: "12px", padding: "8px" }}>
-                    {HABILIDADES_DISPONIVEIS.filter(h => !habilidadesBNCC.includes(h)).map((hab) => (
-                      <button
-                        key={hab}
-                        type="button"
-                        style={{ display: "block", width: "100%", textAlign: "left", padding: "10px", background: "transparent", border: "none", cursor: "pointer", fontSize: "13px", color: "#30383a", borderRadius: "8px" }}
-                        onClick={() => adicionarHabilidade(hab)}
-                        onMouseEnter={(e) => e.target.style.background = "#f0f3f4"}
-                        onMouseLeave={(e) => e.target.style.background = "transparent"}
-                      >
-                        {hab}
-                      </button>
-                    ))}
-                    {HABILIDADES_DISPONIVEIS.filter(h => !habilidadesBNCC.includes(h)).length === 0 && (
-                      <p style={{ fontSize: "12px", color: "#747d80", padding: "10px", margin: 0 }}>Todas as habilidades foram adicionadas.</p>
-                    )}
-                  </div>
-                )}
-              </section>
-              <div className={styles.editorTip}>
-                Dica: use as seções ao lado para criar uma atividade completa e
-                divertida.
-              </div>
             </aside>
             <div className={styles.formBottom}>
               <p>
-                Os dados serão salvos localmente no modo de demonstração. Você
-                decide quando publicar.
+                O rascunho será salvo. Você decide quando publicar.
               </p>
               <button
                 className={styles.primary}

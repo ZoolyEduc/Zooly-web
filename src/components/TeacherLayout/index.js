@@ -11,6 +11,7 @@ const navigation = [
   { href: "/turmas", label: "Turmas e alunos", symbol: "♧" },
   { href: "/atividades", label: "Atividades", symbol: "▤" },
   { href: "/desempenho", label: "Desempenho", symbol: "↗" },
+  { href: "/configuracoes", label: "Configurações", symbol: "⚙" },
 ];
 
 export default function TeacherLayout({ title, subtitle, children }) {
@@ -30,11 +31,32 @@ export default function TeacherLayout({ title, subtitle, children }) {
 
   // --- Estado para a barra de pesquisa ---
   const [termoBusca, setTermoBusca] = useState("");
+  const [mensagemBusca, setMensagemBusca] = useState("");
 
   function executarBusca(event) {
     event.preventDefault();
-    if (!termoBusca.trim()) return;
-    alert(`Buscando por: ${termoBusca}`);
+    const termo = termoBusca
+      .trim()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLocaleLowerCase("pt-BR");
+    if (!termo) return;
+
+    const pagina = navigation.find((item) => {
+      const rotulo = item.label
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLocaleLowerCase("pt-BR");
+      return rotulo.includes(termo) || termo.includes(rotulo);
+    });
+
+    if (pagina) {
+      setMensagemBusca("");
+      setMenuMobile(false);
+      router.push(pagina.href);
+    } else {
+      setMensagemBusca("Nenhuma tela encontrada para essa busca.");
+    }
   }
 
   useEffect(() => {
@@ -42,7 +64,7 @@ export default function TeacherLayout({ title, subtitle, children }) {
     Promise.resolve().then(() => {
       if (!ativo) return;
       const session = getSession();
-      if (!demoEnabled() && !session.token) {
+      if (!session.token || session.usuario?.tipo !== "professor") {
         router.replace("/login");
         return;
       }
@@ -95,10 +117,7 @@ export default function TeacherLayout({ title, subtitle, children }) {
           aria-label="Menu do professor"
         >
           {navigation
-            .filter(
-              (item) =>
-                !["/login", "/cadastro", "/configuracoes"].includes(item.href)
-            )
+            .filter((item) => item.href !== "/configuracoes")
             .map((item) => {
               const active =
                 router.pathname === item.href ||
@@ -158,11 +177,16 @@ export default function TeacherLayout({ title, subtitle, children }) {
             </svg>
             <input
               type="search"
-              placeholder="Pesquisar..."
+              placeholder="Buscar telas..."
               aria-label="Pesquisar"
               value={termoBusca}
               onChange={(e) => setTermoBusca(e.target.value)}
             />
+            {mensagemBusca ? (
+              <span className={styles.searchMessage} role="status">
+                {mensagemBusca}
+              </span>
+            ) : null}
           </form>
           
           <div className={styles.profile}>
@@ -174,12 +198,11 @@ export default function TeacherLayout({ title, subtitle, children }) {
                 aria-expanded={notificacoesAbertas}
                 onClick={() => setNotificacoesAbertas((open) => !open)}
               >
-                <i />
               </button>
               {notificacoesAbertas ? (
                 <div className={styles.notificationPanel}>
                   <strong>Notificações</strong>
-                  <p>Você está em dia! Nenhuma notificação nova.</p>
+                  <p>A API atual ainda não disponibiliza notificações.</p>
                 </div>
               ) : null}
             </div>

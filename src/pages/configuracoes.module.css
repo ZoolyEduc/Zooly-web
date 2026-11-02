@@ -83,10 +83,50 @@
   box-shadow: 0 0 0 3px rgba(22, 129, 68, 0.1);
 }
 
+.card input[readonly] {
+  background: #f7f8f8;
+  color: #586265;
+  cursor: default;
+}
+
 .twoFields {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 16px;
+}
+
+.schoolList {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.schoolList li {
+  display: grid;
+  gap: 4px;
+  padding: 14px 16px;
+  border: 1px solid #e8eeea;
+  border-radius: 12px;
+  background: #fbfcfb;
+}
+
+.schoolList strong {
+  color: #30383a;
+  font-size: 14px;
+}
+
+.schoolList span,
+.muted {
+  color: #747d80;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.muted {
+  margin: 0;
+  line-height: 1.5;
 }
 
 /* --- Botões --- */
@@ -216,6 +256,7 @@
 }
 
 .toggleRow {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -250,7 +291,18 @@
 
 /* Esconde o checkbox padrão e cria um toggle customizado */
 .toggleRow input {
-  display: none;
+  position: absolute;
+  right: 0;
+  width: 44px;
+  height: 24px;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.toggleRow input:focus-visible + i {
+  outline: 3px solid rgba(31, 107, 53, 0.28);
+  outline-offset: 3px;
 }
 
 .toggleRow i {
@@ -295,4 +347,36 @@
   .twoFields {
     grid-template-columns: 1fr;
   }
+}
+
+.accountCard {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 8px;
+  text-align: center;
+}
+
+.accountCard > strong {
+  color: #30383a;
+  font-size: 15px;
+  text-transform: capitalize;
+}
+
+.accountCard > span:last-child {
+  color: #747d80;
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+
+.avatar {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #eafbf0;
+  color: #168144;
+  font-size: 24px;
+  font-weight: 800;
 }

@@ -105,6 +105,7 @@
 
 /* --- Barra de Pesquisa --- */
 .search {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 13px;
@@ -516,4 +517,19 @@
     padding: 27px 21px;
     border-radius: 28px;
   }
+}
+.searchMessage {
+  position: absolute;
+  z-index: 35;
+  top: calc(100% + 7px);
+  left: 8px;
+  width: max-content;
+  max-width: min(320px, calc(100vw - 30px));
+  padding: 8px 11px;
+  border: 1px solid #e6eaeb;
+  border-radius: 8px;
+  background: #fff;
+  color: #586265;
+  font-size: 12px;
+  box-shadow: 0 5px 16px #22332218;
 }

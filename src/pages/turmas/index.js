@@ -5,28 +5,19 @@ import Link from "next/link";
 import TeacherLayout from "../../components/TeacherLayout";
 import Notice from "../../components/Notice";
 import { apiRequest } from "../../services/api";
-import { demoEnabled } from "../../services/demo";
 import { getId } from "../../services/session";
 import styles from "./turmas.module.css";
-
-const mascotes = [
-  { id: "papagaio", nome: "Papagaio", src: "/img/papagaio-botao.png" },
-  { id: "lagarto", nome: "Lagarto", src: "/img/lagarto-botao.png" },
-  { id: "cobra", nome: "Cobra", src: "/img/cobra-botao.png" },
-  { id: "sarue", nome: "Saruê", src: "/img/sarue-botao.png" },
-];
 
 export default function Turmas() {
   const [turmas, setTurmas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
+  const [turmaEmEdicao, setTurmaEmEdicao] = useState(null);
   const [form, setForm] = useState({
     nome: "",
     escolaId: "",
     anoEscolar: String(new Date().getFullYear()),
-    periodo: "Manhã",
   });
-  const [mascote, setMascote] = useState("papagaio");
   const [erro, setErro] = useState("");
   const [sucesso, setSucesso] = useState("");
   const [salvando, setSalvando] = useState(false);
@@ -55,22 +46,29 @@ export default function Turmas() {
     try {
       const dados = {
         nome: form.nome.trim(),
-        escolaId: form.escolaId.trim(),
         anoEscolar: Number(form.anoEscolar),
       };
-      const resposta = await apiRequest("/api/turmas", {
-        method: "POST",
-        body: demoEnabled()
-          ? { ...dados, periodo: form.periodo, mascote }
-          : dados,
-      });
-      setSucesso(resposta?.mensagem || "Turma cadastrada com sucesso.");
+      const resposta = turmaEmEdicao
+        ? await apiRequest(`/api/turmas/${getId(turmaEmEdicao)}`, {
+            method: "PUT",
+            body: dados,
+          })
+        : await apiRequest("/api/turmas", {
+            method: "POST",
+            body: { ...dados, escolaId: form.escolaId.trim() },
+          });
+      setSucesso(
+        resposta?.mensagem ||
+          (turmaEmEdicao
+            ? "Turma atualizada com sucesso."
+            : "Turma cadastrada com sucesso."),
+      );
       setForm({
         nome: "",
         escolaId: "",
         anoEscolar: String(new Date().getFullYear()),
-        periodo: "Manhã",
       });
+      setTurmaEmEdicao(null);
       setMostrarFormulario(false);
       await carregar();
     } catch (error) {
@@ -82,7 +80,7 @@ export default function Turmas() {
 
   async function arquivar(turma) {
     const id = getId(turma);
-    if (!id) return;
+    if (!id || !window.confirm(`Arquivar a turma "${turma.nome}"?`)) return;
     setErro("");
     setSucesso("");
     try {
@@ -94,6 +92,31 @@ export default function Turmas() {
     } catch (error) {
       setErro(error.message);
     }
+  }
+
+  function abrirCadastro() {
+    setTurmaEmEdicao(null);
+    setForm({
+      nome: "",
+      escolaId: "",
+      anoEscolar: String(new Date().getFullYear()),
+    });
+    setMostrarFormulario(true);
+  }
+
+  function abrirEdicao(turma) {
+    setTurmaEmEdicao(turma);
+    setForm({
+      nome: turma.nome || "",
+      escolaId: "",
+      anoEscolar: String(turma.anoEscolar || new Date().getFullYear()),
+    });
+    setMostrarFormulario(true);
+  }
+
+  function fecharFormulario() {
+    setMostrarFormulario(false);
+    setTurmaEmEdicao(null);
   }
 
   return (
@@ -113,7 +136,7 @@ export default function Turmas() {
           <button
             type="button"
             className={styles.primary}
-            onClick={() => setMostrarFormulario(true)}
+            onClick={abrirCadastro}
           >
             + Nova Turma
           </button>
@@ -125,49 +148,30 @@ export default function Turmas() {
           <section className={styles.grid}>
             {turmas.map((turma, index) => {
               const id = getId(turma);
-              const mascot =
-                mascotes.find((item) => item.id === turma.mascote) ||
-                mascotes[index % mascotes.length];
-              const totalAlunos =
-                turma.totalAlunos ?? turma.alunos?.length ?? 3;
               
               return (
                 <article className={styles.card} key={id || index}>
                   <div className={styles.cardTop}>
-                    <div className={`${styles.mascotBox} ${styles[`tone${index % 4}`]}`}>
-                      <Image
-                        src={mascot.src}
-                        alt={mascot.nome}
-                        width={52}
-                        height={52}
-                        style={{ objectFit: "contain" }}
-                      />
+                    <div className={`${styles.mascotBox} ${styles[`tone${index % 4}`]}`} aria-hidden="true">
+                      <span>♧</span>
                     </div>
-                    <button
-                      type="button"
-                      className={styles.more}
-                      aria-label={`Mais opções para ${turma.nome}`}
-                      onClick={() => arquivar(turma)}
-                    >
-                      ⋮
-                    </button>
                   </div>
-                  <span
-                    className={`${styles.kicker} ${styles[`tag${index % 4}`]}`}
-                  >
-                    MASCOTE: {mascot.nome.toUpperCase()}
-                  </span>
                   <h2>{turma.nome}</h2>
                   <p className={styles.period}>
-                    Período: {turma.periodo || (index % 2 ? "Tarde" : "Manhã")}
+                    {turma.escola?.nome ? `${turma.escola.nome} · ` : ""}
+                    Ano letivo {turma.anoEscolar || "—"}
                   </p>
-                  <Link
-                    className={styles.students}
-                    href={`/turmas/${id}/alunos`}
-                  >
-                    <span aria-hidden="true">♧</span>
-                    {totalAlunos} Alunos
-                  </Link>
+                  <div className={styles.cardActions}>
+                    <Link className={styles.students} href={`/turmas/${id}/alunos`}>
+                      Consultar alunos
+                    </Link>
+                    <button type="button" onClick={() => abrirEdicao(turma)}>
+                      Editar
+                    </button>
+                    <button type="button" onClick={() => arquivar(turma)}>
+                      Arquivar
+                    </button>
+                  </div>
                 </article>
               );
             })}
@@ -189,7 +193,7 @@ export default function Turmas() {
             <button
               type="button"
               className={styles.primary}
-              onClick={() => setMostrarFormulario(true)}
+              onClick={abrirCadastro}
             >
               + Nova Turma
             </button>
@@ -211,10 +215,11 @@ export default function Turmas() {
               aria-modal="true"
               aria-labelledby="class-modal-title"
             >
-              <h2 id="class-modal-title">Cadastrar Nova Turma</h2>
+              <h2 id="class-modal-title">
+                {turmaEmEdicao ? "Editar Turma" : "Cadastrar Nova Turma"}
+              </h2>
               <p className={styles.modalIntro}>
-                Preencha os dados abaixo para iniciar sua jornada com novos
-                alunos.
+                Informe os dados utilizados pela escola para identificar a turma.
               </p>
               <form onSubmit={cadastrar}>
                 <label>
@@ -230,20 +235,7 @@ export default function Turmas() {
                 </label>
                 <div className={styles.formRow}>
                   <label>
-                    Período
-                    <select
-                      value={form.periodo}
-                      onChange={(event) =>
-                        setForm({ ...form, periodo: event.target.value })
-                      }
-                    >
-                      <option>Manhã</option>
-                      <option>Tarde</option>
-                      <option>Integral</option>
-                    </select>
-                  </label>
-                  <label>
-                    Ano escolar
+                    Ano letivo
                     <input
                       type="number"
                       min="2000"
@@ -256,50 +248,24 @@ export default function Turmas() {
                     />
                   </label>
                 </div>
-                <label>
-                  ID da escola
-                  <input
-                    value={form.escolaId}
-                    onChange={(event) =>
-                      setForm({ ...form, escolaId: event.target.value })
-                    }
-                    placeholder={
-                      demoEnabled()
-                        ? "Preenchimento demonstrativo"
-                        : "ID fornecido pela administração"
-                    }
-                    required={!demoEnabled()}
-                  />
-                </label>
-                <fieldset>
-                  <legend>Escolha um Mascote</legend>
-                  <div className={styles.mascotPicker}>
-                    {mascotes.map((item) => (
-                      <button
-                        type="button"
-                        key={item.id}
-                        aria-label={item.nome}
-                        aria-pressed={mascote === item.id}
-                        className={
-                          mascote === item.id ? styles.selectedMascot : ""
-                        }
-                        onClick={() => setMascote(item.id)}
-                      >
-                        <Image
-                          src={item.src}
-                          alt=""
-                          width={64}
-                          height={64}
-                        />
-                      </button>
-                    ))}
-                  </div>
-                </fieldset>
+                {!turmaEmEdicao ? (
+                  <label>
+                    ID da escola
+                    <input
+                      value={form.escolaId}
+                      onChange={(event) =>
+                        setForm({ ...form, escolaId: event.target.value })
+                      }
+                      placeholder="ID fornecido pela administração"
+                      required
+                    />
+                  </label>
+                ) : null}
                 <div className={styles.modalActions}>
                   <button
                     type="button"
                     className={styles.cancel}
-                    onClick={() => setMostrarFormulario(false)}
+                    onClick={fecharFormulario}
                   >
                     Cancelar
                   </button>
@@ -308,7 +274,11 @@ export default function Turmas() {
                     className={styles.primary}
                     disabled={salvando}
                   >
-                    {salvando ? "Cadastrando..." : "✓ Criar Turma"}
+                    {salvando
+                      ? "Salvando..."
+                      : turmaEmEdicao
+                        ? "Salvar alterações"
+                        : "Criar turma"}
                   </button>
                 </div>
               </form>

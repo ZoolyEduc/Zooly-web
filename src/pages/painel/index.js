@@ -1,111 +1,195 @@
+import { useEffect, useState } from "react";
 import Head from "next/head";
-import Image from "next/image";
 import Link from "next/link";
 import TeacherLayout from "../../components/TeacherLayout";
 import StatCard from "../../components/StatCard";
+import Notice from "../../components/Notice";
+import { apiRequest } from "../../services/api";
+import { getId, formatDate } from "../../services/session";
 import styles from "./painel.module.css";
 
-const historico = [
-  {
-    nome: "Lucas Silva",
-    fonema: "/b/",
-    palavras: "Bola, Bala, Bule",
-    score: 80,
-    data: "18 Mar, 2026",
-    mascote: "/img/cobra-botao.png",
-  },
-  {
-    nome: "Ana Clara",
-    fonema: "/v/",
-    palavras: "Vaca, Vela, Vento",
-    score: 93,
-    data: "19 Mar, 2026",
-    mascote: "/img/lagarto-botao.png",
-  },
-  {
-    nome: "Felipe Santos",
-    fonema: "/r/",
-    palavras: "Rato, Roda, Rua",
-    score: 60,
-    data: "20 Mar, 2026",
-    mascote: "/img/papagaio-botao.png",
-  },
-];
+function dataLocalISO() {
+  const hoje = new Date();
+  const mes = String(hoje.getMonth() + 1).padStart(2, "0");
+  const dia = String(hoje.getDate()).padStart(2, "0");
+  return `${hoje.getFullYear()}-${mes}-${dia}`;
+}
 
 export default function Painel() {
+  const [dados, setDados] = useState({
+    turmas: [],
+    atividades: [],
+    relatorios: [],
+  });
+  const [loading, setLoading] = useState(true);
+  const [erro, setErro] = useState("");
+
+  useEffect(() => {
+    let ativo = true;
+
+    async function carregar() {
+      try {
+        const [turmasResponse, atividadesResponse] = await Promise.all([
+          apiRequest("/api/turmas"),
+          apiRequest("/api/atividades/publicadas"),
+        ]);
+        const turmas = turmasResponse?.turmas || [];
+        const relatorios = await Promise.all(
+          turmas.map((turma) =>
+            apiRequest(
+              `/api/desempenho/turmas/${getId(turma)}/semanal?data=${dataLocalISO()}`,
+            ),
+          ),
+        );
+        if (ativo) {
+          setDados({
+            turmas,
+            atividades: atividadesResponse?.atividades || [],
+            relatorios,
+          });
+        }
+      } catch (error) {
+        if (ativo) setErro(error.message);
+      } finally {
+        if (ativo) setLoading(false);
+      }
+    }
+
+    carregar();
+    return () => {
+      ativo = false;
+    };
+  }, []);
+
+  const alunos = dados.relatorios.flatMap((relatorio) =>
+    (relatorio.alunos || []).map((item) => ({
+      ...item,
+      turmaNome: relatorio.turma?.nome || "Turma",
+    })),
+  );
+  const ultimasAtividades = [...dados.atividades]
+    .filter((atividade) => atividade.publicadoEm)
+    .sort(
+      (a, b) => new Date(b.publicadoEm).getTime() - new Date(a.publicadoEm).getTime(),
+    );
+  const totalIniciadas = dados.relatorios.reduce(
+    (total, relatorio) => total + (relatorio.indicadores?.atividadesIniciadas || 0),
+    0,
+  );
+  const totalRespostas = dados.relatorios.reduce(
+    (total, relatorio) => total + (relatorio.indicadores?.respostasRegistradas || 0),
+    0,
+  );
+  const totalAcertos = dados.relatorios.reduce(
+    (total, relatorio) => total + (relatorio.indicadores?.acertos || 0),
+    0,
+  );
+  const percentualAcerto = totalRespostas
+    ? Math.round((totalAcertos / totalRespostas) * 100)
+    : null;
+
   return (
     <>
       <Head>
         <title>Home | Zooly</title>
       </Head>
       <TeacherLayout
-        title="Olá, Helena Ferreira!"
-        subtitle="Aqui está um resumo das suas turmas e atividades."
+        title="Visão geral"
+        subtitle="Resumo das turmas e do desempenho semanal conectado à API."
       >
+        {erro ? <Notice kind="error">{erro}</Notice> : null}
         <section className={styles.stats} aria-label="Indicadores gerais">
-          <StatCard label="TOTAL DE TURMAS" value="2" symbol="♧" />
-          <StatCard label="ALUNOS ATIVOS" value="4" symbol="♙" />
-          <StatCard label="MISSÕES EM OK" value="0" symbol="✿" />
-          <StatCard label="ÚLTIMA MISSÃO" value="20/03/2026" symbol="▣" />
+          <StatCard
+            label="TURMAS"
+            value={loading ? "—" : dados.turmas.length}
+            symbol="♧"
+          />
+          <StatCard
+            label="ALUNOS MATRICULADOS"
+            value={loading ? "—" : alunos.length}
+            symbol="♙"
+          />
+          <StatCard
+            label="ATIVIDADES PUBLICADAS"
+            value={loading ? "—" : dados.atividades.length}
+            symbol="✿"
+          />
+          <StatCard
+            label="ACERTO NA SEMANA"
+            value={loading ? "—" : percentualAcerto == null ? "—" : `${percentualAcerto}%`}
+            symbol="↗"
+          />
         </section>
         <section className={styles.history}>
           <div className={styles.historyHead}>
             <div>
-              <h2>Histórico de Desempenho</h2>
-              <p>Acompanhamento individual de progresso fonético</p>
+              <h2>Desempenho semanal</h2>
+              <p>{totalIniciadas} atividades iniciadas · {totalRespostas} respostas registradas</p>
             </div>
             <Link href="/desempenho">Ver Relatório Completo</Link>
           </div>
-          <div className={styles.tableWrap}>
+          {loading ? (
+            <p className={styles.emptyState}>Carregando indicadores...</p>
+          ) : alunos.length ? (
+            <div className={styles.tableWrap}>
             <table>
               <thead>
                 <tr>
-                  <th>Estudante</th>
-                  <th>Fonema</th>
-                  <th>Palavras</th>
-                  <th>Score</th>
-                  <th>Data</th>
+                  <th>Aluno</th>
+                  <th>Turma</th>
+                  <th>Concluídas</th>
+                  <th>Acerto na semana</th>
                   <th>Ações</th>
                 </tr>
               </thead>
               <tbody>
-                {historico.map((item) => (
-                  <tr key={item.nome}>
+                {alunos.slice(0, 5).map((item, index) => {
+                  const aluno = item.aluno || {};
+                  const percentual = item.indicadores?.percentualAcerto;
+                  return (
+                  <tr key={aluno.id || `${item.turmaNome}-${index}`}>
                     <td>
                       <div className={styles.student}>
-                        <Image src={item.mascote} alt="" width={40} height={40} />
-                        <strong>{item.nome}</strong>
+                        <span className={styles.studentAvatar}>
+                          {(aluno.nomeCompleto || "A").trim().charAt(0).toUpperCase()}
+                        </span>
+                        <strong>{aluno.nomeCompleto || "Aluno"}</strong>
                       </div>
                     </td>
-                    <td>
-                      <span className={styles.phoneme}>{item.fonema}</span>
-                    </td>
-                    <td>{item.palavras}</td>
+                    <td>{item.turmaNome}</td>
+                    <td>{item.indicadores?.atividadesConcluidas ?? 0}</td>
                     <td>
                       <div className={styles.score}>
                         <span>
-                          <i style={{ width: `${item.score}%` }} />
+                          {percentual != null ? <i style={{ width: `${percentual}%` }} /> : null}
                         </span>
-                        <strong className={item.score < 70 ? styles.low : ""}>
-                          {item.score}%
+                        <strong className={percentual != null && percentual < 50 ? styles.low : ""}>
+                          {percentual == null ? "Sem respostas" : `${percentual}%`}
                         </strong>
                       </div>
                     </td>
-                    <td>{item.data}</td>
                     <td>
                       <Link
                         className={styles.more}
-                        href="/desempenho"
-                        aria-label={`Ver desempenho de ${item.nome}`}
+                        href={`/desempenho/alunos/${aluno.id}`}
+                        aria-label={`Ver desempenho de ${aluno.nomeCompleto || "aluno"}`}
                       >
-                        ⋮
+                        Ver
                       </Link>
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
-          </div>
+            </div>
+          ) : (
+            <p className={styles.emptyState}>
+              {dados.turmas.length
+                ? "Ainda não há alunos nas turmas vinculadas."
+                : "Nenhuma turma vinculada foi retornada pela API."}
+            </p>
+          )}
         </section>
       </TeacherLayout>
     </>

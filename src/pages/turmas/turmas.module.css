@@ -74,6 +74,10 @@
   height: 52px;
   object-fit: contain;
 }
+.mascotBox span {
+  color: #168144;
+  font-size: 30px;
+}
 
 /* Cores de fundo dos mascotes */
 .tone0 { background: #fff9e4; }
@@ -139,6 +143,40 @@
 
 .students span {
   font-size: 13px;
+}
+
+.cardActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: auto;
+}
+
+.cardActions .students,
+.cardActions button {
+  min-height: 38px;
+  margin: 0;
+  padding: 8px 12px;
+  border: 1px solid #e1e8e3;
+  border-radius: 20px;
+  background: #fff;
+  color: #46566b;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.cardActions .students {
+  border-color: #168144;
+  background: #168144;
+  color: #fff;
+}
+
+.cardActions button:hover {
+  border-color: #168144;
+  color: #168144;
 }
 
 /* ESTADO VAZIO */
@@ -395,16 +433,5 @@
   }
   .formRow {
     grid-template-columns: 1fr;
-  }
-  .mascotPicker {
-    gap: 12px;
-  }
-  .mascotPicker button {
-    width: 57px;
-    height: 57px;
-  }
-  .mascotPicker img {
-    width: 47px;
-    height: 47px;
   }
 }

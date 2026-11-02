@@ -77,6 +77,26 @@
   background: #f8faf8;
   filter: drop-shadow(0 3px 3px #17251a20);
 }
+.studentAvatar {
+  display: grid;
+  flex: 0 0 40px;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #eafbf0;
+  color: #168144;
+  font-size: 13px;
+  font-weight: 800;
+}
+.emptyState {
+  margin: 0;
+  padding: 28px 8px;
+  border-top: 1px solid #f0f1f1;
+  color: #6d7679;
+  font-size: 14px;
+  text-align: center;
+}
 .student strong {
   color: #30383a;
   font-size: 14px;
