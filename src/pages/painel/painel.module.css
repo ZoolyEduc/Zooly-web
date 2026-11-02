@@ -1,3 +1,20 @@
+.welcome {
+  margin: 0 0 26px;
+}
+
+.welcome h2 {
+  margin: 0;
+  color: #30383a;
+  font-size: clamp(18px, 2vw, 22px);
+  font-weight: 700;
+}
+
+.welcome p {
+  margin: 4px 0 0;
+  color: #747d80;
+  font-size: 14px;
+}
+
 .stats {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -138,9 +155,23 @@
   color: #cb4b31;
 }
 .more {
-  color: #6f797b;
-  font-size: 22px;
+  display: inline-flex;
+  min-height: 28px;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 11px;
+  border-radius: 14px;
+  background: #f0f8f2;
+  color: #167534;
+  font-size: 12px;
+  font-weight: 700;
   text-decoration: none;
+}
+
+.more:hover,
+.more:focus-visible {
+  background: #e2f2e7;
+  outline: none;
 }
 @media (max-width: 1100px) {
   .stats {

@@ -5,39 +5,69 @@ import Notice from "../components/Notice";
 import { apiRequest } from "../services/api";
 import { getSession } from "../services/session";
 import styles from "./configuracoes.module.css";
+import {
+  Bell,
+  Camera,
+  CircleUserRound,
+  LockKeyhole,
+  School,
+  UserRound,
+} from "lucide-react";
 
 const CHAVE_NOTIFICACOES = "zooly_notification_preferences";
 const notificacoesIniciais = { conclusao: false, prazo: false };
 
+function lerPreferencias() {
+  try {
+    const preferencias = JSON.parse(
+      window.localStorage.getItem(CHAVE_NOTIFICACOES) || "null",
+    );
+    if (preferencias && typeof preferencias === "object") {
+      return {
+        conclusao: Boolean(preferencias.conclusao),
+        prazo: Boolean(preferencias.prazo),
+      };
+    }
+  } catch {
+    return notificacoesIniciais;
+  }
+  return notificacoesIniciais;
+}
+
 export default function Configuracoes() {
   const [usuario, setUsuario] = useState(null);
-  const [turmas, setTurmas] = useState([]);
+  const [escolas, setEscolas] = useState([]);
   const [notificacoes, setNotificacoes] = useState(notificacoesIniciais);
+  const [notificacoesSalvas, setNotificacoesSalvas] =
+    useState(notificacoesIniciais);
   const [erro, setErro] = useState("");
+  const [mensagem, setMensagem] = useState("");
 
   useEffect(() => {
     let ativo = true;
     Promise.resolve().then(() => {
       if (!ativo) return;
       setUsuario(getSession().usuario);
-      try {
-        const preferencias = JSON.parse(
-          window.localStorage.getItem(CHAVE_NOTIFICACOES) || "null",
-        );
-        if (preferencias && typeof preferencias === "object") {
-          setNotificacoes({
-            conclusao: Boolean(preferencias.conclusao),
-            prazo: Boolean(preferencias.prazo),
-          });
-        }
-      } catch {
-        setNotificacoes(notificacoesIniciais);
-      }
+      const preferencias = lerPreferencias();
+      setNotificacoes(preferencias);
+      setNotificacoesSalvas(preferencias);
     });
 
     apiRequest("/api/turmas")
       .then((resposta) => {
-        if (ativo) setTurmas(resposta?.turmas || []);
+        if (!ativo) return;
+        const escolasUnicas = [
+          ...new Map(
+            (resposta?.turmas || [])
+              .map((turma) => turma.escola)
+              .filter((escola) => escola && typeof escola === "object")
+              .map((escola) => [
+                escola._id || escola.codigoPermanente || escola.nome,
+                escola,
+              ]),
+          ).values(),
+        ];
+        setEscolas(escolasUnicas);
       })
       .catch((error) => {
         if (ativo) setErro(error.message);
@@ -48,60 +78,61 @@ export default function Configuracoes() {
     };
   }, []);
 
-  const escolas = [
-    ...new Map(
-      turmas
-        .map((turma) => turma.escola)
-        .filter((escola) => escola && typeof escola === "object")
-        .map((escola) => [escola._id || escola.codigoPermanente || escola.nome, escola]),
-    ).values(),
-  ];
-
   function atualizarNotificacao(nome, valor) {
-    setNotificacoes((current) => {
-      const atualizadas = { ...current, [nome]: valor };
+    setMensagem("");
+    setNotificacoes((current) => ({ ...current, [nome]: valor }));
+  }
+
+  function descartarAlteracoes() {
+    setNotificacoes(notificacoesSalvas);
+    setMensagem("");
+  }
+
+  function salvarConfiguracoes() {
+    try {
       window.localStorage.setItem(
         CHAVE_NOTIFICACOES,
-        JSON.stringify(atualizadas),
+        JSON.stringify(notificacoes),
       );
-      return atualizadas;
-    });
+      setNotificacoesSalvas(notificacoes);
+      setMensagem("Preferências salvas neste navegador.");
+    } catch (error) {
+      setErro(`Não foi possível salvar as preferências neste navegador: ${error.message}`);
+    }
   }
 
-  function restaurarNotificacoes() {
-    setNotificacoes(notificacoesIniciais);
-    window.localStorage.setItem(
-      CHAVE_NOTIFICACOES,
-      JSON.stringify(notificacoesIniciais),
-    );
-  }
+  const nomeEscola = escolas[0]?.nome || "";
+  const codigoEscola = escolas[0]?.codigo_escola || "";
+  const iniciais = (usuario?.nome || "")
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((parte) => parte.charAt(0).toUpperCase())
+    .join("");
 
   return (
     <>
       <Head>
         <title>Configurações | Zooly</title>
       </Head>
-      <TeacherLayout
-        title="Configurações"
-        subtitle="Gerencie seus dados e preferências do Zooly."
-      >
-        <Notice kind="info">
-          A API atual não oferece edição de perfil, senha ou foto. Os dados da conta são somente leitura.
-        </Notice>
+      <TeacherLayout title="Configurações">
         {erro ? <Notice kind="error">{erro}</Notice> : null}
+        {mensagem ? <Notice kind="success">{mensagem}</Notice> : null}
         <div className={styles.settings}>
           <div className={styles.leftColumn}>
             <section className={styles.card}>
               <h2>
-                <span>♙</span> Dados do Professor
+                <UserRound size={18} aria-hidden="true" />
+                Dados do Professor
               </h2>
               <div className={styles.twoFields}>
                 <label htmlFor="nome-professor">
                   Nome Completo
                   <input
                     id="nome-professor"
-                    value={usuario?.nome || "Não informado"}
+                    value={usuario?.nome || ""}
                     readOnly
+                    placeholder="Não informado pela API"
                   />
                 </label>
                 <label htmlFor="email-professor">
@@ -109,48 +140,116 @@ export default function Configuracoes() {
                   <input
                     id="email-professor"
                     type="email"
-                    value={usuario?.email || "Não informado"}
+                    value={usuario?.email || ""}
                     readOnly
+                    placeholder="Não informado pela API"
                   />
                 </label>
               </div>
+              <button
+                type="button"
+                className={styles.softButton}
+                disabled
+                title="A API integrada não oferece alteração de senha."
+              >
+                <LockKeyhole size={15} aria-hidden="true" />
+                Solicitar alteração de senha
+              </button>
+              <p className={styles.unavailable}>
+                Alteração de dados e senha ainda não disponível na API integrada.
+              </p>
             </section>
+
             <section className={styles.card}>
               <h2>
-                <span>♧</span> Dados da Escola
+                <School size={18} aria-hidden="true" />
+                Dados da Escola
               </h2>
-              {escolas.length ? (
-                <ul className={styles.schoolList}>
-                  {escolas.map((escola) => (
-                    <li key={escola._id || escola.codigoPermanente || escola.nome}>
-                      <strong>{escola.nome || "Escola vinculada"}</strong>
-                      <span>{escola.codigoPermanente || "Código não retornado"}</span>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className={styles.muted}>
-                  Nenhuma escola vinculada foi retornada pelas turmas da conta.
-                </p>
-              )}
+              <div className={styles.schoolFields}>
+                <label className={styles.fullField} htmlFor="nome-escola">
+                  Nome da Escola
+                  <input
+                    id="nome-escola"
+                    value={nomeEscola}
+                    readOnly
+                    placeholder="Não informado pela API"
+                  />
+                </label>
+                <div className={styles.twoFields}>
+                  <label htmlFor="codigo-escola">
+                    Código da Escola
+                    <input
+                      id="codigo-escola"
+                      value={codigoEscola}
+                      readOnly
+                      placeholder="Não informado pela API"
+                    />
+                  </label>
+                  <label htmlFor="telefone-escola">
+                    Telefone
+                    <input
+                      id="telefone-escola"
+                      value=""
+                      readOnly
+                      placeholder="Não disponível na API"
+                    />
+                  </label>
+                  <label className={styles.fullField} htmlFor="endereco-escola">
+                    Endereço
+                    <input
+                      id="endereco-escola"
+                      value=""
+                      readOnly
+                      placeholder="Não disponível na API"
+                    />
+                  </label>
+                  <label className={styles.fullField} htmlFor="email-escola">
+                    E-mail Institucional
+                    <input
+                      id="email-escola"
+                      type="email"
+                      value=""
+                      readOnly
+                      placeholder="Não disponível na API"
+                    />
+                  </label>
+                </div>
+                {!escolas.length ? (
+                  <p className={styles.unavailable}>
+                    Nenhuma escola foi retornada pelas turmas desta conta.
+                  </p>
+                ) : null}
+              </div>
             </section>
           </div>
+
           <div className={styles.rightColumn}>
-            <section className={`${styles.card} ${styles.accountCard}`}>
-              <span className={styles.avatar}>
-                {(usuario?.nome || "P").trim().charAt(0).toUpperCase()}
-              </span>
-              <strong>{usuario?.tipo || "Professor"}</strong>
-              <span>{usuario?.id || "Identificador não retornado"}</span>
+            <section className={`${styles.card} ${styles.photoCard}`}>
+              <div className={styles.photo} aria-label="Foto do perfil">
+                {iniciais || <CircleUserRound size={42} aria-hidden="true" />}
+              </div>
+              <h3>Foto de perfil</h3>
+              <p>JPG ou PNG. A API integrada ainda não oferece envio de imagem.</p>
+              <button
+                type="button"
+                className={styles.upload}
+                disabled
+                title="A API integrada ainda não oferece envio de imagem."
+              >
+                <Camera size={15} aria-hidden="true" />
+                Carregar nova foto
+              </button>
             </section>
+
             <section className={`${styles.card} ${styles.notifications}`}>
               <h2>
-                <span>♧</span> Preferências locais
+                <Bell size={18} aria-hidden="true" />
+                Notificações
               </h2>
               <label className={styles.toggleRow}>
                 <span>
                   <strong>Aluno concluiu atividade</strong>
-                  <small>Preferência salva neste navegador.</small>
+                  <small>Preferência salva somente neste navegador.</small>
                 </span>
                 <input
                   type="checkbox"
@@ -159,12 +258,12 @@ export default function Configuracoes() {
                     atualizarNotificacao("conclusao", event.target.checked)
                   }
                 />
-                <i />
+                <i aria-hidden="true" />
               </label>
               <label className={styles.toggleRow}>
                 <span>
                   <strong>Atividades próximas do prazo</strong>
-                  <small>Preferência salva neste navegador.</small>
+                  <small>Preferência salva somente neste navegador.</small>
                 </span>
                 <input
                   type="checkbox"
@@ -173,16 +272,24 @@ export default function Configuracoes() {
                     atualizarNotificacao("prazo", event.target.checked)
                   }
                 />
-                <i />
+                <i aria-hidden="true" />
               </label>
             </section>
+
             <div className={styles.actions}>
               <button
                 type="button"
                 className={styles.discard}
-                onClick={restaurarNotificacoes}
+                onClick={descartarAlteracoes}
               >
-                Restaurar preferências
+                Descartar alterações
+              </button>
+              <button
+                type="button"
+                className={styles.save}
+                onClick={salvarConfiguracoes}
+              >
+                Salvar configurações
               </button>
             </div>
           </div>

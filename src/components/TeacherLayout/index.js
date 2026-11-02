@@ -1,17 +1,33 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
+import {
+  Bell,
+  ChartNoAxesColumnIncreasing,
+  ClipboardList,
+  House,
+  LogOut,
+  Menu,
+  Search,
+  Settings,
+  UsersRound,
+  X,
+} from "lucide-react";
 import { clearSession, getSession } from "../../services/session";
 import { demoEnabled } from "../../services/demo";
 import styles from "./TeacherLayout.module.css";
 import Logo from "../Logo";
 
 const navigation = [
-  { href: "/painel", label: "Visão geral", symbol: "⌂" },
-  { href: "/turmas", label: "Turmas e alunos", symbol: "♧" },
-  { href: "/atividades", label: "Atividades", symbol: "▤" },
-  { href: "/desempenho", label: "Desempenho", symbol: "↗" },
-  { href: "/configuracoes", label: "Configurações", symbol: "⚙" },
+  { href: "/painel", label: "Home", icon: House },
+  { href: "/turmas", label: "Turmas", icon: UsersRound },
+  { href: "/atividades", label: "Atividades", icon: ClipboardList },
+  {
+    href: "/desempenho",
+    label: "Desempenho",
+    icon: ChartNoAxesColumnIncreasing,
+  },
+  { href: "/configuracoes", label: "Configurações", icon: Settings },
 ];
 
 export default function TeacherLayout({ title, subtitle, children }) {
@@ -110,7 +126,8 @@ export default function TeacherLayout({ title, subtitle, children }) {
           onClick={() => setMenuMobile((open) => !open)}
           aria-expanded={menuMobile}
         >
-          ☰ <span>Menu</span>
+          {menuMobile ? <X size={18} /> : <Menu size={18} />}
+          <span>Menu</span>
         </button>
         <nav
           className={`${styles.nav} ${menuMobile ? styles.navOpen : ""}`}
@@ -129,9 +146,7 @@ export default function TeacherLayout({ title, subtitle, children }) {
                   key={item.href}
                   className={`${styles.navItem} ${active ? styles.active : ""}`}
                 >
-                  <span className={styles.navSymbol} aria-hidden="true">
-                    {item.symbol}
-                  </span>
+                  <item.icon className={styles.navSymbol} size={18} aria-hidden="true" />
                   <span>{item.label}</span>
                 </Link>
               );
@@ -144,9 +159,7 @@ export default function TeacherLayout({ title, subtitle, children }) {
               router.pathname === "/configuracoes" ? styles.active : ""
             }`}
           >
-            <span className={styles.navSymbol} aria-hidden="true">
-              ⚙
-            </span>
+            <Settings className={styles.navSymbol} size={18} aria-hidden="true" />
             <span>Configurações</span>
           </Link>
           <button
@@ -154,7 +167,7 @@ export default function TeacherLayout({ title, subtitle, children }) {
             className={styles.logout}
             onClick={() => setMostrarSaida(true)}
           >
-            <span aria-hidden="true">↪</span> Sair
+            <LogOut size={18} aria-hidden="true" /> Sair
           </button>
         </div>
       </aside>
@@ -162,19 +175,7 @@ export default function TeacherLayout({ title, subtitle, children }) {
       <div className={styles.mainArea}>
         <header className={styles.topbar}>
           <form className={styles.search} onSubmit={executarBusca}>
-            <svg 
-              width="18" 
-              height="18" 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="currentColor" 
-              strokeWidth="2.5" 
-              strokeLinecap="round" 
-              strokeLinejoin="round"
-            >
-              <circle cx="11" cy="11" r="8"></circle>
-              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-            </svg>
+            <Search size={18} aria-hidden="true" />
             <input
               type="search"
               placeholder="Buscar telas..."
@@ -198,6 +199,7 @@ export default function TeacherLayout({ title, subtitle, children }) {
                 aria-expanded={notificacoesAbertas}
                 onClick={() => setNotificacoesAbertas((open) => !open)}
               >
+                <Bell size={19} aria-hidden="true" />
               </button>
               {notificacoesAbertas ? (
                 <div className={styles.notificationPanel}>
@@ -233,7 +235,8 @@ export default function TeacherLayout({ title, subtitle, children }) {
                     className={styles.dropdownItem}
                     onClick={() => setMenuPerfilAberto(false)}
                   >
-                    ⚙ Minhas Configurações
+                    <Settings size={16} aria-hidden="true" />
+                    Minhas Configurações
                   </Link>
                   <button 
                     type="button" 
@@ -243,7 +246,8 @@ export default function TeacherLayout({ title, subtitle, children }) {
                       setMostrarSaida(true);
                     }}
                   >
-                    ↪ Sair da conta
+                    <LogOut size={16} aria-hidden="true" />
+                    Sair da conta
                   </button>
                 </div>
               ) : null}
@@ -252,10 +256,12 @@ export default function TeacherLayout({ title, subtitle, children }) {
         </header>
         
         <main className={styles.content}>
-          <div className={styles.pageHeading}>
-            <h1>{title}</h1>
-            {subtitle ? <p>{subtitle}</p> : null}
-          </div>
+          {title || subtitle ? (
+            <div className={styles.pageHeading}>
+              {title ? <h1>{title}</h1> : null}
+              {subtitle ? <p>{subtitle}</p> : null}
+            </div>
+          ) : null}
           {children}
         </main>
       </div>
@@ -274,7 +280,9 @@ export default function TeacherLayout({ title, subtitle, children }) {
             aria-modal="true"
             aria-labelledby="exit-title"
           >
-            <div className={styles.exitIcon}>↪</div>
+            <div className={styles.exitIcon}>
+              <LogOut size={30} aria-hidden="true" />
+            </div>
             <h2 id="exit-title">Deseja sair?</h2>
             <p>Você será desconectado da sua conta Zooly.</p>
             <div>

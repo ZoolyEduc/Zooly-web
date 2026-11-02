@@ -9,6 +9,8 @@ export const turmasDemo = [
     escolaId: "demo-escola",
     anoEscolar: 2026,
     codigoPermanente: "VALE-1A",
+    periodo: "Manhã",
+    mascote: "sarue",
   },
   {
     _id: "demo-turma-2",
@@ -17,6 +19,8 @@ export const turmasDemo = [
     escolaId: "demo-escola",
     anoEscolar: 2026,
     codigoPermanente: "VALE-2B",
+    periodo: "Tarde",
+    mascote: "papagaio",
   },
 ];
 
@@ -209,6 +213,8 @@ export function demoResponse(path, options = {}) {
     }
     return { mensagem: "Aluno atualizado na demonstração." };
   }
+  if (route === "/api/atividades" && method === "GET")
+    return { atividades: atividadesDemo };
   if (route === "/api/atividades/publicadas" && method === "GET")
     return {
       atividades: atividadesDemo.filter((item) => item.status === "publicada"),
@@ -221,15 +227,40 @@ export function demoResponse(path, options = {}) {
       historia: historiasDemo.find((item) => item._id === historia[1]) || null,
     };
   if (route === "/api/atividades" && method === "POST") {
+    const id = `demo-atividade-${Date.now()}`;
     const atividade = {
-      _id: `demo-atividade-${Date.now()}`,
+      _id: id,
       ...options.body,
       titulo: options.body?.titulo || "Nova atividade",
+      questoes: (options.body?.questoes || []).map((questao, index) => ({
+        ...questao,
+        _id: questao._id || `${id}-questao-${index + 1}`,
+      })),
+      pontuacaoTotal: (options.body?.questoes || []).reduce(
+        (total, questao) => total + (Number(questao.pontos) || 0),
+        0,
+      ),
       status: "rascunho",
       publicadoEm: null,
     };
     atividadesDemo.unshift(atividade);
     return { atividade };
+  }
+  const atividade = route.match(/^\/api\/atividades\/([^/]+)$/);
+  if (atividade && method === "GET") {
+    const registro = atividadesDemo.find((item) => item._id === atividade[1]);
+    if (!registro) throw new Error("Atividade não encontrada na demonstração.");
+    return { atividade: registro };
+  }
+  if (atividade && method === "PUT") {
+    const registro = atividadesDemo.find((item) => item._id === atividade[1]);
+    if (!registro) throw new Error("Atividade não encontrada na demonstração.");
+    Object.assign(registro, options.body);
+    registro.pontuacaoTotal = (registro.questoes || []).reduce(
+      (total, questao) => total + (Number(questao.pontos) || 0),
+      0,
+    );
+    return { atividade: registro };
   }
   const publicar = route.match(/^\/api\/atividades\/([^/]+)\/publicar$/);
   if (publicar && method === "PATCH") {

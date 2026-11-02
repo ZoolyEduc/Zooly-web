@@ -7,24 +7,32 @@ export const mascotes = [
     nome: "Papagaio",
     srcBotao: "/img/papagaio-botao.png",
     srcVetor: "/img/papagaio-vetor.png",
+    widthBotao: 64,
+    heightBotao: 64,
   },
   {
     id: "lagarto",
     nome: "Lagarto",
     srcBotao: "/img/lagarto-botao.png",
     srcVetor: "/img/lagarto-vetor.png",
+    widthBotao: 64,
+    heightBotao: 64,
   },
   {
     id: "cobra",
     nome: "Cobra",
     srcBotao: "/img/cobra-botao.png",
     srcVetor: "/img/cobra-vetor.png",
+    widthBotao: 64,
+    heightBotao: 68,
   },
   {
     id: "sarue",
     nome: "Saruê",
     srcBotao: "/img/sarue-botao.png",
     srcVetor: "/img/sarue-vetor.png",
+    widthBotao: 64,
+    heightBotao: 67,
   },
 ];
 

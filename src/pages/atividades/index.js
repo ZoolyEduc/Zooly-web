@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
+import { ArrowRight, BookOpen, ClipboardList, Plus, TreePine, Volume2 } from "lucide-react";
 import TeacherLayout from "../../components/TeacherLayout";
 import Notice from "../../components/Notice";
 import { apiRequest } from "../../services/api";
@@ -9,6 +10,7 @@ import { getId, formatDate } from "../../services/session";
 import styles from "./atividades.module.css";
 
 const iconColors = ["blue", "yellow", "sky", "coral"];
+const activityIcons = [ClipboardList, TreePine, BookOpen, Volume2];
 
 export default function Atividades() {
   const [atividades, setAtividades] = useState([]);
@@ -24,7 +26,7 @@ export default function Atividades() {
   useEffect(() => {
     let ativo = true;
     Promise.all([
-      apiRequest("/api/atividades/publicadas"),
+      apiRequest("/api/atividades"),
       apiRequest("/api/turmas"),
     ])
       .then(([a, t]) => {
@@ -126,7 +128,8 @@ export default function Atividades() {
             </select>
           </div>
           <Link href="/atividades/nova" className={styles.primary}>
-            ＋ Nova Atividade
+            <Plus size={17} aria-hidden="true" />
+            Nova Atividade
           </Link>
         </div>
         {loading ? (
@@ -138,44 +141,72 @@ export default function Atividades() {
                 typeof atividade.turma === "object"
                   ? getId(atividade.turma)
                   : atividade.turma;
-              const total = atividade.totalAlunos || 32;
-              const concluidas = atividade.concluidas || 0;
-              const progresso = total
-                ? Math.round((concluidas / total) * 100)
-                : 0;
+              const total = Number.isFinite(atividade.totalAlunos)
+                ? atividade.totalAlunos
+                : null;
+              const concluidas = Number.isFinite(atividade.concluidas)
+                ? atividade.concluidas
+                : null;
+              const ActivityIcon = activityIcons[index % activityIcons.length];
+              const isDraft = atividade.status === "rascunho";
               return (
                 <article
-                  className={styles.card}
+                  className={`${styles.card} ${isDraft ? styles.draftCard : ""}`}
                   key={getId(atividade) || index}
                 >
                   <div className={styles.cardTop}>
                     <span
                       className={`${styles.activityIcon} ${styles[iconColors[index % iconColors.length]]}`}
                     >
-                      {["♣", "♟", "▣", "◖"][index % 4]}
+                      <ActivityIcon size={21} aria-hidden="true" />
                     </span>
-                    <span className={styles.status}>Publicada</span>
+                    <span className={`${styles.status} ${isDraft ? styles.draftStatus : ""}`}>
+                      {isDraft ? "Rascunho" : "Publicada"}
+                    </span>
                   </div>
                   <h2>{atividade.titulo || "Atividade sem título"}</h2>
                   <p className={styles.className}>
                     {nomesTurmas[turmaId] ||
                       atividade.turma?.nome ||
-                      "Turma vinculada"}
+                      "Turma não informada"}
                   </p>
                   <p className={styles.phoneme}>
-                    {atividade.questoes?.length ?? 0} questões · {atividade.recompensaMoedas ?? "—"} moedas
+                    {atividade.questoes?.length ?? 0} questões ·{" "}
+                    {atividade.pontuacaoTotal == null
+                      ? "Pontuação indisponível"
+                      : `${atividade.pontuacaoTotal} pts`}
                   </p>
                   <div className={styles.cardBottom}>
                     <small>
-                      {atividade.prazo
+                      {total != null && concluidas != null
+                        ? `${concluidas}/${total} alunos concluíram`
+                        : atividade.prazo
                         ? `Prazo: ${formatDate(atividade.prazo)}`
                         : "Sem prazo definido"}
                     </small>
-                    <Link href={`/atividades/${getId(atividade)}`}>Visualizar →</Link>
+                    {isDraft ? (
+                      <>
+                        <Link href={`/atividades/${encodeURIComponent(getId(atividade))}`}>
+                          Abrir
+                          <ArrowRight size={14} aria-hidden="true" />
+                        </Link>
+                        <Link href={`/atividades/nova?id=${encodeURIComponent(getId(atividade))}`}>
+                          Editar
+                          <ArrowRight size={14} aria-hidden="true" />
+                        </Link>
+                      </>
+                    ) : (
+                      <Link href={`/atividades/${getId(atividade)}`}>
+                        Visualizar
+                        <ArrowRight size={14} aria-hidden="true" />
+                      </Link>
+                    )}
                   </div>
-                  <div className={styles.meta}>
-                    Publicada em {formatDate(atividade.publicadoEm)}
-                  </div>
+                  {atividade.publicadoEm ? (
+                    <div className={styles.meta}>
+                      Publicada em {formatDate(atividade.publicadoEm)}
+                    </div>
+                  ) : null}
                 </article>
               );
             })}
@@ -188,7 +219,7 @@ export default function Atividades() {
               width={180}
               height={180}
             />
-            <h2>Nenhuma atividade publicada encontrada</h2>
+            <h2>Nenhuma atividade encontrada</h2>
             <p>
               Crie uma atividade para esta turma ou selecione outra turma.
             </p>
@@ -207,6 +238,9 @@ export default function Atividades() {
               <div className={styles.storyGrid}>
                 {historias.map((historia) => (
                   <article className={styles.story} key={getId(historia)}>
+                    <div className={styles.storyCover} aria-hidden="true">
+                      <BookOpen size={27} />
+                    </div>
                     <h2>{historia.titulo}</h2>
                     <details className={styles.storyDetails}>
                       <summary>Ver história completa</summary>

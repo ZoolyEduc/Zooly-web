@@ -51,11 +51,7 @@
   background: #eafbf0;
 }
 .navSymbol {
-  display: grid;
-  place-items: center;
-  width: 25px;
-  font-size: 18px;
-  line-height: 1;
+  flex: 0 0 25px;
 }
 .sidebarBottom {
   display: flex;
@@ -224,6 +220,9 @@
   cursor: pointer;
   transition: background 0.15s ease;
 }
+.dropdownItem svg {
+  flex: 0 0 auto;
+}
 .dropdownItem:hover {
   background: #f0f3f4;
   color: #168144;
@@ -244,13 +243,11 @@
   border: 0;
   background: transparent;
   color: #46566b;
-  font-size: 22px;
   cursor: pointer;
 }
-.notificationButton::before {
-  content: "🔔"; 
+.notificationButton svg {
   display: block;
-  font-size: 20px; 
+  margin: auto;
 }
 .notificationButton i {
   position: absolute;
@@ -347,7 +344,6 @@
   border-radius: 50%;
   background: #fff0ed;
   color: #b3462e;
-  font-size: 36px;
 }
 .exitModal h2 {
   margin: 0 0 8px;

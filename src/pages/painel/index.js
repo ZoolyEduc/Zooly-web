@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import Head from "next/head";
 import Link from "next/link";
+import { ClipboardList, GraduationCap, TrendingUp, UsersRound } from "lucide-react";
 import TeacherLayout from "../../components/TeacherLayout";
 import StatCard from "../../components/StatCard";
 import Notice from "../../components/Notice";
 import { apiRequest } from "../../services/api";
-import { getId, formatDate } from "../../services/session";
+import { getId, getSession } from "../../services/session";
 import styles from "./painel.module.css";
 
 function dataLocalISO() {
@@ -23,6 +24,13 @@ export default function Painel() {
   });
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState("");
+  const [nomeProfessor, setNomeProfessor] = useState("");
+
+  useEffect(() => {
+    Promise.resolve().then(() => {
+      setNomeProfessor(getSession().usuario?.nome || "");
+    });
+  }, []);
 
   useEffect(() => {
     let ativo = true;
@@ -93,31 +101,32 @@ export default function Painel() {
       <Head>
         <title>Home | Zooly</title>
       </Head>
-      <TeacherLayout
-        title="Visão geral"
-        subtitle="Resumo das turmas e do desempenho semanal conectado à API."
-      >
+      <TeacherLayout>
+        <section className={styles.welcome}>
+          <h2>Olá, {nomeProfessor || "professor(a)"}!</h2>
+          <p>Aqui está um resumo das suas turmas e atividades.</p>
+        </section>
         {erro ? <Notice kind="error">{erro}</Notice> : null}
         <section className={styles.stats} aria-label="Indicadores gerais">
           <StatCard
             label="TURMAS"
             value={loading ? "—" : dados.turmas.length}
-            symbol="♧"
+            icon={UsersRound}
           />
           <StatCard
             label="ALUNOS MATRICULADOS"
             value={loading ? "—" : alunos.length}
-            symbol="♙"
+            icon={GraduationCap}
           />
           <StatCard
             label="ATIVIDADES PUBLICADAS"
             value={loading ? "—" : dados.atividades.length}
-            symbol="✿"
+            icon={ClipboardList}
           />
           <StatCard
             label="ACERTO NA SEMANA"
             value={loading ? "—" : percentualAcerto == null ? "—" : `${percentualAcerto}%`}
-            symbol="↗"
+            icon={TrendingUp}
           />
         </section>
         <section className={styles.history}>
