@@ -7,18 +7,64 @@
   justify-content: space-between;
   gap: 24px;
 }
-.brand { display: inline-flex; align-items: center; }
-.brand img { width: 150px; height: auto; object-fit: contain; }
-.navigation { display: flex; align-items: center; gap: clamp(16px, 3vw, 34px); }
-.navigation a { color: #334155; text-decoration: none; font-size: 14px; font-weight: 600; transition: color .2s ease; }
-.navigation a:hover { color: #1f6b35; }
-.navigation .login { color: #fff; background: #1f6b35; padding: 12px 24px; border-radius: 999px; box-shadow: 0 10px 22px rgba(31,107,53,.17); }
-.navigation .login:hover { color: #fff; background: #185629; }
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  /* Tamanho da imagem é controlado pelo componente <Logo /> */
+}
+
+.navigation {
+  display: flex;
+  align-items: center;
+  gap: clamp(16px, 3vw, 34px);
+}
+
+.navigation a {
+  color: #334155;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+  transition: color 0.2s ease;
+}
+
+.navigation a:hover {
+  color: #1f6b35;
+}
+
+.navigation .login {
+  color: #fff;
+  background: #1f6b35;
+  padding: 12px 24px;
+  border-radius: 999px;
+  box-shadow: 0 10px 22px rgba(31, 107, 53, 0.17);
+}
+
+.navigation .login:hover {
+  color: #fff;
+  background: #185629;
+}
+
 @media (max-width: 640px) {
-  .menu { width: min(100% - 28px, 1180px); min-height: 76px; }
-  .brand img { width: 118px; }
-  .navigation { gap: 12px; }
-  .navigation a { font-size: 12px; }
-  .navigation a:first-child, .navigation a:nth-child(2) { display: none; }
-  .navigation .login { padding: 10px 18px; }
+  .menu {
+    width: min(100% - 28px, 1180px);
+    min-height: 76px;
+  }
+
+  .navigation {
+    gap: 12px;
+  }
+
+  .navigation a {
+    font-size: 12px;
+  }
+
+  .navigation a:first-child,
+  .navigation a:nth-child(2) {
+    display: none;
+  }
+
+  .navigation .login {
+    padding: 10px 18px;
+  }
 }

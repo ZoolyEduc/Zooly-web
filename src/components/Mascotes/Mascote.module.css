@@ -1,0 +1,71 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: #ffffff;
+  border: 2px solid #f0f3f4;
+  border-radius: 24px;
+  padding: 20px;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  font-family: inherit;
+  width: 100%;
+}
+
+/* Se for um botão, adiciona o cursor e o hover */
+button.card {
+  cursor: pointer;
+}
+
+button.card:hover {
+  border-color: #d9eee0;
+  transform: translateY(-4px);
+  box-shadow: 0 10px 20px rgba(22, 129, 68, 0.08);
+}
+
+.selected {
+  border-color: #168144;
+  background: #eafbf0;
+  box-shadow: 0 0 0 3px rgba(22, 129, 68, 0.15);
+}
+
+.imageWrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.image {
+  object-fit: contain;
+  transition: transform 0.2s ease;
+}
+
+button.card:hover .image {
+  transform: scale(1.05);
+}
+
+.name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #30383a;
+}
+
+.selected .name {
+  color: #168144;
+}
+
+/* Tamanhos */
+.sm .image {
+  height: 60px;
+  width: auto;
+}
+.md .image {
+  height: 100px;
+  width: auto;
+}
+.lg .image {
+  height: 150px;
+  width: auto;
+}

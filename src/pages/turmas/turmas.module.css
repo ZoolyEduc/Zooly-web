@@ -1,41 +1,410 @@
-.toolbar { display: flex; justify-content: flex-end; margin: -76px 0 86px; pointer-events: none; }
-.primary { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 54px; padding: 12px 28px; border: 0; border-radius: 30px; background: #168144; color: white; font-size: 14px; font-weight: 750; box-shadow: 0 10px 20px #16814425; cursor: pointer; pointer-events: auto; }
-.primary:hover { background: #116b36; }
-.primary:disabled { opacity: .65; cursor: wait; }
-.grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 30px; }
-.card { min-height: 330px; padding: 32px; border: 1px solid #e7e9e9; border-radius: 48px; background: #fff; box-shadow: var(--zooly-shadow-card); }
-.cardTop { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 36px; }
-.mascotBox { display: grid; place-items: center; width: 64px; height: 64px; border-radius: 19px; }
-.mascotBox img { width: 52px; height: 52px; object-fit: contain; }
-.tone0 { background: #fff6c9; }.tone1 { background: #d9f5b5; }.tone2 { background: #ffe3d9; }.tone3 { background: #fff5c5; }
-.more { border: 0; background: transparent; color: #91a0b6; font-size: 24px; cursor: pointer; }
-.kicker { display: inline-block; padding: 4px 12px; border-radius: 14px; font-size: 10px; font-weight: 800; letter-spacing: .8px; }
-.tag0 { color: #c08400; background: #fff9e4; }.tag1 { color: #2cbf70; background: #edfff4; }.tag2 { color: #ef6b3a; background: #fff3eb; }.tag3 { color: #b69300; background: #fffae1; }
-.card h2 { margin: 15px 0 2px; color: #30383a; font-size: 23px; letter-spacing: -.4px; }
-.period { margin: 0 0 25px; color: #70797c; font-size: 15px; }
-.students { display: inline-flex; align-items: center; gap: 8px; padding: 9px 15px; border-radius: 22px; background: #f4f7fa; color: #63758c; font-size: 13px; text-decoration: none; }
-.students:hover { background: #eafbf0; color: #168144; }
-.students span { font-size: 13px; }
-.empty { display: flex; flex-direction: column; align-items: center; padding: 38px; border-radius: var(--zooly-radius-card); background: #fff; text-align: center; }
-.empty img { width: 110px; height: 110px; object-fit: contain; }.empty h2 { margin: 8px 0 3px; color: #30383a; }.empty p { margin: 0 0 18px; color: #70797c; }
-.loading { padding: 30px 0; color: #70797c; }
-.modalBackdrop { position: fixed; inset: 0; z-index: 70; display: grid; place-items: center; padding: 22px; background: rgba(27, 29, 29, .82); }
-.modal { width: min(670px, 100%); max-height: min(92vh, 850px); overflow: auto; padding: 42px 40px 34px; border-radius: 38px; background: white; box-shadow: 0 24px 70px #0003; }
-.modal h2 { margin: 0; color: #30383a; font-size: 27px; text-align: center; letter-spacing: -.7px; }
-.modalIntro { max-width: 400px; margin: 7px auto 28px; color: #727b7e; font-size: 14px; text-align: center; }
-.modal form { display: flex; flex-direction: column; gap: 17px; }
-.modal form > label, .formRow label { display: flex; flex-direction: column; gap: 7px; color: #30383a; font-size: 13px; font-weight: 700; }
-.modal input, .modal select { width: 100%; min-height: 55px; padding: 0 18px; border: 0; border-radius: 19px; outline: 0; background: #f0f3f4; color: #354044; }
-.modal input:focus, .modal select:focus { box-shadow: 0 0 0 2px #16814470; }
-.formRow { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
-.modal fieldset { padding: 0; border: 0; }
-.modal legend { margin-bottom: 12px; color: #30383a; font-size: 13px; font-weight: 750; }
-.mascotPicker { display: flex; justify-content: center; gap: 22px; }
-.mascotPicker button { display: grid; place-items: center; width: 67px; height: 67px; border: 2px solid transparent; border-radius: 50%; background: #e1f5be; cursor: pointer; }
-.mascotPicker button:nth-child(2) { background: #e4d2b7; }.mascotPicker button:nth-child(3) { background: #f6ce68; }.mascotPicker button:nth-child(4) { background: #fff4b8; }
-.mascotPicker button[aria-pressed="true"] { border-color: #168144; box-shadow: 0 0 0 4px #16814420; }
-.mascotPicker img { width: 55px; height: 55px; object-fit: contain; }
-.modalActions { display: flex; align-items: center; justify-content: center; gap: 22px; margin-top: 16px; }
-.cancel { min-height: 48px; padding: 0 18px; border: 0; border-radius: 24px; background: transparent; color: #626c6e; font-weight: 700; cursor: pointer; }
-@media(max-width: 1000px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }.toolbar { margin: -62px 0 68px; } }
-@media(max-width: 620px) { .grid { grid-template-columns: 1fr; }.toolbar { justify-content: stretch; margin: 0 0 20px; }.toolbar .primary { width: 100%; }.card { min-height: 285px; padding: 25px; border-radius: 34px; }.cardTop { margin-bottom: 25px; }.modal { padding: 31px 21px 24px; border-radius: 28px; }.modal h2 { font-size: 23px; }.formRow { grid-template-columns: 1fr; }.mascotPicker { gap: 12px; }.mascotPicker button { width: 57px; height: 57px; }.mascotPicker img { width: 47px; height: 47px; } }
+/* BARRA DE FERRAMENTAS E BOTÃO NOVA TURMA */
+.toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin: -76px 0 86px;
+  pointer-events: none;
+}
+
+.primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 54px;
+  padding: 12px 28px;
+  border: 0;
+  border-radius: 30px;
+  background: #168144;
+  color: white;
+  font-size: 14px;
+  font-weight: 750;
+  box-shadow: 0 10px 20px #16814425;
+  cursor: pointer;
+  pointer-events: auto;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.primary:hover {
+  background: #116b36;
+  transform: translateY(-1px);
+}
+
+.primary:disabled {
+  opacity: 0.65;
+  cursor: wait;
+  transform: none;
+}
+
+/* GRADE DE TURMAS */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 30px;
+}
+
+.card {
+  min-height: 330px;
+  padding: 32px;
+  border: 1px solid #e7e9e9;
+  border-radius: 48px;
+  background: #fff;
+  box-shadow: var(--zooly-shadow-card, 0 10px 30px rgba(34, 47, 43, 0.035));
+  display: flex;
+  flex-direction: column;
+}
+
+.cardTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 36px;
+}
+
+.mascotBox {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 19px;
+}
+
+.mascotBox img {
+  width: 52px;
+  height: 52px;
+  object-fit: contain;
+}
+
+/* Cores de fundo dos mascotes */
+.tone0 { background: #fff9e4; }
+.tone1 { background: #edfff4; }
+.tone2 { background: #f0f7ff; }
+.tone3 { background: #fff3eb; }
+
+.more {
+  border: 0;
+  background: transparent;
+  color: #91a0b6;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 0;
+}
+
+.kicker {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 14px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+}
+
+/* Cores das tags de mascote */
+.tag0 { color: #c08400; background: #fff9e4; }
+.tag1 { color: #2cbf70; background: #edfff4; }
+.tag2 { color: #ef6b3a; background: #fff3eb; }
+.tag3 { color: #b69300; background: #fffae1; }
+
+.card h2 {
+  margin: 15px 0 2px;
+  color: #30383a;
+  font-size: 23px;
+  letter-spacing: -0.4px;
+}
+
+.period {
+  margin: 0 0 25px;
+  color: #70797c;
+  font-size: 15px;
+}
+
+.students {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 15px;
+  border-radius: 22px;
+  background: #f4f7fa;
+  color: #63758c;
+  font-size: 13px;
+  text-decoration: none;
+  margin-top: auto; /* Empurra para o final do card */
+  width: fit-content;
+}
+
+.students:hover {
+  background: #eafbf0;
+  color: #168144;
+}
+
+.students span {
+  font-size: 13px;
+}
+
+/* ESTADO VAZIO */
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 38px;
+  border-radius: var(--zooly-radius-card, 24px);
+  background: #fff;
+  text-align: center;
+}
+
+.empty img {
+  width: 110px;
+  height: 110px;
+  object-fit: contain;
+}
+
+.empty h2 {
+  margin: 8px 0 3px;
+  color: #30383a;
+}
+
+.empty p {
+  margin: 0 0 18px;
+  color: #70797c;
+}
+
+.loading {
+  padding: 30px 0;
+  color: #70797c;
+}
+
+/* MODAL DE NOVA TURMA */
+.modalBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: grid;
+  place-items: center;
+  padding: 22px;
+  background: rgba(27, 29, 29, 0.82);
+}
+
+.modal {
+  width: min(670px, 100%);
+  max-height: min(92vh, 850px);
+  overflow: auto;
+  padding: 42px 40px 34px;
+  border-radius: 38px;
+  background: white;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.2);
+}
+
+.modal h2 {
+  margin: 0;
+  color: #30383a;
+  font-size: 27px;
+  text-align: center;
+  letter-spacing: -0.7px;
+}
+
+.modalIntro {
+  max-width: 400px;
+  margin: 7px auto 28px;
+  color: #727b7e;
+  font-size: 14px;
+  text-align: center;
+  line-height: 1.6;
+}
+
+.modal form {
+  display: flex;
+  flex-direction: column;
+  gap: 17px;
+}
+
+.modal form > label,
+.formRow label {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  color: #30383a;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* ESTILOS DOS INPUTS E SELECTS (COM A SETINHA CORRIGIDA) */
+.modal input,
+.modal select {
+  width: 100%;
+  min-height: 55px;
+  border: 1px solid transparent;
+  border-radius: 19px;
+  outline: 0;
+  background: #f0f3f4;
+  color: #354044;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+/* Ajuste de padding para o input */
+.modal input {
+  padding: 0 18px;
+}
+
+/* Ajuste específico do select e a mágica da setinha */
+.modal select {
+  padding: 0 40px 0 18px;
+  cursor: pointer;
+  
+  /* Esconde a setinha padrão do Windows */
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  
+  /* Desenha a setinha SVG verde */
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23168144' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 18px center;
+  background-size: 18px;
+}
+
+/* Efeito de foco */
+.modal input:focus,
+.modal select:focus {
+  border-color: #168144;
+  background-color: #ffffff;
+  box-shadow: 0 0 0 3px rgba(22, 129, 68, 0.1);
+}
+
+.formRow {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.modal fieldset {
+  padding: 0;
+  border: 0;
+}
+
+.modal legend {
+  margin-bottom: 12px;
+  color: #30383a;
+  font-size: 13px;
+  font-weight: 750;
+}
+
+/* ESCOLHA DE MASCOTE */
+.mascotPicker {
+  display: flex;
+  justify-content: center;
+  gap: 22px;
+  padding-top: 5px;
+}
+
+.mascotPicker button {
+  display: grid;
+  place-items: center;
+  width: 67px;
+  height: 67px;
+  border: 2px solid transparent;
+  border-radius: 50%;
+  background: #e1f5be;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.mascotPicker button:nth-child(2) { background: #e4d2b7; }
+.mascotPicker button:nth-child(3) { background: #f6ce68; }
+.mascotPicker button:nth-child(4) { background: #fff4b8; }
+
+.mascotPicker button:hover {
+  transform: scale(1.05);
+}
+
+.mascotPicker button[aria-pressed="true"] {
+  border-color: #168144;
+  box-shadow: 0 0 0 4px rgba(22, 129, 68, 0.15);
+}
+
+.mascotPicker img {
+  width: 55px;
+  height: 55px;
+  object-fit: contain;
+}
+
+/* RODAPÉ DO MODAL (BOTÕES) */
+.modalActions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
+  margin-top: 24px;
+}
+
+.cancel {
+  min-height: 48px;
+  padding: 0 24px;
+  border: 0;
+  border-radius: 24px;
+  background: transparent;
+  color: #626c6e;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.cancel:hover {
+  background: #f0f3f4;
+}
+
+/* RESPONSIVIDADE */
+@media (max-width: 1000px) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+  }
+  .toolbar {
+    margin: -62px 0 68px;
+  }
+}
+
+@media (max-width: 620px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+  .toolbar {
+    justify-content: stretch;
+    margin: 0 0 20px;
+  }
+  .toolbar .primary {
+    width: 100%;
+  }
+  .card {
+    min-height: 285px;
+    padding: 25px;
+    border-radius: 34px;
+  }
+  .cardTop {
+    margin-bottom: 25px;
+  }
+  .modal {
+    padding: 31px 21px 24px;
+    border-radius: 28px;
+  }
+  .modal h2 {
+    font-size: 23px;
+  }
+  .formRow {
+    grid-template-columns: 1fr;
+  }
+  .mascotPicker {
+    gap: 12px;
+  }
+  .mascotPicker button {
+    width: 57px;
+    height: 57px;
+  }
+  .mascotPicker img {
+    width: 47px;
+    height: 47px;
+  }
+}

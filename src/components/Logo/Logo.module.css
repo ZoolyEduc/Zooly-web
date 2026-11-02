@@ -1,0 +1,26 @@
+.logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+.img {
+  object-fit: contain;
+  width: auto;
+  height: 100%;
+  max-width: none; /* Impede que resets globais esmaguem a logo */
+}
+
+/* Tamanhos */
+.sm { height: 36px; }
+.md { height: 52px; }
+.lg { height: 80px; }
+
+/* Ajuste automático para mobile */
+@media (max-width: 640px) {
+  .sm { height: 28px; }
+  .md { height: 40px; }
+  .lg { height: 60px; }
+}

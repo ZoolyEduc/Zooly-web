@@ -1,48 +1,246 @@
-.page { min-height: 100vh; background: linear-gradient(180deg, #f7fbf8 0%, #ffffff 55%); padding: 24px; }
-.top { max-width: 1180px; margin: 0 auto 24px; display: flex; justify-content: space-between; align-items: center; gap: 20px; }
-.logo img { width: 140px; display: block; }
-.topLinks { display: flex; align-items: center; gap: 12px; font-size: 13px; font-weight: 700; text-decoration: none; }
-.topLinks a { text-decoration: none; color: #1f6b35; }
-.card { width: min(100%, 440px); margin: 30px auto 46px; background: #fff; border: 1px solid #e4e6ea; border-radius: 24px; padding: clamp(24px, 5vw, 38px); box-shadow: 0 20px 60px rgba(16,60,31,.08); }
-.card h1 { margin: 0 0 7px; font-size: 26px; letter-spacing: -.8px; color: #15271a; text-align: center; }
-.subtitle { color: #6b7280; font-size: 13px; text-align: center; line-height: 1.6; margin: 0 auto 24px; max-width: 330px; }
-.form { display: flex; flex-direction: column; gap: 15px; }
-.field { display: flex; flex-direction: column; gap: 6px; }
-.field label { color: #374151; font-size: 12px; font-weight: 750; }
-.field input, .field select, .field textarea { width: 100%; min-height: 45px; background: #fbfcfb; border: 1px solid #dfe5e0; border-radius: 12px; padding: 11px 13px; color: #111827; outline: none; }
-.field input:focus, .field select:focus, .field textarea:focus { border-color: #1f6b35; box-shadow: 0 0 0 3px rgba(31,107,53,.09); background: #fff; }
-.primary { width: 100%; border: 0; border-radius: 999px; min-height: 47px; padding: 12px 18px; font-size: 14px; font-weight: 800; background: #1f6b35; color: #fff; margin-top: 4px; box-shadow: 0 10px 22px rgba(31,107,53,.17); }
-.primary:hover { background: #185629; }
-.bottomText { text-align: center; color: #6b7280; font-size: 13px; margin: 18px 0 0; }
-.bottomText a { color: #1f6b35; font-weight: 800; text-decoration: none; }
-.error { background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; padding: 11px 13px; border-radius: 11px; font-size: 13px; }
-.helper { color: #6b7280; font-size: 11px; line-height: 1.5; margin: 0; }
-@media (max-width: 560px) { .page { padding: 15px; } .top { margin-bottom: 10px; } .logo img { width: 112px; } .card { margin-top: 12px; } }
+/* --- Estrutura da Página --- */
+.page {
+  min-height: 100vh;
+  padding: 28px 32px 42px;
+  background: #fff;
+}
 
-.showPassword { align-self: flex-end; color: #1f6b35; background: transparent; border: 0; padding: 0; font-size: 11px; font-weight: 700; }
-.primary:disabled { opacity: .7; cursor: wait; }
+/* Topo (Header) */
+.top {
+  position: relative;
+  min-height: 108px;
+  margin-bottom: 5px;
+  display: flex;
+  justify-content: flex-end; /* Empurra os links para a direita */
+  align-items: center;
+}
 
-.page { min-height: 100vh; padding: 28px 32px 42px; background: #fff; }
-.top { position: relative; min-height: 108px; margin-bottom: 5px; }
-.logo { position: absolute; left: 50%; transform: translateX(-50%); }
-.logo img { width: 165px; }
-.topLinks { gap: 24px; }
-.topLinks a { color: #46566b; font-size: 14px; font-weight: 600; }
-.topLinks .topAction { padding: 11px 25px; border-radius: 25px; background: #116b2a; color: #fff; }
-.card { width: min(100%, 690px); min-height: 675px; margin: 0 auto; padding: 42px 48px; border: 1px solid #f0f1f1; border-radius: 48px; box-shadow: 0 3px 4px #101b1624, 0 19px 34px #101b1610; }
-.card h1 { color: #30383a; font-size: 30px; letter-spacing: -.7px; }
-.subtitle { margin-bottom: 34px; font-size: 15px; }
-.form { gap: 22px; }
-.field label { color: #30383a; font-size: 13px; }
-.field input, .field select, .field textarea { min-height: 55px; padding: 0 22px; border: 0; border-radius: 30px; background: #f0f3f4; }
-.primary { min-height: 54px; margin-top: 8px; border-radius: 30px; background: #126d26; text-transform: uppercase; letter-spacing: .5px; box-shadow: 0 7px 14px #116b2a22; }
-.bottomText { padding-top: 20px; border-top: 1px solid #edf0f0; }
-.registerPage .top { margin-bottom: 0; }
-.registerPage .card { width: min(100%, 690px); min-height: 0; padding: 28px 48px 35px; }
-.registerPage .card h1 { margin-bottom: 5px; }
-.registerPage .subtitle { margin-bottom: 22px; }
-.registerPage .form { gap: 14px; }
-.registerPage .field label { font-size: 11px; letter-spacing: .3px; text-transform: uppercase; }
-.registerPage .primary { margin-top: 4px; }
-.registerPage .bottomText { padding-top: 0; border: 0; margin-top: 10px; }
-@media(max-width: 700px) { .page { padding: 16px 15px 28px; }.top { min-height: 80px; }.logo { left: 0; transform: none; }.logo img { width: 120px; }.topLinks { gap: 9px; }.topLinks a { font-size: 12px; }.topLinks .topAction { padding: 8px 13px; }.card, .registerPage .card { width: 100%; min-height: 0; margin-top: 6px; padding: 30px 22px; border-radius: 30px; }.card h1 { font-size: 25px; }.subtitle { margin-bottom: 25px; }.form { gap: 16px; } }
+/* Wrapper para centralizar a logo, já que ela é absoluta */
+.logoWrapper {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.topLinks {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.topLinks a {
+  color: #46566b;
+  text-decoration: none;
+}
+
+.topLinks .topAction {
+  padding: 11px 25px;
+  border-radius: 25px;
+  background: var(--zooly-green-dark);
+  color: #fff;
+}
+
+/* --- Card Principal --- */
+.card {
+  width: min(100%, 690px);
+  min-height: 675px;
+  margin: 0 auto;
+  padding: 42px 48px;
+  border: 1px solid #f0f1f1;
+  border-radius: 48px;
+  box-shadow:
+    0 3px 4px rgba(16, 27, 22, 0.14),
+    0 19px 34px rgba(16, 27, 22, 0.06);
+}
+
+.card h1 {
+  color: var(--zooly-text);
+  font-size: 30px;
+  letter-spacing: -0.7px;
+  text-align: center;
+  margin: 0 0 7px;
+}
+
+.subtitle {
+  color: #6b7280;
+  font-size: 15px;
+  text-align: center;
+  line-height: 1.6;
+  margin: 0 auto 34px;
+  max-width: 400px;
+}
+
+/* --- Formulário --- */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field label {
+  color: var(--zooly-text);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.field input,
+.field select,
+.field textarea {
+  width: 100%;
+  min-height: 55px;
+  padding: 0 22px;
+  border: 1px solid #dfe5e0;
+  border-radius: 30px;
+  background: #f0f3f4;
+  color: #111827;
+  outline: none;
+  transition: all 0.2s;
+}
+
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+  border-color: var(--zooly-green-dark);
+  box-shadow: 0 0 0 3px rgba(31, 107, 53, 0.09);
+  background: #fff;
+}
+
+/* --- Botão Principal --- */
+.primary {
+  width: 100%;
+  border: 0;
+  border-radius: 30px;
+  min-height: 54px;
+  padding: 12px 18px;
+  font-size: 14px;
+  font-weight: 800;
+  background: var(--zooly-green-dark);
+  color: #fff;
+  margin-top: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 7px 14px rgba(17, 107, 42, 0.13);
+  transition: background 0.2s;
+}
+
+.primary:hover {
+  background: var(--zooly-green);
+}
+
+.primary:disabled {
+  opacity: 0.7;
+  cursor: wait;
+}
+
+/* --- Textos de Apoio --- */
+.bottomText {
+  text-align: center;
+  color: #6b7280;
+  font-size: 13px;
+  margin: 18px 0 0;
+  padding-top: 20px;
+  border-top: 1px solid #edf0f0;
+}
+
+.bottomText a {
+  color: var(--zooly-green-dark);
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.error {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+  padding: 11px 13px;
+  border-radius: 11px;
+  font-size: 13px;
+}
+
+.showPassword {
+  align-self: flex-end;
+  color: var(--zooly-green-dark);
+  background: transparent;
+  border: 0;
+  padding: 0;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* --- Variações da Página de Cadastro --- */
+.registerPage .top {
+  margin-bottom: 0;
+}
+.registerPage .card {
+  min-height: 0;
+  padding: 28px 48px 35px;
+}
+.registerPage .subtitle {
+  margin-bottom: 22px;
+}
+.registerPage .form {
+  gap: 14px;
+}
+.registerPage .field label {
+  font-size: 11px;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+.registerPage .bottomText {
+  padding-top: 0;
+  border: 0;
+  margin-top: 10px;
+}
+
+/* --- Responsividade (Mobile) --- */
+@media (max-width: 700px) {
+  .page {
+    padding: 16px 15px 28px;
+  }
+  .top {
+    min-height: 80px;
+    justify-content: center; /* Centraliza os links no mobile */
+  }
+  .logoWrapper {
+    position: static; /* Tira o absoluto para não sobrepor */
+    transform: none;
+    margin-bottom: 20px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+  .topLinks {
+    gap: 9px;
+  }
+  .topLinks a {
+    font-size: 12px;
+  }
+  .topLinks .topAction {
+    padding: 8px 13px;
+  }
+  .card, .registerPage .card {
+    width: 100%;
+    min-height: 0;
+    margin-top: 6px;
+    padding: 30px 22px;
+    border-radius: 30px;
+  }
+  .card h1 {
+    font-size: 25px;
+  }
+  .subtitle {
+    margin-bottom: 25px;
+  }
+  .form {
+    gap: 16px;
+  }
+}

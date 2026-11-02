@@ -4,10 +4,7 @@ export function saveSession({ token, usuario }) {
   if (typeof window === "undefined") return;
 
   window.localStorage.setItem("zooly_token", token || "");
-  window.localStorage.setItem(
-    "zooly_usuario",
-    JSON.stringify(usuario || {})
-  );
+  window.localStorage.setItem("zooly_usuario", JSON.stringify(usuario || {}));
 }
 
 export function getSession() {
@@ -30,7 +27,7 @@ export function getSession() {
 
   try {
     usuario = JSON.parse(
-      window.localStorage.getItem("zooly_usuario") || "null"
+      window.localStorage.getItem("zooly_usuario") || "null",
     );
   } catch {
     usuario = null;

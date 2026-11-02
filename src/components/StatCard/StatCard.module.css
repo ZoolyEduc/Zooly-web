@@ -1,10 +1,72 @@
-.card { min-width: 0; min-height: 160px; padding: 24px 23px 20px; border: 0; border-radius: var(--zooly-radius-card, 30px); background: #fff; box-shadow: var(--zooly-shadow-card); }
-.icon { display: grid; place-items: center; width: 40px; height: 40px; margin-bottom: 17px; border-radius: 50%; background: #eaf9ec; color: #168144; font-size: 21px; font-weight: 800; }
-.card:nth-child(2) .icon { color: #0872b4; background: #edf6ff; }
-.card:nth-child(3) .icon { color: #9b7800; background: #fff6d7; }
-.card:nth-child(4) .icon { color: #6a7477; background: #f0f2f3; }
-.label { overflow: hidden; color: #657073; font-weight: 800; font-size: 10px; letter-spacing: .8px; text-overflow: ellipsis; white-space: nowrap; }
-.value { margin-top: 3px; color: #30383a; font-size: 29px; line-height: 1.25; font-weight: 800; letter-spacing: -.5px; }
-.card:nth-child(4) .value { font-size: 23px; white-space: nowrap; }
-.helper { margin: 4px 0 0; color: #969fa1; font-size: 12px; }
-@media(max-width: 560px) { .card { min-height: 136px; padding: 17px; border-radius: 23px; }.value { font-size: 24px; }.card:nth-child(4) .value { font-size: 17px; } }
+.card {
+  min-width: 0;
+  min-height: 160px;
+  padding: 24px 23px 20px;
+  border: 0;
+  border-radius: var(--zooly-radius-card, 30px);
+  background: #fff;
+  box-shadow: var(--zooly-shadow-card);
+}
+.icon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  margin-bottom: 17px;
+  border-radius: 50%;
+  background: #eaf9ec;
+  color: #168144;
+  font-size: 21px;
+  font-weight: 800;
+}
+.card:nth-child(2) .icon {
+  color: #0872b4;
+  background: #edf6ff;
+}
+.card:nth-child(3) .icon {
+  color: #9b7800;
+  background: #fff6d7;
+}
+.card:nth-child(4) .icon {
+  color: #6a7477;
+  background: #f0f2f3;
+}
+.label {
+  overflow: hidden;
+  color: #657073;
+  font-weight: 800;
+  font-size: 10px;
+  letter-spacing: 0.8px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.value {
+  margin-top: 3px;
+  color: #30383a;
+  font-size: 29px;
+  line-height: 1.25;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+.card:nth-child(4) .value {
+  font-size: 23px;
+  white-space: nowrap;
+}
+.helper {
+  margin: 4px 0 0;
+  color: #969fa1;
+  font-size: 12px;
+}
+@media (max-width: 560px) {
+  .card {
+    min-height: 136px;
+    padding: 17px;
+    border-radius: 23px;
+  }
+  .value {
+    font-size: 24px;
+  }
+  .card:nth-child(4) .value {
+    font-size: 17px;
+  }
+}

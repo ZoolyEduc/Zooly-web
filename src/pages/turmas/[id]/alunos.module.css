@@ -1,55 +1,439 @@
-.back { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin: -14px 0 20px; }
-.back > a { color: #6f797b; font-size: 14px; text-decoration: none; }
-.primary { display: inline-flex; align-items: center; justify-content: center; min-height: 51px; padding: 10px 27px; border: 0; border-radius: 28px; background: #168144; color: white; font-size: 14px; font-weight: 750; text-decoration: none; cursor: pointer; box-shadow: 0 8px 17px #16814425; }
-.primary:hover { background: #116b36; }.primary:disabled { opacity: .65; }
-.metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 23px; margin-bottom: 20px; }
-.metrics article { position: relative; display: flex; align-items: center; justify-content: space-between; min-height: 185px; overflow: hidden; padding: 28px 31px; border-radius: 43px; background: #fff; box-shadow: var(--zooly-shadow-card); }
-.metrics article::after { position: absolute; top: -31px; right: -23px; width: 105px; height: 105px; border-radius: 50%; background: #f1f7f3; content: ""; }
-.metrics article:nth-child(2)::after { background: #f0f7ff; }.metrics article:nth-child(3)::after { background: #fff7d8; }
-.metrics article > div:first-child { display: flex; align-items: baseline; flex-wrap: wrap; gap: 0 9px; z-index: 1; }
-.metrics article > div:first-child > span { width: 100%; color: #167534; font-size: 12px; font-weight: 800; letter-spacing: 1px; }
-.metrics article:nth-child(2) > div:first-child > span { color: #0872b4; }.metrics article:nth-child(3) > div:first-child > span { color: #937000; }
-.metrics article strong { color: #30383a; font-size: 48px; line-height: 1.2; }
-.metrics article small { color: #727b7e; font-size: 14px; }
-.metricIcon, .award { z-index: 1; color: #168144; font-size: 32px; }
-.missionProgress { position: absolute; bottom: 36px; left: 32px; width: 61%; height: 8px; border-radius: 8px; background: #edf0f1; }
-.missionProgress i { display: block; width: 50%; height: 100%; border-radius: inherit; background: #0872b4; }
-.tableCard { overflow: hidden; border-radius: 42px; background: #fff; box-shadow: var(--zooly-shadow-card); }
-.tableTitle { display: flex; align-items: center; justify-content: space-between; padding: 20px 32px 15px; border-bottom: 1px solid #eef0f0; }
-.tableTitle h2 { margin: 0; color: #30383a; font-size: 20px; }
-.tableTitle button { border: 0; background: transparent; color: #667174; font-size: 24px; cursor: pointer; }
-.tableWrap { overflow-x: auto; }
-.tableWrap table { width: 100%; min-width: 760px; border-collapse: collapse; text-align: left; }
-.tableWrap th { height: 46px; padding: 10px 22px; color: #687174; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; }
-.tableWrap td { height: 97px; padding: 12px 22px; border-top: 1px solid #f0f1f1; color: #737c7e; font-size: 14px; }
-.student { display: flex; align-items: center; gap: 15px; min-width: 240px; }
-.student > div { display: flex; flex-direction: column; gap: 1px; }
-.student strong { color: #30383a; font-size: 15px; }
-.student small { color: #788184; font-size: 11px; }
-.studentAvatar { display: grid; flex: 0 0 48px; place-items: center; width: 48px; height: 48px; border-radius: 50%; background: #d4eee5; color: #31574c; font-size: 17px; font-weight: 700; }
-.avatar1 { background: #f5dfd4; }.avatar2 { background: #e8d7e8; }.avatar3 { background: #efdfc9; }
-.activeBadge { display: inline-flex; padding: 4px 13px; border-radius: 20px; background: #e4fae4; color: #168144; font-size: 10px; font-weight: 800; }
-.progress { display: flex; align-items: center; gap: 10px; min-width: 135px; }
-.progress > span { width: 95px; height: 6px; border-radius: 9px; background: #edf0f1; }
-.progress i { display: block; height: 100%; border-radius: inherit; background: #168144; }
-.progress strong { color: #30383a; font-size: 12px; }
-.more { border: 0; background: transparent; color: #697477; font-size: 23px; cursor: pointer; }
-.tableFooter { display: flex; justify-content: space-between; padding: 12px 32px; background: #f3f5f5; color: #687174; font-size: 11px; letter-spacing: .5px; }
-.tableFooter span { color: #697477; font-size: 15px; }.tableFooter b { padding: 5px 9px; border-radius: 50%; background: #168144; color: white; }
-.loading, .empty { padding: 26px; text-align: center; color: #717b7e; }.empty img { width: 90px; height: 90px; object-fit: contain; }.empty p { margin: 0 0 16px; }
-.modalBackdrop { position: fixed; inset: 0; z-index: 70; display: grid; place-items: center; padding: 18px; background: #20232380; }
-.modal { width: min(670px, 100%); max-height: 94vh; overflow-y: auto; padding: 38px 40px 34px; border-radius: 44px; background: #fff; box-shadow: 0 25px 70px #0003; }
-.modal h2, .detailModal h2 { margin: 0 0 22px; color: #30383a; font-size: 26px; }
-.modal form { display: flex; flex-direction: column; gap: 17px; }
-.modal label { display: flex; flex-direction: column; gap: 7px; color: #30383a; font-size: 13px; font-weight: 700; }
-.modal input { min-height: 62px; padding: 0 20px; border: 0; border-radius: 32px; outline: 0; background: #f0f3f4; }
-.modal input:focus { box-shadow: 0 0 0 2px #16814470; }
-.formRow { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
-.modalActions { display: flex; justify-content: center; gap: 22px; margin-top: 16px; }
-.cancel { min-height: 50px; padding: 0 20px; border: 0; background: transparent; color: #657073; font-weight: 700; cursor: pointer; }
-.detailModal { position: relative; width: min(390px, 100%); padding: 38px; border-radius: 28px; background: #fff; text-align: center; }
-.detailModal .studentAvatar { margin: auto auto 15px; }
-.detailModal h2 { margin-bottom: 3px; }.detailModal p { margin: 0 0 18px; color: #747d80; }.detailModal > strong { color: #168144; }
-.close { position: absolute; top: 15px; right: 18px; border: 0; background: transparent; color: #70797c; font-size: 24px; cursor: pointer; }
-@media(max-width: 1000px) { .metrics { gap: 14px; }.metrics article { min-height: 156px; padding: 21px; border-radius: 31px; }.metrics article strong { font-size: 40px; } }
-@media(max-width: 680px) { .back { align-items: stretch; flex-direction: column-reverse; margin: 0 0 17px; }.back .primary { width: 100%; }.metrics { grid-template-columns: 1fr; }.metrics article { min-height: 125px; }.missionProgress { bottom: 23px; left: 21px; }.tableCard { border-radius: 26px; }.tableTitle { padding: 18px; }.tableTitle h2 { font-size: 18px; }.tableWrap th,.tableWrap td { padding-right: 14px; padding-left: 14px; }.tableFooter { padding: 12px 16px; font-size: 9px; }.modal { padding: 30px 21px 25px; border-radius: 31px; }.modal h2 { font-size: 23px; }.formRow { grid-template-columns: 1fr; } }
+.back {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin: -14px 0 20px;
+}
+.back > a {
+  color: #6f797b;
+  font-size: 14px;
+  text-decoration: none;
+}
+.primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 51px;
+  padding: 10px 27px;
+  border: 0;
+  border-radius: 28px;
+  background: #168144;
+  color: white;
+  font-size: 14px;
+  font-weight: 750;
+  text-decoration: none;
+  cursor: pointer;
+  box-shadow: 0 8px 17px #16814425;
+}
+.primary:hover {
+  background: #116b36;
+}
+.primary:disabled {
+  opacity: 0.65;
+}
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 23px;
+  margin-bottom: 20px;
+}
+.metrics article {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 185px;
+  overflow: hidden;
+  padding: 28px 31px;
+  border-radius: 43px;
+  background: #fff;
+  box-shadow: var(--zooly-shadow-card);
+}
+.metrics article::after {
+  position: absolute;
+  top: -31px;
+  right: -23px;
+  width: 105px;
+  height: 105px;
+  border-radius: 50%;
+  background: #f1f7f3;
+  content: "";
+}
+.metrics article:nth-child(2)::after {
+  background: #f0f7ff;
+}
+.metrics article:nth-child(3)::after {
+  background: #fff7d8;
+}
+.metrics article > div:first-child {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0 9px;
+  z-index: 1;
+}
+.metrics article > div:first-child > span {
+  width: 100%;
+  color: #167534;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+.metrics article:nth-child(2) > div:first-child > span {
+  color: #0872b4;
+}
+.metrics article:nth-child(3) > div:first-child > span {
+  color: #937000;
+}
+.metrics article strong {
+  color: #30383a;
+  font-size: 48px;
+  line-height: 1.2;
+}
+.metrics article small {
+  color: #727b7e;
+  font-size: 14px;
+}
+.metricIcon,
+.award {
+  z-index: 1;
+  color: #168144;
+  font-size: 32px;
+}
+.missionProgress {
+  position: absolute;
+  bottom: 36px;
+  left: 32px;
+  width: 61%;
+  height: 8px;
+  border-radius: 8px;
+  background: #edf0f1;
+}
+.missionProgress i {
+  display: block;
+  width: 50%;
+  height: 100%;
+  border-radius: inherit;
+  background: #0872b4;
+}
+.tableCard {
+  overflow: hidden;
+  border-radius: 42px;
+  background: #fff;
+  box-shadow: var(--zooly-shadow-card);
+}
+.tableTitle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 32px 15px;
+  border-bottom: 1px solid #eef0f0;
+}
+.tableTitle h2 {
+  margin: 0;
+  color: #30383a;
+  font-size: 20px;
+}
+.tableTitle button {
+  border: 0;
+  background: transparent;
+  color: #667174;
+  font-size: 24px;
+  cursor: pointer;
+}
+.tableWrap {
+  overflow-x: auto;
+}
+.tableWrap table {
+  width: 100%;
+  min-width: 760px;
+  border-collapse: collapse;
+  text-align: left;
+}
+.tableWrap th {
+  height: 46px;
+  padding: 10px 22px;
+  color: #687174;
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.tableWrap td {
+  height: 97px;
+  padding: 12px 22px;
+  border-top: 1px solid #f0f1f1;
+  color: #737c7e;
+  font-size: 14px;
+}
+.student {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  min-width: 240px;
+}
+.student > div {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.student strong {
+  color: #30383a;
+  font-size: 15px;
+}
+.student small {
+  color: #788184;
+  font-size: 11px;
+}
+.studentAvatar {
+  display: grid;
+  flex: 0 0 48px;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #d4eee5;
+  color: #31574c;
+  font-size: 17px;
+  font-weight: 700;
+}
+.avatar1 {
+  background: #f5dfd4;
+}
+.avatar2 {
+  background: #e8d7e8;
+}
+.avatar3 {
+  background: #efdfc9;
+}
+.activeBadge {
+  display: inline-flex;
+  padding: 4px 13px;
+  border-radius: 20px;
+  background: #e4fae4;
+  color: #168144;
+  font-size: 10px;
+  font-weight: 800;
+}
+.progress {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 135px;
+}
+.progress > span {
+  width: 95px;
+  height: 6px;
+  border-radius: 9px;
+  background: #edf0f1;
+}
+.progress i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #168144;
+}
+.progress strong {
+  color: #30383a;
+  font-size: 12px;
+}
+.more {
+  border: 0;
+  background: transparent;
+  color: #697477;
+  font-size: 23px;
+  cursor: pointer;
+}
+.tableFooter {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 32px;
+  background: #f3f5f5;
+  color: #687174;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+}
+.tableFooter span {
+  color: #697477;
+  font-size: 15px;
+}
+.tableFooter b {
+  padding: 5px 9px;
+  border-radius: 50%;
+  background: #168144;
+  color: white;
+}
+.loading,
+.empty {
+  padding: 26px;
+  text-align: center;
+  color: #717b7e;
+}
+.empty img {
+  width: 90px;
+  height: 90px;
+  object-fit: contain;
+}
+.empty p {
+  margin: 0 0 16px;
+}
+.modalBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  background: #20232380;
+}
+.modal {
+  width: min(670px, 100%);
+  max-height: 94vh;
+  overflow-y: auto;
+  padding: 38px 40px 34px;
+  border-radius: 44px;
+  background: #fff;
+  box-shadow: 0 25px 70px #0003;
+}
+.modal h2,
+.detailModal h2 {
+  margin: 0 0 22px;
+  color: #30383a;
+  font-size: 26px;
+}
+.modal form {
+  display: flex;
+  flex-direction: column;
+  gap: 17px;
+}
+.modal label {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  color: #30383a;
+  font-size: 13px;
+  font-weight: 700;
+}
+.modal input {
+  min-height: 62px;
+  padding: 0 20px;
+  border: 0;
+  border-radius: 32px;
+  outline: 0;
+  background: #f0f3f4;
+}
+.modal input:focus {
+  box-shadow: 0 0 0 2px #16814470;
+}
+.formRow {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+.modalActions {
+  display: flex;
+  justify-content: center;
+  gap: 22px;
+  margin-top: 16px;
+}
+.cancel {
+  min-height: 50px;
+  padding: 0 20px;
+  border: 0;
+  background: transparent;
+  color: #657073;
+  font-weight: 700;
+  cursor: pointer;
+}
+.detailModal {
+  position: relative;
+  width: min(390px, 100%);
+  padding: 38px;
+  border-radius: 28px;
+  background: #fff;
+  text-align: center;
+}
+.detailModal .studentAvatar {
+  margin: auto auto 15px;
+}
+.detailModal h2 {
+  margin-bottom: 3px;
+}
+.detailModal p {
+  margin: 0 0 18px;
+  color: #747d80;
+}
+.detailModal > strong {
+  color: #168144;
+}
+.close {
+  position: absolute;
+  top: 15px;
+  right: 18px;
+  border: 0;
+  background: transparent;
+  color: #70797c;
+  font-size: 24px;
+  cursor: pointer;
+}
+@media (max-width: 1000px) {
+  .metrics {
+    gap: 14px;
+  }
+  .metrics article {
+    min-height: 156px;
+    padding: 21px;
+    border-radius: 31px;
+  }
+  .metrics article strong {
+    font-size: 40px;
+  }
+}
+@media (max-width: 680px) {
+  .back {
+    align-items: stretch;
+    flex-direction: column-reverse;
+    margin: 0 0 17px;
+  }
+  .back .primary {
+    width: 100%;
+  }
+  .metrics {
+    grid-template-columns: 1fr;
+  }
+  .metrics article {
+    min-height: 125px;
+  }
+  .missionProgress {
+    bottom: 23px;
+    left: 21px;
+  }
+  .tableCard {
+    border-radius: 26px;
+  }
+  .tableTitle {
+    padding: 18px;
+  }
+  .tableTitle h2 {
+    font-size: 18px;
+  }
+  .tableWrap th,
+  .tableWrap td {
+    padding-right: 14px;
+    padding-left: 14px;
+  }
+  .tableFooter {
+    padding: 12px 16px;
+    font-size: 9px;
+  }
+  .modal {
+    padding: 30px 21px 25px;
+    border-radius: 31px;
+  }
+  .modal h2 {
+    font-size: 23px;
+  }
+  .formRow {
+    grid-template-columns: 1fr;
+  }
+}

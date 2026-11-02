@@ -1,19 +1,28 @@
 import { demoEnabled, demoResponse } from "./demo";
 
-const API_BASE_URL = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000").replace(/\/$/, "");
+const API_BASE_URL = (
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"
+).replace(/\/$/, "");
 
 export async function apiRequest(path, options = {}) {
   if (demoEnabled()) return demoResponse(path, options);
   const { body, headers: customHeaders = {}, ...rest } = options;
   const headers = new Headers(customHeaders);
-  const token = typeof window !== "undefined" ? window.localStorage.getItem("zooly_token") : null;
+  const token =
+    typeof window !== "undefined"
+      ? window.localStorage.getItem("zooly_token")
+      : null;
 
   if (token && !headers.has("Authorization")) {
     headers.set("Authorization", `Bearer ${token}`);
   }
 
   let requestBody = body;
-  if (body !== undefined && body !== null && !(typeof FormData !== "undefined" && body instanceof FormData)) {
+  if (
+    body !== undefined &&
+    body !== null &&
+    !(typeof FormData !== "undefined" && body instanceof FormData)
+  ) {
     headers.set("Content-Type", "application/json");
     requestBody = JSON.stringify(body);
   }
@@ -26,7 +35,9 @@ export async function apiRequest(path, options = {}) {
       body: requestBody,
     });
   } catch {
-    throw new Error(`Não consegui conectar à API em ${API_BASE_URL}. Confira se o backend está rodando e se a URL está correta.`);
+    throw new Error(
+      `Não consegui conectar à API em ${API_BASE_URL}. Confira se o backend está rodando e se a URL está correta.`,
+    );
   }
 
   if (response.status === 204) return null;
@@ -45,7 +56,9 @@ export async function apiRequest(path, options = {}) {
     if (response.status === 401 && typeof window !== "undefined") {
       // Mantemos a mensagem visível na tela; cada página decide quando redirecionar.
     }
-    throw new Error(data?.mensagem || `A API respondeu com erro HTTP ${response.status}.`);
+    throw new Error(
+      data?.mensagem || `A API respondeu com erro HTTP ${response.status}.`,
+    );
   }
 
   return data;
@@ -56,7 +69,10 @@ export async function downloadApiFile(path, fileName) {
     window.print();
     return;
   }
-  const token = typeof window !== "undefined" ? window.localStorage.getItem("zooly_token") : null;
+  const token =
+    typeof window !== "undefined"
+      ? window.localStorage.getItem("zooly_token")
+      : null;
   const headers = new Headers();
   if (token) headers.set("Authorization", `Bearer ${token}`);
 
@@ -88,5 +104,7 @@ export async function downloadApiFile(path, fileName) {
 }
 
 export function makeObjectId() {
-  return Array.from({ length: 24 }, () => Math.floor(Math.random() * 16).toString(16)).join("");
+  return Array.from({ length: 24 }, () =>
+    Math.floor(Math.random() * 16).toString(16),
+  ).join("");
 }

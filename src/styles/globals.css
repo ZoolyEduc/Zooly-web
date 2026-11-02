@@ -1,10 +1,50 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
-:root { --zooly-green: #168144; --zooly-green-dark: #116b36; --zooly-green-light: #eafbf0; --zooly-yellow: #f5b92f; --zooly-text: #30383a; --zooly-muted: #747d80; --zooly-border: #e5e9e9; --zooly-bg: #f1f2f1; --zooly-radius-card: 30px; --zooly-radius-control: 18px; --zooly-shadow-card: 0 10px 30px rgba(34, 47, 43, .035); --zooly-space: 24px; }
-*, *::before, *::after { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
-body { margin: 0; color: var(--zooly-text); background: #fff; font-family: Inter, "Segoe UI", Arial, sans-serif; font-size: 14px; line-height: 1.5; }
-a { color: inherit; }
-button, input, textarea, select { font: inherit; }
-button { cursor: pointer; }
-img { max-width: 100%; }
-:focus-visible { outline: 3px solid rgba(31,107,53,.28); outline-offset: 2px; }
+:root {
+  --zooly-green: #168144;
+  --zooly-green-dark: #116b36;
+  --zooly-green-light: #eafbf0;
+  --zooly-yellow: #f5b92f;
+  --zooly-text: #30383a;
+  --zooly-muted: #747d80;
+  --zooly-border: #e5e9e9;
+  --zooly-bg: #f1f2f1;
+  --zooly-radius-card: 30px;
+  --zooly-radius-control: 18px;
+  --zooly-shadow-card: 0 10px 30px rgba(34, 47, 43, 0.035);
+  --zooly-space: 24px;
+}
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+html {
+  scroll-behavior: smooth;
+}
+body {
+  margin: 0;
+  color: var(--zooly-text);
+  background: #fff;
+  font-family: Inter, "Segoe UI", Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+}
+a {
+  color: inherit;
+}
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+button {
+  cursor: pointer;
+}
+img {
+  max-width: 100%;
+}
+:focus-visible {
+  outline: 3px solid rgba(31, 107, 53, 0.28);
+  outline-offset: 2px;
+}
