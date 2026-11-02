@@ -2,39 +2,91 @@ import { useCallback, useEffect, useState } from "react";
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/router";
+import { Archive, EllipsisVertical, Eye, Pencil, UsersRound, UserPlus } from "lucide-react";
 import TeacherLayout from "../../components/TeacherLayout";
+import { mascotes } from "../../components/Mascotes/Index";
 import Notice from "../../components/Notice";
 import { apiRequest } from "../../services/api";
-import { demoEnabled } from "../../services/demo";
 import { getId } from "../../services/session";
 import styles from "./turmas.module.css";
 
-const mascotes = [
-  { id: "papagaio", nome: "Papagaio", src: "/img/papagaio-botao.png" },
-  { id: "lagarto", nome: "Lagarto", src: "/img/lagarto-botao.png" },
-  { id: "cobra", nome: "Cobra", src: "/img/cobra-botao.png" },
-  { id: "sarue", nome: "Saruê", src: "/img/sarue-botao.png" },
-];
-
 export default function Turmas() {
+  const router = useRouter();
   const [turmas, setTurmas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
+  const [turmaEmEdicao, setTurmaEmEdicao] = useState(null);
   const [form, setForm] = useState({
     nome: "",
     escolaId: "",
     anoEscolar: String(new Date().getFullYear()),
-    periodo: "Manhã",
+    periodo: "",
+    mascote: "",
   });
-  const [mascote, setMascote] = useState("papagaio");
   const [erro, setErro] = useState("");
   const [sucesso, setSucesso] = useState("");
   const [salvando, setSalvando] = useState(false);
+  const [codigoCopiado, setCodigoCopiado] = useState("");
+
+  async function copiarCodigo(event, turma) {
+    event.stopPropagation();
+    const codigo = turma.codigoPermanente || turma.codigo || turma.codigo_turma;
+    if (!codigo) return;
+    try {
+      await navigator.clipboard.writeText(codigo);
+      setCodigoCopiado(getId(turma));
+      window.setTimeout(() => setCodigoCopiado(""), 1800);
+    } catch {
+      setErro("Não foi possível copiar o código neste navegador.");
+    }
+  }
 
   const carregar = useCallback(async () => {
+    setErro("");
     try {
       const resposta = await apiRequest("/api/turmas");
-      setTurmas(resposta?.turmas || []);
+      const lista = resposta?.turmas || [];
+      const contagens = await Promise.all(
+        lista.map(async (turma) => {
+          if (Number.isFinite(turma.totalAlunos)) {
+            return { total: turma.totalAlunos, erro: null };
+          }
+          if (Array.isArray(turma.alunos)) {
+            return { total: turma.alunos.length, erro: null };
+          }
+          const id = getId(turma);
+          if (!id) {
+            return {
+              total: null,
+              erro: "Uma turma retornada pela API não possui identificador.",
+            };
+          }
+          try {
+            const alunos = await apiRequest(`/api/alunos/turma/${id}`);
+            return {
+              total: Array.isArray(alunos?.alunos) ? alunos.alunos.length : null,
+              erro: Array.isArray(alunos?.alunos)
+                ? null
+                : `A API não retornou os alunos da turma "${turma.nome || id}".`,
+            };
+          } catch (error) {
+            return { total: null, erro: error.message };
+          }
+        }),
+      );
+      setTurmas(
+        lista.map((turma, index) => ({
+          ...turma,
+          alunosCountExibicao: contagens[index].total,
+        })),
+      );
+      const errosContagem = contagens
+        .map((item) => item.erro)
+        .filter(Boolean);
+      if (errosContagem.length) {
+        setErro(`Não foi possível obter todas as quantidades de alunos: ${errosContagem[0]}`);
+      }
     } catch (error) {
       setErro(error.message);
     } finally {
@@ -51,26 +103,41 @@ export default function Turmas() {
     event.preventDefault();
     setErro("");
     setSucesso("");
+    if (!form.periodo || !form.mascote) {
+      setErro("Selecione o período e o mascote da turma.");
+      return;
+    }
     setSalvando(true);
     try {
       const dados = {
         nome: form.nome.trim(),
-        escolaId: form.escolaId.trim(),
         anoEscolar: Number(form.anoEscolar),
+        periodo: form.periodo,
+        mascote: form.mascote,
       };
-      const resposta = await apiRequest("/api/turmas", {
-        method: "POST",
-        body: demoEnabled()
-          ? { ...dados, periodo: form.periodo, mascote }
-          : dados,
-      });
-      setSucesso(resposta?.mensagem || "Turma cadastrada com sucesso.");
+      const resposta = turmaEmEdicao
+        ? await apiRequest(`/api/turmas/${getId(turmaEmEdicao)}`, {
+            method: "PUT",
+            body: dados,
+          })
+        : await apiRequest("/api/turmas", {
+            method: "POST",
+            body: { ...dados, escolaId: form.escolaId.trim() },
+          });
+      setSucesso(
+        resposta?.mensagem ||
+          (turmaEmEdicao
+            ? "Turma atualizada com sucesso."
+            : "Turma cadastrada com sucesso."),
+      );
       setForm({
         nome: "",
         escolaId: "",
         anoEscolar: String(new Date().getFullYear()),
-        periodo: "Manhã",
+        periodo: "",
+        mascote: "",
       });
+      setTurmaEmEdicao(null);
       setMostrarFormulario(false);
       await carregar();
     } catch (error) {
@@ -82,7 +149,7 @@ export default function Turmas() {
 
   async function arquivar(turma) {
     const id = getId(turma);
-    if (!id) return;
+    if (!id || !window.confirm(`Arquivar a turma "${turma.nome}"?`)) return;
     setErro("");
     setSucesso("");
     try {
@@ -94,6 +161,35 @@ export default function Turmas() {
     } catch (error) {
       setErro(error.message);
     }
+  }
+
+  function abrirCadastro() {
+    setTurmaEmEdicao(null);
+    setForm({
+      nome: "",
+      escolaId: "",
+      anoEscolar: String(new Date().getFullYear()),
+      periodo: "",
+      mascote: "",
+    });
+    setMostrarFormulario(true);
+  }
+
+  function abrirEdicao(turma) {
+    setTurmaEmEdicao(turma);
+    setForm({
+      nome: turma.nome || "",
+      escolaId: "",
+      anoEscolar: String(turma.anoEscolar || new Date().getFullYear()),
+      periodo: turma.periodo || "",
+      mascote: turma.mascote || "",
+    });
+    setMostrarFormulario(true);
+  }
+
+  function fecharFormulario() {
+    setMostrarFormulario(false);
+    setTurmaEmEdicao(null);
   }
 
   return (
@@ -113,9 +209,10 @@ export default function Turmas() {
           <button
             type="button"
             className={styles.primary}
-            onClick={() => setMostrarFormulario(true)}
+            onClick={abrirCadastro}
           >
-            + Nova Turma
+            <UserPlus size={18} aria-hidden="true" />
+            Nova Turma
           </button>
         </div>
 
@@ -125,49 +222,104 @@ export default function Turmas() {
           <section className={styles.grid}>
             {turmas.map((turma, index) => {
               const id = getId(turma);
-              const mascot =
-                mascotes.find((item) => item.id === turma.mascote) ||
-                mascotes[index % mascotes.length];
-              const totalAlunos =
-                turma.totalAlunos ?? turma.alunos?.length ?? 3;
-              
+              const mascoteId = String(turma.mascote || "")
+                .toLowerCase()
+                .split("/")
+                .pop()
+                .replace(/-vetor\.png$|-botao\.png$/, "");
+              const mascote = mascotes.find(
+                (item) =>
+                  item.id === mascoteId ||
+                  item.nome.toLowerCase() === mascoteId,
+              );
+              const mascotePadrao = mascotes.find((item) => item.id === "sarue");
+              const imagemMascote = mascote || mascotePadrao;
               return (
-                <article className={styles.card} key={id || index}>
+                <article
+                  className={styles.card}
+                  key={id || index}
+                  role="link"
+                  tabIndex={0}
+                  aria-label={`Abrir alunos da turma ${turma.nome || ""}`}
+                  onClick={(event) => {
+                    if (event.target.closest("a, button, summary, details")) return;
+                    if (id) router.push(`/turmas/${encodeURIComponent(id)}/alunos`);
+                  }}
+                  onKeyDown={(event) => {
+                    if (event.target !== event.currentTarget) return;
+                    if ((event.key === "Enter" || event.key === " ") && id) {
+                      event.preventDefault();
+                      router.push(`/turmas/${encodeURIComponent(id)}/alunos`);
+                    }
+                  }}
+                >
                   <div className={styles.cardTop}>
                     <div className={`${styles.mascotBox} ${styles[`tone${index % 4}`]}`}>
                       <Image
-                        src={mascot.src}
-                        alt={mascot.nome}
-                        width={52}
-                        height={52}
-                        style={{ objectFit: "contain" }}
+                        src={imagemMascote.srcVetor}
+                        alt={mascote ? `Mascote ${mascote.nome}` : "Ilustração de mascote"}
+                        width={56}
+                        height={56}
                       />
                     </div>
-                    <button
-                      type="button"
-                      className={styles.more}
-                      aria-label={`Mais opções para ${turma.nome}`}
-                      onClick={() => arquivar(turma)}
-                    >
-                      ⋮
-                    </button>
+                    <details className={styles.actionsMenu}>
+                      <summary aria-label={`Ações da turma ${turma.nome || ""}`}>
+                        <EllipsisVertical size={19} aria-hidden="true" />
+                      </summary>
+                      <div className={styles.actionsDropdown}>
+                        <Link href={`/turmas/${id}/alunos`}>
+                          <Eye size={16} aria-hidden="true" />
+                          Consultar turma
+                        </Link>
+                        <button
+                          type="button"
+                          onClick={(event) => {
+                            event.currentTarget.closest("details").open = false;
+                            abrirEdicao(turma);
+                          }}
+                        >
+                          <Pencil size={16} aria-hidden="true" />
+                          Editar turma
+                        </button>
+                        <button
+                          type="button"
+                          className={styles.archiveAction}
+                          onClick={(event) => {
+                            event.currentTarget.closest("details").open = false;
+                            arquivar(turma);
+                          }}
+                        >
+                          <Archive size={16} aria-hidden="true" />
+                          Arquivar turma
+                        </button>
+                      </div>
+                    </details>
                   </div>
-                  <span
-                    className={`${styles.kicker} ${styles[`tag${index % 4}`]}`}
-                  >
-                    MASCOTE: {mascot.nome.toUpperCase()}
+                  <span className={`${styles.kicker} ${styles[`tag${index % 4}`]}`}>
+                    {mascote ? `Mascote: ${mascote.nome}` : "Mascote não informado"}
                   </span>
                   <h2>{turma.nome}</h2>
+                  {(turma.codigoPermanente || turma.codigo || turma.codigo_turma) ? (
+                    <button
+                      type="button"
+                      className={styles.classCode}
+                      onClick={(event) => copiarCodigo(event, turma)}
+                      aria-label={`Copiar código da turma ${turma.codigoPermanente || turma.codigo || turma.codigo_turma}`}
+                    >
+                      <span>CÓDIGO DA TURMA</span>
+                      <strong>{turma.codigoPermanente || turma.codigo || turma.codigo_turma}</strong>
+                      <small>{codigoCopiado === id ? "Copiado" : "Copiar"}</small>
+                    </button>
+                  ) : null}
                   <p className={styles.period}>
-                    Período: {turma.periodo || (index % 2 ? "Tarde" : "Manhã")}
+                    Período: {turma.periodo || "Não informado"}
                   </p>
-                  <Link
-                    className={styles.students}
-                    href={`/turmas/${id}/alunos`}
-                  >
-                    <span aria-hidden="true">♧</span>
-                    {totalAlunos} Alunos
-                  </Link>
+                  <div className={styles.students}>
+                    <UsersRound size={14} aria-hidden="true" />
+                    {turma.alunosCountExibicao == null
+                      ? "Quantidade de alunos indisponível"
+                      : `${turma.alunosCountExibicao} ${turma.alunosCountExibicao === 1 ? "aluno" : "alunos"}`}
+                  </div>
                 </article>
               );
             })}
@@ -189,9 +341,10 @@ export default function Turmas() {
             <button
               type="button"
               className={styles.primary}
-              onClick={() => setMostrarFormulario(true)}
+              onClick={abrirCadastro}
             >
-              + Nova Turma
+              <UserPlus size={18} aria-hidden="true" />
+              Nova Turma
             </button>
           </section>
         )}
@@ -211,10 +364,11 @@ export default function Turmas() {
               aria-modal="true"
               aria-labelledby="class-modal-title"
             >
-              <h2 id="class-modal-title">Cadastrar Nova Turma</h2>
+              <h2 id="class-modal-title">
+                {turmaEmEdicao ? "Editar Turma" : "Cadastrar Nova Turma"}
+              </h2>
               <p className={styles.modalIntro}>
-                Preencha os dados abaixo para iniciar sua jornada com novos
-                alunos.
+                Informe os dados utilizados pela escola para identificar a turma.
               </p>
               <form onSubmit={cadastrar}>
                 <label>
@@ -228,22 +382,44 @@ export default function Turmas() {
                     required
                   />
                 </label>
+                <label>
+                  Período
+                  <select
+                    value={form.periodo}
+                    onChange={(event) =>
+                      setForm({ ...form, periodo: event.target.value })
+                    }
+                    required
+                  >
+                    <option value="">Selecione o período</option>
+                    <option value="Manhã">Manhã</option>
+                    <option value="Tarde">Tarde</option>
+                  </select>
+                </label>
+                <fieldset>
+                  <legend>Escolha um mascote</legend>
+                  <div className={styles.mascotPicker} role="group" aria-label="Mascote da turma">
+                    {mascotes.map((item) => (
+                      <button
+                        key={item.id}
+                        type="button"
+                        aria-label={`Selecionar mascote ${item.nome}`}
+                        aria-pressed={form.mascote === item.id}
+                        onClick={() => setForm({ ...form, mascote: item.id })}
+                      >
+                        <Image
+                          src={item.srcBotao}
+                          alt=""
+                          width={item.widthBotao}
+                          height={item.heightBotao}
+                        />
+                      </button>
+                    ))}
+                  </div>
+                </fieldset>
                 <div className={styles.formRow}>
                   <label>
-                    Período
-                    <select
-                      value={form.periodo}
-                      onChange={(event) =>
-                        setForm({ ...form, periodo: event.target.value })
-                      }
-                    >
-                      <option>Manhã</option>
-                      <option>Tarde</option>
-                      <option>Integral</option>
-                    </select>
-                  </label>
-                  <label>
-                    Ano escolar
+                    Ano letivo
                     <input
                       type="number"
                       min="2000"
@@ -256,50 +432,24 @@ export default function Turmas() {
                     />
                   </label>
                 </div>
-                <label>
-                  ID da escola
-                  <input
-                    value={form.escolaId}
-                    onChange={(event) =>
-                      setForm({ ...form, escolaId: event.target.value })
-                    }
-                    placeholder={
-                      demoEnabled()
-                        ? "Preenchimento demonstrativo"
-                        : "ID fornecido pela administração"
-                    }
-                    required={!demoEnabled()}
-                  />
-                </label>
-                <fieldset>
-                  <legend>Escolha um Mascote</legend>
-                  <div className={styles.mascotPicker}>
-                    {mascotes.map((item) => (
-                      <button
-                        type="button"
-                        key={item.id}
-                        aria-label={item.nome}
-                        aria-pressed={mascote === item.id}
-                        className={
-                          mascote === item.id ? styles.selectedMascot : ""
-                        }
-                        onClick={() => setMascote(item.id)}
-                      >
-                        <Image
-                          src={item.src}
-                          alt=""
-                          width={64}
-                          height={64}
-                        />
-                      </button>
-                    ))}
-                  </div>
-                </fieldset>
+                {!turmaEmEdicao ? (
+                  <label>
+                    ID da escola
+                    <input
+                      value={form.escolaId}
+                      onChange={(event) =>
+                        setForm({ ...form, escolaId: event.target.value })
+                      }
+                      placeholder="ID fornecido pela administração"
+                      required
+                    />
+                  </label>
+                ) : null}
                 <div className={styles.modalActions}>
                   <button
                     type="button"
                     className={styles.cancel}
-                    onClick={() => setMostrarFormulario(false)}
+                    onClick={fecharFormulario}
                   >
                     Cancelar
                   </button>
@@ -308,7 +458,11 @@ export default function Turmas() {
                     className={styles.primary}
                     disabled={salvando}
                   >
-                    {salvando ? "Cadastrando..." : "✓ Criar Turma"}
+                    {salvando
+                      ? "Salvando..."
+                      : turmaEmEdicao
+                        ? "Salvar alterações"
+                        : "Criar turma"}
                   </button>
                 </div>
               </form>

@@ -12,6 +12,7 @@ export function getSession() {
     return {
       token: "demo-token-local",
       usuario: {
+        id: "demo-professor",
         nome: "Helena Ferreira",
         email: "helena.ferreira@zooly.edu.br",
         tipo: "professor",

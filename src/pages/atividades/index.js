@@ -2,26 +2,31 @@ import { useEffect, useMemo, useState } from "react";
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
+import { ArrowRight, BookOpen, ClipboardList, Plus, TreePine, Volume2 } from "lucide-react";
 import TeacherLayout from "../../components/TeacherLayout";
 import Notice from "../../components/Notice";
 import { apiRequest } from "../../services/api";
 import { getId, formatDate } from "../../services/session";
 import styles from "./atividades.module.css";
 
-const filtros = ["1º ANO", "2º ANO", "3º ANO"];
 const iconColors = ["blue", "yellow", "sky", "coral"];
+const activityIcons = [ClipboardList, TreePine, BookOpen, Volume2];
 
 export default function Atividades() {
   const [atividades, setAtividades] = useState([]);
   const [turmas, setTurmas] = useState([]);
-  const [ano, setAno] = useState("1º ANO");
+  const [historias, setHistorias] = useState([]);
+  const [aba, setAba] = useState("atividades");
+  const [turmaSelecionada, setTurmaSelecionada] = useState("");
   const [loading, setLoading] = useState(true);
+  const [loadingHistorias, setLoadingHistorias] = useState(true);
   const [erro, setErro] = useState("");
+  const [erroHistorias, setErroHistorias] = useState("");
 
   useEffect(() => {
     let ativo = true;
     Promise.all([
-      apiRequest("/api/atividades/publicadas"),
+      apiRequest("/api/atividades"),
       apiRequest("/api/turmas"),
     ])
       .then(([a, t]) => {
@@ -41,6 +46,23 @@ export default function Atividades() {
     };
   }, []);
 
+  useEffect(() => {
+    let ativo = true;
+    apiRequest("/api/historias")
+      .then((resposta) => {
+        if (ativo) setHistorias(resposta?.historias || []);
+      })
+      .catch((error) => {
+        if (ativo) setErroHistorias(error.message);
+      })
+      .finally(() => {
+        if (ativo) setLoadingHistorias(false);
+      });
+    return () => {
+      ativo = false;
+    };
+  }, []);
+
   const filtered = useMemo(
     () =>
       atividades.filter((atividade) => {
@@ -48,10 +70,9 @@ export default function Atividades() {
           typeof atividade.turma === "object"
             ? getId(atividade.turma)
             : atividade.turma;
-        const turma = turmas.find((item) => getId(item) === turmaId);
-        return turma && `${turma.anoEscolar}º ANO` === ano;
+        return !turmaSelecionada || turmaId === turmaSelecionada;
       }),
-    [atividades, turmas, ano],
+    [atividades, turmaSelecionada],
   );
   const nomesTurmas = Object.fromEntries(
     turmas.map((turma) => [getId(turma), turma.nome]),
@@ -64,25 +85,51 @@ export default function Atividades() {
       </Head>
       <TeacherLayout
         title="Atividades"
-        subtitle="Gerencie as missões e acompanhe o progresso das suas turmas."
+        subtitle="Gerencie as atividades e consulte a biblioteca de histórias."
       >
         {erro ? <Notice kind="error">{erro}</Notice> : null}
+        <div className={styles.viewTabs} role="tablist" aria-label="Atividades e histórias">
+          <button
+            type="button"
+            role="tab"
+            aria-selected={aba === "atividades"}
+            className={aba === "atividades" ? styles.viewTabActive : ""}
+            onClick={() => setAba("atividades")}
+          >
+            Minhas atividades
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={aba === "historias"}
+            className={aba === "historias" ? styles.viewTabActive : ""}
+            onClick={() => setAba("historias")}
+          >
+            Biblioteca de histórias
+          </button>
+        </div>
+        {aba === "atividades" ? (
+          <>
         <div className={styles.toolbar}>
           <div className={styles.filters}>
-            {filtros.map((item) => (
-              <button
-                type="button"
-                key={item}
-                aria-pressed={ano === item}
-                className={ano === item ? styles.filterActive : ""}
-                onClick={() => setAno(item)}
-              >
-                {item}
-              </button>
-            ))}
+            <label htmlFor="activity-class-filter">Turma</label>
+            <select
+              id="activity-class-filter"
+              value={turmaSelecionada}
+              onChange={(event) => setTurmaSelecionada(event.target.value)}
+              disabled={loading || turmas.length === 0}
+            >
+              <option value="">Todas as turmas</option>
+              {turmas.map((turma) => (
+                <option key={getId(turma)} value={getId(turma)}>
+                  {turma.nome}
+                </option>
+              ))}
+            </select>
           </div>
           <Link href="/atividades/nova" className={styles.primary}>
-            ＋ Nova Atividade
+            <Plus size={17} aria-hidden="true" />
+            Nova Atividade
           </Link>
         </div>
         {loading ? (
@@ -94,60 +141,72 @@ export default function Atividades() {
                 typeof atividade.turma === "object"
                   ? getId(atividade.turma)
                   : atividade.turma;
-              const total = atividade.totalAlunos || 32;
-              const concluidas = atividade.concluidas || 0;
-              const progresso = total
-                ? Math.round((concluidas / total) * 100)
-                : 0;
+              const total = Number.isFinite(atividade.totalAlunos)
+                ? atividade.totalAlunos
+                : null;
+              const concluidas = Number.isFinite(atividade.concluidas)
+                ? atividade.concluidas
+                : null;
+              const ActivityIcon = activityIcons[index % activityIcons.length];
+              const isDraft = atividade.status === "rascunho";
               return (
                 <article
-                  className={styles.card}
+                  className={`${styles.card} ${isDraft ? styles.draftCard : ""}`}
                   key={getId(atividade) || index}
                 >
                   <div className={styles.cardTop}>
                     <span
                       className={`${styles.activityIcon} ${styles[iconColors[index % iconColors.length]]}`}
                     >
-                      {["♣", "♟", "▣", "◖"][index % 4]}
+                      <ActivityIcon size={21} aria-hidden="true" />
                     </span>
-                    <span
-                      className={
-                        atividade.status === "Agendada"
-                          ? styles.scheduled
-                          : styles.status
-                      }
-                    >
-                      {atividade.status || "Em andamento"}
+                    <span className={`${styles.status} ${isDraft ? styles.draftStatus : ""}`}>
+                      {isDraft ? "Rascunho" : "Publicada"}
                     </span>
                   </div>
                   <h2>{atividade.titulo || "Atividade sem título"}</h2>
                   <p className={styles.className}>
                     {nomesTurmas[turmaId] ||
                       atividade.turma?.nome ||
-                      "Turma vinculada"}
+                      "Turma não informada"}
                   </p>
                   <p className={styles.phoneme}>
-                    Fonema: <strong>{atividade.fonema || "/b/"}</strong>
+                    {atividade.questoes?.length ?? 0} questões ·{" "}
+                    {atividade.pontuacaoTotal == null
+                      ? "Pontuação indisponível"
+                      : `${atividade.pontuacaoTotal} pts`}
                   </p>
-                  <div className={styles.progress}>
-                    <span>
-                      <i style={{ width: `${progresso}%` }} />
-                    </span>
-                  </div>
                   <div className={styles.cardBottom}>
                     <small>
-                      {atividade.status === "Agendada"
-                        ? "Inicia em 2 dias"
-                        : `${concluidas}/${total} Alunos`}
+                      {total != null && concluidas != null
+                        ? `${concluidas}/${total} alunos concluíram`
+                        : atividade.prazo
+                        ? `Prazo: ${formatDate(atividade.prazo)}`
+                        : "Sem prazo definido"}
                     </small>
-                    <Link href={`/atividades/${getId(atividade)}`}>Visualizar →</Link>
+                    {isDraft ? (
+                      <>
+                        <Link href={`/atividades/${encodeURIComponent(getId(atividade))}`}>
+                          Abrir
+                          <ArrowRight size={14} aria-hidden="true" />
+                        </Link>
+                        <Link href={`/atividades/nova?id=${encodeURIComponent(getId(atividade))}`}>
+                          Editar
+                          <ArrowRight size={14} aria-hidden="true" />
+                        </Link>
+                      </>
+                    ) : (
+                      <Link href={`/atividades/${getId(atividade)}`}>
+                        Visualizar
+                        <ArrowRight size={14} aria-hidden="true" />
+                      </Link>
+                    )}
                   </div>
-                  <div className={styles.meta}>
-                    Missão{" "}
-                    {String(atividade.ordem || index + 1).padStart(2, "0")} ·{" "}
-                    {atividade.recompensaMoedas || 10} moedas ·{" "}
-                    {formatDate(atividade.publicadoEm)}
-                  </div>
+                  {atividade.publicadoEm ? (
+                    <div className={styles.meta}>
+                      Publicada em {formatDate(atividade.publicadoEm)}
+                    </div>
+                  ) : null}
                 </article>
               );
             })}
@@ -160,15 +219,48 @@ export default function Atividades() {
               width={180}
               height={180}
             />
-            <h2>Nenhuma atividade para esta turma</h2>
+            <h2>Nenhuma atividade encontrada</h2>
             <p>
-              Crie uma missão educativa para começar a acompanhar o progresso
-              dos alunos.
+              Crie uma atividade para esta turma ou selecione outra turma.
             </p>
             <Link href="/atividades/nova" className={styles.primary}>
               Criar atividade
             </Link>
           </div>
+        )}
+          </>
+        ) : (
+          <section className={styles.storyLibrary}>
+            {erroHistorias ? <Notice kind="error">{erroHistorias}</Notice> : null}
+            {loadingHistorias ? (
+              <p className={styles.loading}>Carregando histórias...</p>
+            ) : historias.length ? (
+              <div className={styles.storyGrid}>
+                {historias.map((historia) => (
+                  <article className={styles.story} key={getId(historia)}>
+                    <div className={styles.storyCover} aria-hidden="true">
+                      <BookOpen size={27} />
+                    </div>
+                    <h2>{historia.titulo}</h2>
+                    <details className={styles.storyDetails}>
+                      <summary>Ver história completa</summary>
+                      <p>{historia.conteudo}</p>
+                    </details>
+                    <Link
+                      href={`/atividades/nova?historiaId=${encodeURIComponent(getId(historia))}`}
+                    >
+                      Criar atividade com esta história
+                    </Link>
+                  </article>
+                ))}
+              </div>
+            ) : (
+              <div className={styles.empty}>
+                <h2>Nenhuma história disponível</h2>
+                <p>A biblioteca não retornou histórias para esta conta.</p>
+              </div>
+            )}
+          </section>
         )}
       </TeacherLayout>
     </>

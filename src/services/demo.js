@@ -7,16 +7,20 @@ export const turmasDemo = [
     nome: "1º Ano A",
     escola: { nome: "Escola do Vale" },
     escolaId: "demo-escola",
-    anoEscolar: 1,
+    anoEscolar: 2026,
     codigoPermanente: "VALE-1A",
+    periodo: "Manhã",
+    mascote: "sarue",
   },
   {
     _id: "demo-turma-2",
     nome: "2º Ano B",
     escola: { nome: "Escola do Vale" },
     escolaId: "demo-escola",
-    anoEscolar: 2,
+    anoEscolar: 2026,
     codigoPermanente: "VALE-2B",
+    periodo: "Tarde",
+    mascote: "papagaio",
   },
 ];
 
@@ -25,40 +29,40 @@ export const alunosDemo = [
     _id: "demo-aluno-1",
     nomeCompleto: "Lucas Machado",
     email: "lucas.machado@zooly.com",
+    turma: "demo-turma-1",
     sexo: "masculino",
     cadastroInicialConcluido: true,
     progresso: 85,
-    ultimoAcesso: "Hoje, 10:45",
     createdAt: agora,
   },
   {
     _id: "demo-aluno-2",
     nomeCompleto: "Matheus Rodrigues",
     email: "matheus.r@zooly.com",
+    turma: "demo-turma-1",
     sexo: "masculino",
     cadastroInicialConcluido: true,
     progresso: 40,
-    ultimoAcesso: "Ontem, 16:20",
     createdAt: agora,
   },
   {
     _id: "demo-aluno-3",
     nomeCompleto: "Helena Ferreira",
     email: "helena.f@zooly.com",
+    turma: "demo-turma-2",
     sexo: "feminino",
     cadastroInicialConcluido: true,
     progresso: 92,
-    ultimoAcesso: "Há 2 horas",
     createdAt: agora,
   },
   {
     _id: "demo-aluno-4",
     nomeCompleto: "Beatriz Souza",
     email: "b.souza@zooly.com",
+    turma: "demo-turma-2",
     sexo: "feminino",
     cadastroInicialConcluido: false,
     progresso: 15,
-    ultimoAcesso: "Há 4 dias",
     createdAt: agora,
   },
 ];
@@ -71,10 +75,12 @@ export const atividadesDemo = [
     publicadoEm: agora,
     recompensaMoedas: 10,
     ordem: 1,
-    fonema: "/b/",
-    concluidas: 24,
-    totalAlunos: 32,
-    status: "Em andamento",
+    historia: { tipo: "propria", texto: "Uma aventura entre as pedras e os sons da caverna." },
+    questoes: [{
+      enunciado: "Qual palavra começa com o som indicado?",
+      alternativas: [{ texto: "Bola" }, { texto: "Vela" }],
+    }],
+    status: "publicada",
   },
   {
     _id: "demo-atividade-2",
@@ -83,10 +89,12 @@ export const atividadesDemo = [
     publicadoEm: agora,
     recompensaMoedas: 15,
     ordem: 2,
-    fonema: "/p/",
-    concluidas: 0,
-    totalAlunos: 22,
-    status: "Agendada",
+    historia: { tipo: "propria", texto: "Uma caça divertida pelas patas dos animais." },
+    questoes: [{
+      enunciado: "Qual palavra começa com o som indicado?",
+      alternativas: [{ texto: "Pato" }, { texto: "Bola" }],
+    }],
+    status: "publicada",
   },
   {
     _id: "demo-atividade-3",
@@ -95,10 +103,12 @@ export const atividadesDemo = [
     publicadoEm: agora,
     recompensaMoedas: 20,
     ordem: 3,
-    fonema: "/v/",
-    concluidas: 28,
-    totalAlunos: 32,
-    status: "Em andamento",
+    historia: { tipo: "propria", texto: "Uma leitura guiada para descobrir novas palavras." },
+    questoes: [{
+      enunciado: "Qual palavra começa com o som indicado?",
+      alternativas: [{ texto: "Vento" }, { texto: "Rato" }],
+    }],
+    status: "publicada",
   },
   {
     _id: "demo-atividade-4",
@@ -107,16 +117,18 @@ export const atividadesDemo = [
     publicadoEm: agora,
     recompensaMoedas: 10,
     ordem: 4,
-    fonema: "/a/",
-    concluidas: 0,
-    totalAlunos: 22,
-    status: "Agendada",
+    historia: { tipo: "propria", texto: "Um passeio pelas vogais e seus sons." },
+    questoes: [{
+      enunciado: "Qual destas é uma vogal?",
+      alternativas: [{ texto: "A" }, { texto: "B" }],
+    }],
+    status: "publicada",
   },
 ];
 
 export const historiasDemo = [
-  { _id: "demo-historia-1", titulo: "O passeio da capivara" },
-  { _id: "demo-historia-2", titulo: "O papagaio curioso" },
+  { _id: "demo-historia-1", titulo: "O passeio da capivara", conteudo: "A capivara passeou pela margem do rio e encontrou novos amigos." },
+  { _id: "demo-historia-2", titulo: "O papagaio curioso", conteudo: "Um papagaio curioso aprendeu a reconhecer palavras na floresta." },
 ];
 
 export function demoEnabled() {
@@ -135,6 +147,7 @@ export function demoResponse(path, options = {}) {
     return {
       token: "demo-token-local",
       usuario: {
+        id: "demo-professor",
         nome: "Helena Ferreira",
         email: options.body?.email || "helena.ferreira@zooly.edu.br",
         tipo: "professor",
@@ -144,7 +157,7 @@ export function demoResponse(path, options = {}) {
   if (route === "/api/professores" && method === "POST")
     return { mensagem: "Cadastro de demonstração concluído." };
   if (route === "/api/turmas" && method === "GET")
-    return { turmas: turmasDemo };
+    return { turmas: turmasDemo.filter((item) => !item.arquivada) };
   if (route === "/api/turmas" && method === "POST") {
     const turma = {
       _id: `demo-turma-${Date.now()}`,
@@ -160,72 +173,230 @@ export function demoResponse(path, options = {}) {
     return {
       turma: turmasDemo.find((item) => item._id === turma[1]) || turmasDemo[0],
     };
-  if (/^\/api\/turmas\/[^/]+\/arquivar$/.test(route) && method === "PATCH")
+  if (turma && method === "PUT") {
+    const registro = turmasDemo.find((item) => item._id === turma[1]);
+    if (registro) Object.assign(registro, options.body);
+    return { mensagem: "Turma atualizada na demonstração.", turma: registro };
+  }
+  const turmaArquivar = route.match(/^\/api\/turmas\/([^/]+)\/arquivar$/);
+  if (turmaArquivar && method === "PATCH") {
+    const registro = turmasDemo.find((item) => item._id === turmaArquivar[1]);
+    if (registro) registro.arquivada = true;
     return { mensagem: "Turma arquivada na demonstração." };
+  }
   const alunosDaTurma = route.match(/^\/api\/alunos\/turma\/([^/]+)$/);
-  if (alunosDaTurma && method === "GET") return { alunos: alunosDemo };
+  if (alunosDaTurma && method === "GET")
+    return {
+      alunos: alunosDemo.filter(
+        (aluno) => !aluno.turma || aluno.turma === alunosDaTurma[1],
+      ),
+    };
   if (route === "/api/alunos" && method === "POST") {
     alunosDemo.push({
       _id: `demo-aluno-${Date.now()}`,
-      nomeCompleto: options.body?.nomeCompleto || "Cadastro inicial pendente",
-      email: options.body?.email || "",
+      turma: options.body?.turmaId,
+      nomeCompleto: null,
+      ra: options.body?.ra || "",
       sexo: "nao_informado",
       cadastroInicialConcluido: false,
       progresso: 0,
-      ultimoAcesso: "Nunca acessou",
       createdAt: agora,
-      ra: options.body?.ra,
     });
     return { mensagem: "Aluno adicionado à demonstração." };
   }
-  if (route === "/api/atividades/publicadas" && method === "GET")
+  const aluno = route.match(/^\/api\/alunos\/([^/]+)$/);
+  if (aluno && method === "PUT") {
+    const registro = alunosDemo.find((item) => item._id === aluno[1]);
+    if (registro) {
+      if (options.body?.ra) registro.ra = options.body.ra;
+      if (options.body?.turmaId) registro.turma = options.body.turmaId;
+    }
+    return { mensagem: "Aluno atualizado na demonstração." };
+  }
+  if (route === "/api/atividades" && method === "GET")
     return { atividades: atividadesDemo };
+  if (route === "/api/atividades/publicadas" && method === "GET")
+    return {
+      atividades: atividadesDemo.filter((item) => item.status === "publicada"),
+    };
   if (route === "/api/historias" && method === "GET")
     return { historias: historiasDemo };
+  const historia = route.match(/^\/api\/historias\/([^/]+)$/);
+  if (historia && method === "GET")
+    return {
+      historia: historiasDemo.find((item) => item._id === historia[1]) || null,
+    };
   if (route === "/api/atividades" && method === "POST") {
+    const id = `demo-atividade-${Date.now()}`;
     const atividade = {
-      _id: `demo-atividade-${Date.now()}`,
+      _id: id,
       ...options.body,
       titulo: options.body?.titulo || "Nova atividade",
-      publicadoEm: agora,
+      questoes: (options.body?.questoes || []).map((questao, index) => ({
+        ...questao,
+        _id: questao._id || `${id}-questao-${index + 1}`,
+      })),
+      pontuacaoTotal: (options.body?.questoes || []).reduce(
+        (total, questao) => total + (Number(questao.pontos) || 0),
+        0,
+      ),
+      status: "rascunho",
+      publicadoEm: null,
     };
     atividadesDemo.unshift(atividade);
     return { atividade };
   }
-  if (/^\/api\/atividades\/[^/]+\/publicar$/.test(route) && method === "PATCH")
+  const atividade = route.match(/^\/api\/atividades\/([^/]+)$/);
+  if (atividade && method === "GET") {
+    const registro = atividadesDemo.find((item) => item._id === atividade[1]);
+    if (!registro) throw new Error("Atividade não encontrada na demonstração.");
+    return { atividade: registro };
+  }
+  if (atividade && method === "PUT") {
+    const registro = atividadesDemo.find((item) => item._id === atividade[1]);
+    if (!registro) throw new Error("Atividade não encontrada na demonstração.");
+    Object.assign(registro, options.body);
+    registro.pontuacaoTotal = (registro.questoes || []).reduce(
+      (total, questao) => total + (Number(questao.pontos) || 0),
+      0,
+    );
+    return { atividade: registro };
+  }
+  const publicar = route.match(/^\/api\/atividades\/([^/]+)\/publicar$/);
+  if (publicar && method === "PATCH") {
+    const atividade = atividadesDemo.find((item) => item._id === publicar[1]);
+    if (atividade) {
+      atividade.status = "publicada";
+      atividade.publicadoEm = agora;
+    }
     return { mensagem: "Atividade publicada na demonstração." };
+  }
+  const excluirAtividade = route.match(/^\/api\/atividades\/([^/]+)$/);
+  if (excluirAtividade && method === "DELETE") {
+    const index = atividadesDemo.findIndex(
+      (item) => item._id === excluirAtividade[1],
+    );
+    if (index >= 0) atividadesDemo.splice(index, 1);
+    return { mensagem: "Atividade excluída na demonstração." };
+  }
   if (/^\/api\/desempenho\/turmas\/[^/]+\/semanal$/.test(route)) {
+    const turmaId = route.split("/")[4];
+    const turmaAtual = turmasDemo.find(
+      (item) => item._id === turmaId && !item.arquivada,
+    );
+    const alunosDaTurmaAtual = alunosDemo.filter(
+      (aluno) => aluno.turma === turmaId,
+    );
+    const alunos = alunosDaTurmaAtual.map((aluno, index) => {
+      const percentualAcerto = [95, 68, 32, 75][Number(aluno._id.slice(-1)) - 1] ?? null;
+      const atividadesIniciadas = aluno.progresso > 0 ? 3 : 0;
+      const atividadesConcluidas = Math.round(
+        (aluno.progresso / 100) * atividadesIniciadas,
+      );
+      const respostasRegistradas = aluno.progresso > 0 ? 8 : 0;
+      return {
+        aluno: {
+          id: aluno._id,
+          nomeCompleto: aluno.nomeCompleto,
+          ra: aluno.ra || `2026${index + 1}`,
+        },
+        indicadores: {
+          atividadesIniciadas,
+          atividadesConcluidas,
+          respostasRegistradas,
+          respostasSemData: 0,
+          acertos: respostasRegistradas
+            ? Math.round((respostasRegistradas * percentualAcerto) / 100)
+            : 0,
+          erros: respostasRegistradas
+            ? respostasRegistradas -
+              Math.round((respostasRegistradas * percentualAcerto) / 100)
+            : 0,
+          percentualAcerto: respostasRegistradas ? percentualAcerto : null,
+        },
+      };
+    });
+    const respostasRegistradas = alunos.reduce(
+      (total, item) => total + item.indicadores.respostasRegistradas,
+      0,
+    );
+    const acertos = alunos.reduce(
+      (total, item) => total + item.indicadores.acertos,
+      0,
+    );
     return {
-      turma:
-        turmasDemo.find((item) => item._id === route.split("/")[4]) ||
-        turmasDemo[0],
+      turma: turmaAtual ? { id: turmaAtual._id, nome: turmaAtual.nome } : null,
       periodo: {
         inicio: url.searchParams.get("data") || agora,
         fim: url.searchParams.get("data") || agora,
         fuso: "America/Sao_Paulo",
-        disponivel: true,
+        disponivel:
+          new Date(url.searchParams.get("data") || agora).getTime() <
+          new Date(agora).getTime(),
       },
-      totalAlunos: alunosDemo.length,
+      totalAlunos: alunos.length,
       indicadores: {
-        atividadesIniciadas: 156,
-        atividadesConcluidas: 112,
-        percentualAcerto: 84.2,
+        atividadesIniciadas: alunos.reduce(
+          (total, item) => total + item.indicadores.atividadesIniciadas,
+          0,
+        ),
+        atividadesConcluidas: alunos.reduce(
+          (total, item) => total + item.indicadores.atividadesConcluidas,
+          0,
+        ),
+        respostasRegistradas,
+        respostasSemData: 0,
+        acertos,
+        erros: respostasRegistradas - acertos,
+        percentualAcerto: respostasRegistradas
+          ? Math.round((acertos / respostasRegistradas) * 10000) / 100
+          : null,
       },
-      alunos: alunosDemo.map((aluno, index) => ({
-        aluno: {
-          id: aluno._id,
-          nomeCompleto: aluno.nomeCompleto,
-          ra: `2026${index + 1}`,
-        },
-        ultimoAcesso: aluno.ultimoAcesso,
-        indicadores: {
-          atividadesIniciadas: 3,
-          atividadesConcluidas: index + 1,
-          respostasRegistradas: 8,
-          acertos: 6,
-          percentualAcerto: [95, 68, 32, 75][index % 4],
-        },
-      })),
+      alunos,
+    };
+  }
+  const desempenhoAluno = route.match(/^\/api\/desempenho\/alunos\/([^/]+)$/);
+  if (desempenhoAluno && method === "GET") {
+    const aluno = alunosDemo.find((item) => item._id === desempenhoAluno[1]);
+    if (!aluno) return {};
+    const percentualAcerto = aluno.progresso || null;
+    const respostasRegistradas = aluno.progresso > 0 ? 8 : 0;
+    const acertos = respostasRegistradas
+      ? Math.round((respostasRegistradas * percentualAcerto) / 100)
+      : 0;
+    const questoesComMaisErros = respostasRegistradas && acertos < respostasRegistradas
+      ? [{
+          questaoId: `demo-questao-${aluno._id}`,
+          enunciado: "Qual palavra começa com o som indicado?",
+          tituloAtividade: "Atividade de leitura",
+          respostasRegistradas,
+          acertos,
+          erros: respostasRegistradas - acertos,
+        }]
+      : [];
+    return {
+      turma: {
+        id: aluno.turma,
+        nome: turmasDemo.find((item) => item._id === aluno.turma)?.nome || "Turma",
+      },
+      aluno: {
+        id: aluno._id,
+        ra:
+          aluno.ra ||
+          `2026${alunosDemo
+            .filter((item) => item.turma === aluno.turma)
+            .findIndex((item) => item._id === aluno._id) + 1}`,
+        nomeCompleto: aluno.nomeCompleto,
+      },
+      indicadores: {
+        atividadesIniciadas: aluno.progresso > 0 ? 3 : 0,
+        atividadesConcluidas: aluno.progresso > 0 ? 1 : 0,
+        respostasRegistradas,
+        acertos,
+        erros: respostasRegistradas - acertos,
+        percentualAcerto,
+      },
+      questoesComMaisErros,
     };
   }
   return {};

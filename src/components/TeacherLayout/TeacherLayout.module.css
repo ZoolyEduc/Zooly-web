@@ -51,11 +51,7 @@
   background: #eafbf0;
 }
 .navSymbol {
-  display: grid;
-  place-items: center;
-  width: 25px;
-  font-size: 18px;
-  line-height: 1;
+  flex: 0 0 25px;
 }
 .sidebarBottom {
   display: flex;
@@ -105,6 +101,7 @@
 
 /* --- Barra de Pesquisa --- */
 .search {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 13px;
@@ -223,6 +220,9 @@
   cursor: pointer;
   transition: background 0.15s ease;
 }
+.dropdownItem svg {
+  flex: 0 0 auto;
+}
 .dropdownItem:hover {
   background: #f0f3f4;
   color: #168144;
@@ -243,13 +243,11 @@
   border: 0;
   background: transparent;
   color: #46566b;
-  font-size: 22px;
   cursor: pointer;
 }
-.notificationButton::before {
-  content: "🔔"; 
+.notificationButton svg {
   display: block;
-  font-size: 20px; 
+  margin: auto;
 }
 .notificationButton i {
   position: absolute;
@@ -346,7 +344,6 @@
   border-radius: 50%;
   background: #fff0ed;
   color: #b3462e;
-  font-size: 36px;
 }
 .exitModal h2 {
   margin: 0 0 8px;
@@ -516,4 +513,19 @@
     padding: 27px 21px;
     border-radius: 28px;
   }
+}
+.searchMessage {
+  position: absolute;
+  z-index: 35;
+  top: calc(100% + 7px);
+  left: 8px;
+  width: max-content;
+  max-width: min(320px, calc(100vw - 30px));
+  padding: 8px 11px;
+  border: 1px solid #e6eaeb;
+  border-radius: 8px;
+  background: #fff;
+  color: #586265;
+  font-size: 12px;
+  box-shadow: 0 5px 16px #22332218;
 }

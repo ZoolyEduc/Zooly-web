@@ -34,7 +34,7 @@
 }
 .metrics {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 23px;
   margin-bottom: 20px;
 }
@@ -314,15 +314,23 @@
   font-size: 13px;
   font-weight: 700;
 }
-.modal input {
+.modal input,
+.modal select {
+  width: 100%;
   min-height: 62px;
   padding: 0 20px;
   border: 0;
   border-radius: 32px;
   outline: 0;
   background: #f0f3f4;
+  color: #30383a;
+  font: inherit;
 }
-.modal input:focus {
+.modal select {
+  cursor: pointer;
+}
+.modal input:focus,
+.modal select:focus {
   box-shadow: 0 0 0 2px #16814470;
 }
 .formRow {
@@ -364,7 +372,12 @@
   color: #747d80;
 }
 .detailModal > strong {
+  display: block;
+  margin-bottom: 20px;
   color: #168144;
+}
+.detailModal > .primary {
+  width: 100%;
 }
 .close {
   position: absolute;

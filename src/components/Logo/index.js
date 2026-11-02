@@ -14,9 +14,9 @@ export default function Logo({
     <Image
       src="/img/Logo.png"
       alt="Zooly Education"
-      width={180}
-      height={60}
-      priority={priority}
+      width={1379}
+      height={650}
+      preload={priority}
       className={styles.img}
     />
   );

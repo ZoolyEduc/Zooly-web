@@ -1,62 +1,50 @@
 .settings {
-  display: flex;
-  gap: 24px;
-  align-items: flex-start;
+  display: grid;
+  grid-template-columns: minmax(0, 1.65fr) minmax(250px, 0.8fr);
+  gap: 22px;
+  align-items: start;
 }
 
-.leftColumn {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
+.leftColumn,
 .rightColumn {
-  width: 320px;
   display: flex;
+  min-width: 0;
   flex-direction: column;
-  gap: 24px;
-  flex-shrink: 0;
+  gap: 16px;
 }
 
-/* --- Cartões --- */
 .card {
-  background: #ffffff;
-  border: 1px solid #f0f1f1;
-  border-radius: 24px;
-  padding: 28px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+  min-width: 0;
+  padding: 22px;
+  border: 1px solid #edf0ef;
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 6px 20px rgba(34, 47, 43, 0.035);
 }
 
 .card h2 {
-  margin: 0 0 24px;
-  font-size: 18px;
-  color: var(--zooly-text, #30383a);
   display: flex;
   align-items: center;
-  gap: 10px;
-}
-
-.card h2 span {
-  display: grid;
-  place-items: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: #eafbf0;
-  color: #168144;
+  gap: 9px;
+  margin: 0 0 17px;
+  color: #30383a;
   font-size: 16px;
+  line-height: 1.3;
 }
 
-/* --- Formulários (Padrão Login) --- */
+.card h2 svg {
+  flex: 0 0 auto;
+  color: #168144;
+}
+
 .card label {
   display: flex;
+  min-width: 0;
   flex-direction: column;
-  gap: 8px;
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--zooly-text, #30383a);
-  margin-bottom: 18px;
+  gap: 6px;
+  color: #424a4c;
+  font-size: 11px;
+  font-weight: 600;
 }
 
 .card input[type="text"],
@@ -64,235 +52,299 @@
 .card input:not([type]),
 .card input[type="tel"] {
   width: 100%;
-  min-height: 52px;
-  padding: 0 20px;
+  min-width: 0;
+  min-height: 40px;
+  padding: 0 13px;
   border: 1px solid transparent;
-  border-radius: 30px;
+  border-radius: 22px;
   background: #f0f3f4;
-  color: #111827;
+  color: #3d4548;
   font: inherit;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 400;
-  transition: all 0.2s ease;
 }
 
-.card input:focus {
-  outline: none;
-  border-color: #168144;
-  background: #ffffff;
-  box-shadow: 0 0 0 3px rgba(22, 129, 68, 0.1);
+.card input::placeholder {
+  color: #828b8d;
+  opacity: 1;
+}
+
+.card input:focus-visible {
+  outline: 2px solid rgba(22, 129, 68, 0.3);
+  outline-offset: 2px;
 }
 
 .twoFields {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-}
-
-/* --- Botões --- */
-.softButton {
-  background: transparent;
-  border: 1px solid #d9eee0;
-  color: #168144;
-  font-weight: 700;
-  font-size: 13px;
-  padding: 12px 20px;
-  border-radius: 30px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  margin-top: 8px;
-}
-
-.softButton:hover {
-  background: #eafbf0;
-}
-
-.actions {
-  display: flex;
-  flex-direction: column;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
-  margin-top: 8px;
 }
 
-.discard, .save {
-  width: 100%;
-  min-height: 52px;
-  border-radius: 30px;
-  font-size: 14px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.2s ease;
+.twoFields label {
+  margin: 0;
 }
 
-.discard {
-  background: transparent;
-  border: 1px solid #dfe5e0;
-  color: #556063;
-}
-
-.discard:hover {
-  background: #f0f3f4;
-  color: #30383a;
-}
-
-.save {
-  background: #168144;
-  border: 1px solid #168144;
-  color: #ffffff;
-  box-shadow: 0 8px 18px rgba(22, 129, 68, 0.2);
-}
-
-.save:hover {
-  background: #185629;
-  border-color: #185629;
-  transform: translateY(-1px);
-}
-
-/* --- Foto de Perfil --- */
-.photoCard {
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.photo {
-  width: 120px;
-  height: 120px;
-  border-radius: 50%;
-  background: #eafbf0;
-  color: #168144;
-  font-size: 48px;
-  font-weight: 800;
+.schoolFields {
   display: grid;
-  place-items: center;
-  overflow: hidden;
-  margin-bottom: 16px;
+  gap: 12px;
 }
 
-.photo img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+.fullField {
+  grid-column: 1 / -1;
 }
 
-.photoCard h3 {
-  margin: 0 0 4px;
-  font-size: 16px;
-  color: var(--zooly-text);
-}
-
-.photoCard p {
-  font-size: 12px;
-  color: #747d80;
-  margin: 0 0 20px;
-}
-
+.softButton,
 .upload {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 12px 24px;
-  border-radius: 30px;
-  background: #f0f3f4;
+  gap: 7px;
+  min-height: 38px;
+  padding: 8px 14px;
+  border: 1px solid #d5e9db;
+  border-radius: 24px;
+  background: #f0fbf4;
+  color: #168144;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.softButton {
+  margin-top: 15px;
+  cursor: not-allowed;
+  opacity: 0.8;
+}
+
+.softButton:disabled,
+.upload input:disabled {
+  cursor: not-allowed;
+}
+
+.unavailable {
+  margin: 9px 0 0;
+  color: #778083;
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+.photoCard {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  padding: 23px 18px;
+  text-align: center;
+}
+
+.photo {
+  display: grid;
+  width: 82px;
+  aspect-ratio: 1;
+  place-items: center;
+  margin-bottom: 10px;
+  overflow: hidden;
+  border-radius: 50%;
+  background: #eef6f0;
+  color: #168144;
+  font-size: 23px;
+  font-weight: 700;
+}
+
+.photoCard h3 {
+  margin: 0 0 3px;
   color: #30383a;
   font-size: 13px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: background 0.2s ease;
 }
 
-.upload:hover {
-  background: #e5e9e9;
+.photoCard p {
+  max-width: 210px;
+  margin: 0 0 12px;
+  color: #778083;
+  font-size: 10px;
+  line-height: 1.4;
 }
 
-.upload input {
-  display: none; /* Esconde o input de arquivo original */
+.upload {
+  min-height: 34px;
+  background: #fff;
+  cursor: not-allowed;
+  opacity: 0.75;
 }
 
-/* --- Notificações (Toggles) --- */
+.upload:disabled {
+  cursor: not-allowed;
+}
+
+.notifications {
+  padding-bottom: 15px;
+}
+
 .notifications h2 {
-  margin-bottom: 20px;
+  margin-bottom: 8px;
 }
 
 .toggleRow {
-  display: flex;
+  position: relative;
+  display: flex !important;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  padding: 16px 0;
+  flex-direction: row !important;
+  gap: 12px !important;
+  min-height: 58px;
+  padding: 10px 0;
   border-bottom: 1px solid #edf0f1;
   cursor: pointer;
-  margin-bottom: 0 !important;
 }
 
 .toggleRow:last-child {
-  border-bottom: none;
-  padding-bottom: 0;
+  border-bottom: 0;
 }
 
-.toggleRow span {
+.toggleRow > span {
   display: flex;
+  min-width: 0;
   flex-direction: column;
   gap: 2px;
 }
 
 .toggleRow strong {
-  font-size: 14px;
   color: #30383a;
+  font-size: 11px;
 }
 
 .toggleRow small {
-  font-size: 12px;
-  color: #747d80;
+  color: #778083;
+  font-size: 9px;
   font-weight: 400;
+  line-height: 1.35;
 }
 
-/* Esconde o checkbox padrão e cria um toggle customizado */
 .toggleRow input {
-  display: none;
+  position: absolute;
+  right: 0;
+  width: 42px;
+  height: 24px;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.toggleRow input:focus-visible + i {
+  outline: 3px solid rgba(31, 107, 53, 0.28);
+  outline-offset: 3px;
 }
 
 .toggleRow i {
   position: relative;
-  width: 44px;
-  height: 24px;
+  flex: 0 0 42px;
+  height: 23px;
   border-radius: 20px;
-  background: #dfe5e0;
+  background: #dfe3e3;
+  pointer-events: none;
   transition: background 0.2s ease;
-  flex-shrink: 0;
 }
 
 .toggleRow i::after {
-  content: "";
   position: absolute;
   top: 3px;
   left: 3px;
-  width: 18px;
-  height: 18px;
+  width: 17px;
+  height: 17px;
   border-radius: 50%;
-  background: #ffffff;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  background: #56636d;
+  content: "";
   transition: transform 0.2s ease;
 }
 
 .toggleRow input:checked + i {
-  background: #168144;
+  background: #ccebd6;
 }
 
 .toggleRow input:checked + i::after {
-  transform: translateX(20px);
+  transform: translateX(19px);
+  background: #168144;
 }
 
-/* --- Responsividade --- */
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.discard,
+.save {
+  min-height: 40px;
+  padding: 8px 15px;
+  border-radius: 24px;
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.discard {
+  border: 1px solid #e1e5e3;
+  background: #f2f3f2;
+  color: #586265;
+}
+
+.save {
+  border: 1px solid #168144;
+  background: #168144;
+  color: #fff;
+  box-shadow: 0 6px 14px rgba(22, 129, 68, 0.16);
+}
+
+.discard:hover {
+  background: #e8ebea;
+}
+
+.save:hover {
+  background: #116b36;
+}
+
 @media (max-width: 900px) {
   .settings {
-    flex-direction: column;
+    grid-template-columns: minmax(0, 1fr) minmax(230px, 0.75fr);
+    gap: 16px;
   }
+}
+
+@media (max-width: 700px) {
+  .settings {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
   .rightColumn {
-    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
   }
+
+  .notifications,
+  .actions {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 480px) {
+  .card {
+    padding: 18px;
+    border-radius: 17px;
+  }
+
   .twoFields {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .rightColumn {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .actions {
+    flex-direction: column-reverse;
+  }
+
+  .discard,
+  .save {
+    width: 100%;
   }
 }

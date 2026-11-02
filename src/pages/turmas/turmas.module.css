@@ -2,8 +2,7 @@
 .toolbar {
   display: flex;
   justify-content: flex-end;
-  margin: -76px 0 86px;
-  pointer-events: none;
+  margin: -7px 0 27px;
 }
 
 .primary {
@@ -21,7 +20,6 @@
   font-weight: 750;
   box-shadow: 0 10px 20px #16814425;
   cursor: pointer;
-  pointer-events: auto;
   transition: background 0.2s ease, transform 0.2s ease;
 }
 
@@ -40,33 +38,43 @@
 .grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 30px;
+  gap: 22px;
 }
 
 .card {
-  min-height: 330px;
-  padding: 32px;
+  min-width: 0;
+  min-height: 250px;
+  padding: 22px;
   border: 1px solid #e7e9e9;
-  border-radius: 48px;
+  border-radius: 30px;
   background: #fff;
   box-shadow: var(--zooly-shadow-card, 0 10px 30px rgba(34, 47, 43, 0.035));
   display: flex;
   flex-direction: column;
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.card:hover,
+.card:focus-visible {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 30px rgba(34, 47, 43, 0.1);
+  outline: none;
 }
 
 .cardTop {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  margin-bottom: 36px;
+  margin-bottom: 17px;
 }
 
 .mascotBox {
   display: grid;
   place-items: center;
-  width: 64px;
-  height: 64px;
-  border-radius: 19px;
+  width: 58px;
+  height: 58px;
+  border-radius: 17px;
 }
 
 .mascotBox img {
@@ -74,27 +82,86 @@
   height: 52px;
   object-fit: contain;
 }
-
 /* Cores de fundo dos mascotes */
 .tone0 { background: #fff9e4; }
 .tone1 { background: #edfff4; }
 .tone2 { background: #f0f7ff; }
 .tone3 { background: #fff3eb; }
 
-.more {
-  border: 0;
-  background: transparent;
-  color: #91a0b6;
-  font-size: 24px;
+.actionsMenu {
+  position: relative;
+}
+
+.actionsMenu summary {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  color: #82909b;
   cursor: pointer;
-  padding: 0;
+  list-style: none;
+}
+
+.actionsMenu summary::-webkit-details-marker {
+  display: none;
+}
+
+.actionsMenu summary:hover,
+.actionsMenu[open] summary {
+  background: #f0f3f4;
+  color: #168144;
+}
+
+.actionsDropdown {
+  position: absolute;
+  z-index: 15;
+  top: calc(100% + 6px);
+  right: 0;
+  display: grid;
+  width: 190px;
+  padding: 6px;
+  border: 1px solid #e4e9e6;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 12px 30px rgba(34, 47, 43, 0.14);
+}
+
+.actionsDropdown a,
+.actionsDropdown button {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  min-height: 38px;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: #46566b;
+  font: inherit;
+  font-size: 12px;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.actionsDropdown a:hover,
+.actionsDropdown button:hover {
+  background: #f0f8f2;
+  color: #168144;
+}
+
+.actionsDropdown .archiveAction:hover {
+  background: #fff3f0;
+  color: #b3462e;
 }
 
 .kicker {
   display: inline-block;
   padding: 4px 12px;
   border-radius: 14px;
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 800;
   letter-spacing: 0.8px;
 }
@@ -106,39 +173,66 @@
 .tag3 { color: #b69300; background: #fffae1; }
 
 .card h2 {
-  margin: 15px 0 2px;
+  margin: 9px 0 2px;
   color: #30383a;
-  font-size: 23px;
+  font-size: 18px;
   letter-spacing: -0.4px;
 }
 
+.classCode {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 3px 10px;
+  width: 100%;
+  margin: 8px 0 10px;
+  padding: 10px 12px;
+  border: 1px dashed #b9ddc7;
+  border-radius: 14px;
+  background: #f4fbf6;
+  color: #168144;
+  text-align: left;
+  cursor: copy;
+}
+
+.classCode span {
+  grid-column: 1 / -1;
+  color: #74827a;
+  font-size: 9px;
+  font-weight: 750;
+  letter-spacing: 0.07em;
+}
+
+.classCode strong {
+  overflow-wrap: anywhere;
+  font-size: 16px;
+  letter-spacing: 0.04em;
+}
+
+.classCode small {
+  font-size: 11px;
+  font-weight: 700;
+}
+
 .period {
-  margin: 0 0 25px;
+  margin: 0 0 16px;
   color: #70797c;
-  font-size: 15px;
+  font-size: 13px;
 }
 
 .students {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: 8px;
-  padding: 9px 15px;
+  width: fit-content;
+  max-width: 100%;
+  margin-top: auto;
+  padding: 8px 12px;
   border-radius: 22px;
   background: #f4f7fa;
   color: #63758c;
-  font-size: 13px;
-  text-decoration: none;
-  margin-top: auto; /* Empurra para o final do card */
-  width: fit-content;
-}
-
-.students:hover {
-  background: #eafbf0;
-  color: #168144;
-}
-
-.students span {
-  font-size: 13px;
+  font-size: 12px;
+  line-height: 1.35;
 }
 
 /* ESTADO VAZIO */
@@ -293,17 +387,20 @@
 
 /* ESCOLHA DE MASCOTE */
 .mascotPicker {
-  display: flex;
-  justify-content: center;
-  gap: 22px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  justify-items: center;
+  gap: 12px;
+  width: min(100%, 310px);
+  margin: 0 auto;
   padding-top: 5px;
 }
 
 .mascotPicker button {
   display: grid;
   place-items: center;
-  width: 67px;
-  height: 67px;
+  width: min(100%, 67px);
+  aspect-ratio: 1;
   border: 2px solid transparent;
   border-radius: 50%;
   background: #e1f5be;
@@ -325,8 +422,9 @@
 }
 
 .mascotPicker img {
-  width: 55px;
-  height: 55px;
+  width: 52px;
+  height: auto;
+  max-height: 55px;
   object-fit: contain;
 }
 
@@ -363,7 +461,7 @@
     gap: 18px;
   }
   .toolbar {
-    margin: -62px 0 68px;
+    margin-bottom: 22px;
   }
 }
 
@@ -379,12 +477,12 @@
     width: 100%;
   }
   .card {
-    min-height: 285px;
-    padding: 25px;
-    border-radius: 34px;
+    min-height: 225px;
+    padding: 20px;
+    border-radius: 25px;
   }
   .cardTop {
-    margin-bottom: 25px;
+    margin-bottom: 15px;
   }
   .modal {
     padding: 31px 21px 24px;
@@ -395,16 +493,5 @@
   }
   .formRow {
     grid-template-columns: 1fr;
-  }
-  .mascotPicker {
-    gap: 12px;
-  }
-  .mascotPicker button {
-    width: 57px;
-    height: 57px;
-  }
-  .mascotPicker img {
-    width: 47px;
-    height: 47px;
   }
 }
