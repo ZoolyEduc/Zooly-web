@@ -3,6 +3,7 @@ import { useRouter } from "next/router";
 import Link from "next/link";
 import {
   Bell,
+  BookOpen,
   ChartNoAxesColumnIncreasing,
   ClipboardList,
   House,
@@ -14,7 +15,6 @@ import {
   X,
 } from "lucide-react";
 import { clearSession, getSession } from "../../services/session";
-import { demoEnabled } from "../../services/demo";
 import styles from "./TeacherLayout.module.css";
 import Logo from "../Logo";
 
@@ -22,6 +22,7 @@ const navigation = [
   { href: "/painel", label: "Home", icon: House },
   { href: "/turmas", label: "Turmas", icon: UsersRound },
   { href: "/atividades", label: "Atividades", icon: ClipboardList },
+  { href: "/historias", label: "Histórias", icon: BookOpen },
   {
     href: "/desempenho",
     label: "Desempenho",
@@ -30,13 +31,19 @@ const navigation = [
   { href: "/configuracoes", label: "Configurações", icon: Settings },
 ];
 
+// Min\u00fasculas e sem acentos, para a busca de telas.
+function semAcento(texto) {
+  return texto
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLocaleLowerCase("pt-BR");
+}
+
 export default function TeacherLayout({ title, subtitle, children }) {
   const router = useRouter();
   const [mostrarSaida, setMostrarSaida] = useState(false);
   const [menuMobile, setMenuMobile] = useState(false);
   const [notificacoesAbertas, setNotificacoesAbertas] = useState(false);
-
-  // NOVO: Estado para o menu do perfil
   const [menuPerfilAberto, setMenuPerfilAberto] = useState(false);
 
   const [sessionState, setSessionState] = useState({
@@ -45,24 +52,17 @@ export default function TeacherLayout({ title, subtitle, children }) {
   });
   const { ready, usuario } = sessionState;
 
-  // --- Estado para a barra de pesquisa ---
+  // Barra de pesquisa: leva \u00e0 tela do menu cujo nome combina com o termo.
   const [termoBusca, setTermoBusca] = useState("");
   const [mensagemBusca, setMensagemBusca] = useState("");
 
   function executarBusca(event) {
     event.preventDefault();
-    const termo = termoBusca
-      .trim()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .toLocaleLowerCase("pt-BR");
+    const termo = semAcento(termoBusca.trim());
     if (!termo) return;
 
     const pagina = navigation.find((item) => {
-      const rotulo = item.label
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .toLocaleLowerCase("pt-BR");
+      const rotulo = semAcento(item.label);
       return rotulo.includes(termo) || termo.includes(rotulo);
     });
 
@@ -91,7 +91,7 @@ export default function TeacherLayout({ title, subtitle, children }) {
     };
   }, [router]);
 
-  // NOVO: Fechar o menu do perfil ao clicar fora dele
+  // Fecha o menu do perfil ao clicar fora dele.
   useEffect(() => {
     function fecharMenu(event) {
       if (
@@ -222,12 +222,11 @@ export default function TeacherLayout({ title, subtitle, children }) {
 
             <span className={styles.profileDivider} />
 
-            {/* NOVO: Menu do Perfil */}
             <div className={styles.profileMenuWrap}>
               <button
                 type="button"
                 className={styles.profileButton}
-                onClick={() => setMenuPerfilAberto(!menuPerfilAberto)}
+                onClick={() => setMenuPerfilAberto((aberto) => !aberto)}
                 aria-expanded={menuPerfilAberto}
               >
                 <div className={styles.avatar}>

@@ -1,5 +1,3 @@
-import { demoEnabled } from "./demo";
-
 export function saveSession({ token, usuario }) {
   if (typeof window === "undefined") return;
 
@@ -8,18 +6,6 @@ export function saveSession({ token, usuario }) {
 }
 
 export function getSession() {
-  if (demoEnabled()) {
-    return {
-      token: "demo-token-local",
-      usuario: {
-        id: "demo-professor",
-        nome: "Helena Ferreira",
-        email: "helena.ferreira@zooly.edu.br",
-        tipo: "professor",
-      },
-    };
-  }
-
   if (typeof window === "undefined") {
     return { token: null, usuario: null };
   }
@@ -45,20 +31,4 @@ export function clearSession() {
 
   window.localStorage.removeItem("zooly_token");
   window.localStorage.removeItem("zooly_usuario");
-}
-
-export function getId(item) {
-  return item?._id || item?.id || "";
-}
-
-export function formatDate(value) {
-  if (!value) return "—";
-
-  const date = new Date(value);
-
-  if (Number.isNaN(date.getTime())) return "—";
-
-  return date.toLocaleDateString("pt-BR", {
-    timeZone: "America/Sao_Paulo",
-  });
 }

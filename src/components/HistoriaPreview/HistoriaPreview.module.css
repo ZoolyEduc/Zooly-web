@@ -1,0 +1,83 @@
+.storyText {
+  margin: 0;
+  color: #3f4749;
+  font-size: 15px;
+  line-height: 1.7;
+  white-space: pre-line;
+}
+.note {
+  margin: 14px 0 0;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: #fff9e8;
+  color: #6b5414;
+  font-size: 12px;
+}
+.question {
+  padding: 16px 0;
+  border-top: 1px solid #eef1ef;
+}
+.question:first-of-type {
+  border-top: 0;
+  padding-top: 0;
+}
+.question h3 {
+  margin: 0 0 10px;
+  font-size: 15px;
+}
+.options {
+  display: grid;
+  gap: 6px;
+  margin: 0 0 10px;
+  padding: 0;
+  list-style: none;
+}
+.options li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border: 1px solid #e6ebe8;
+  border-radius: 14px;
+  font-size: 13px;
+}
+.options .correct {
+  border-color: #9fd8b3;
+  background: var(--zooly-green-light);
+  color: var(--zooly-green-dark);
+  font-weight: 700;
+}
+.letter {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #f1f4f2;
+  font-size: 11px;
+  font-weight: 800;
+}
+.support {
+  display: grid;
+  gap: 6px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: #f5f8ff;
+  color: #34446b;
+  font-size: 12px;
+}
+.support p {
+  margin: 0;
+}
+.support strong {
+  color: #22305a;
+}
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}

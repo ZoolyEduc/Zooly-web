@@ -13,11 +13,40 @@ import {
   UserPlus,
 } from "lucide-react";
 import TeacherLayout from "../../components/TeacherLayout";
-import { mascotes } from "../../components/Mascotes/Index";
+import { mascotes } from "../../components/Mascotes";
 import Notice from "../../components/Notice";
 import { apiRequest } from "../../services/api";
-import { getId } from "../../services/session";
+import { getId } from "../../utils/formatacao";
 import styles from "./turmas.module.css";
+
+function formularioVazio(escolaId = "") {
+  return {
+    nome: "",
+    escolaId,
+    anoEscolar: String(new Date().getFullYear()),
+    periodo: "",
+    mascote: "",
+  };
+}
+
+// A API já usou nomes diferentes para o código da turma.
+function codigoDaTurma(turma) {
+  return turma.codigoPermanente || turma.codigo || turma.codigo_turma;
+}
+
+// O mascote pode vir como id ("sarue"), nome ou caminho de imagem antigo.
+function mascoteDaTurma(turma) {
+  const mascoteId = String(turma.mascote || "")
+    .toLowerCase()
+    .split("/")
+    .pop()
+    .replace(/-vetor\.png$|-botao\.png$/, "");
+  return mascotes.find(
+    (item) => item.id === mascoteId || item.nome.toLowerCase() === mascoteId,
+  );
+}
+
+const mascotePadrao = mascotes.find((item) => item.id === "sarue");
 
 export default function Turmas() {
   const router = useRouter();
@@ -25,13 +54,7 @@ export default function Turmas() {
   const [loading, setLoading] = useState(true);
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
   const [turmaEmEdicao, setTurmaEmEdicao] = useState(null);
-  const [form, setForm] = useState({
-    nome: "",
-    escolaId: "",
-    anoEscolar: String(new Date().getFullYear()),
-    periodo: "",
-    mascote: "",
-  });
+  const [form, setForm] = useState(formularioVazio);
   const [erro, setErro] = useState("");
   const [sucesso, setSucesso] = useState("");
   const [salvando, setSalvando] = useState(false);
@@ -62,7 +85,7 @@ export default function Turmas() {
 
   async function copiarCodigo(event, turma) {
     event.stopPropagation();
-    const codigo = turma.codigoPermanente || turma.codigo || turma.codigo_turma;
+    const codigo = codigoDaTurma(turma);
     if (!codigo) return;
     try {
       await navigator.clipboard.writeText(codigo);
@@ -167,13 +190,7 @@ export default function Turmas() {
             ? "Turma atualizada com sucesso."
             : "Turma cadastrada com sucesso."),
       );
-      setForm({
-        nome: "",
-        escolaId: "",
-        anoEscolar: String(new Date().getFullYear()),
-        periodo: "",
-        mascote: "",
-      });
+      setForm(formularioVazio());
       setTurmaEmEdicao(null);
       setMostrarFormulario(false);
       await carregar();
@@ -203,13 +220,7 @@ export default function Turmas() {
   function abrirCadastro() {
     setErro("");
     setTurmaEmEdicao(null);
-    setForm({
-      nome: "",
-      escolaId: escolas.length === 1 ? getId(escolas[0]) : "",
-      anoEscolar: String(new Date().getFullYear()),
-      periodo: "",
-      mascote: "",
-    });
+    setForm(formularioVazio(escolas.length === 1 ? getId(escolas[0]) : ""));
     setMostrarFormulario(true);
   }
 
@@ -236,6 +247,10 @@ export default function Turmas() {
     setErro("");
     setTurmaSenha(null);
     setSenhaAcesso("");
+  }
+
+  function abrirAlunos(id) {
+    if (id) router.push(`/turmas/${encodeURIComponent(id)}/alunos`);
   }
 
   const modalAberto = mostrarFormulario || Boolean(turmaSenha);
@@ -270,20 +285,9 @@ export default function Turmas() {
           <section className={styles.grid}>
             {turmas.map((turma, index) => {
               const id = getId(turma);
-              const mascoteId = String(turma.mascote || "")
-                .toLowerCase()
-                .split("/")
-                .pop()
-                .replace(/-vetor\.png$|-botao\.png$/, "");
-              const mascote = mascotes.find(
-                (item) =>
-                  item.id === mascoteId ||
-                  item.nome.toLowerCase() === mascoteId,
-              );
-              const mascotePadrao = mascotes.find(
-                (item) => item.id === "sarue",
-              );
+              const mascote = mascoteDaTurma(turma);
               const imagemMascote = mascote || mascotePadrao;
+              const codigo = codigoDaTurma(turma);
               return (
                 <article
                   className={styles.card}
@@ -294,14 +298,13 @@ export default function Turmas() {
                   onClick={(event) => {
                     if (event.target.closest("a, button, summary, details"))
                       return;
-                    if (id)
-                      router.push(`/turmas/${encodeURIComponent(id)}/alunos`);
+                    abrirAlunos(id);
                   }}
                   onKeyDown={(event) => {
                     if (event.target !== event.currentTarget) return;
                     if ((event.key === "Enter" || event.key === " ") && id) {
                       event.preventDefault();
-                      router.push(`/turmas/${encodeURIComponent(id)}/alunos`);
+                      abrirAlunos(id);
                     }
                   }}
                 >
@@ -376,21 +379,15 @@ export default function Turmas() {
                       : "Mascote não informado"}
                   </span>
                   <h2>{turma.nome}</h2>
-                  {turma.codigoPermanente ||
-                  turma.codigo ||
-                  turma.codigo_turma ? (
+                  {codigo ? (
                     <button
                       type="button"
                       className={styles.classCode}
                       onClick={(event) => copiarCodigo(event, turma)}
-                      aria-label={`Copiar código da turma ${turma.codigoPermanente || turma.codigo || turma.codigo_turma}`}
+                      aria-label={`Copiar código da turma ${codigo}`}
                     >
                       <span>CÓDIGO DA TURMA</span>
-                      <strong>
-                        {turma.codigoPermanente ||
-                          turma.codigo ||
-                          turma.codigo_turma}
-                      </strong>
+                      <strong>{codigo}</strong>
                       <small>
                         {codigoCopiado === id ? "Copiado" : "Copiar"}
                       </small>
@@ -410,7 +407,6 @@ export default function Turmas() {
             })}
           </section>
         ) : (
-          // AQUI ESTÁ O EMPTY STATE (Tela vazia bonita)
           <section className={styles.empty}>
             <Image
               src="/img/sarue-vetor.png"

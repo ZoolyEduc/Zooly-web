@@ -1,0 +1,460 @@
+/* BANCO DE HISTÓRIAS — mesmo vocabulário visual de atividades.module.css */
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin: -5px 0 20px;
+}
+.filters {
+  display: grid;
+  grid-template-columns: minmax(220px, 2fr) repeat(4, minmax(140px, 1fr));
+  gap: 10px;
+  flex: 1;
+}
+.filters label {
+  display: grid;
+  gap: 6px;
+  color: #5e686b;
+  font-size: 12px;
+  font-weight: 700;
+}
+.filters input,
+.filters select {
+  width: 100%;
+  min-width: 0;
+  min-height: 42px;
+  padding: 8px 14px;
+  border: 1px solid #dce5df;
+  border-radius: 20px;
+  background: #fff;
+  color: var(--zooly-text);
+  font-size: 13px;
+}
+.filters input:focus,
+.filters select:focus,
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+  outline: 2px solid #b7e2c5;
+  border-color: var(--zooly-green);
+}
+.summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 18px;
+  color: var(--zooly-muted);
+  font-size: 13px;
+}
+.linkButton {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--zooly-green);
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.primary,
+.secondary,
+.danger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 44px;
+  padding: 10px 20px;
+  border-radius: 28px;
+  font-size: 13px;
+  font-weight: 750;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+.primary {
+  border: 0;
+  background: var(--zooly-green);
+  color: #fff;
+  box-shadow: 0 9px 19px rgba(22, 129, 68, 0.15);
+}
+.primary:hover {
+  background: var(--zooly-green-dark);
+  transform: translateY(-1px);
+}
+.secondary {
+  border: 1px solid #dce5df;
+  background: #fff;
+  color: var(--zooly-green);
+}
+.secondary:hover {
+  background: #f0f3f4;
+}
+.danger {
+  border: 1px solid #f3cfc6;
+  background: #fff;
+  color: #b3462e;
+}
+.danger:hover {
+  background: #fff0ed;
+}
+.primary:disabled,
+.secondary:disabled,
+.danger:disabled {
+  opacity: 0.6;
+  cursor: wait;
+  transform: none;
+}
+
+/* Cards */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  gap: 18px;
+}
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 300px;
+  padding: 22px;
+  border: 1px solid var(--zooly-border);
+  border-radius: 26px;
+  background: #fff;
+  box-shadow: var(--zooly-shadow-card);
+}
+.cardArchived {
+  background: #fafbfa;
+  border-style: dashed;
+}
+.cardTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.cover {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: #fff6dd;
+  color: #b07a00;
+}
+.coverOwn {
+  background: var(--zooly-green-light);
+  color: var(--zooly-green);
+}
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: flex-end;
+}
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #f1f4f2;
+  color: #556063;
+  font-size: 11px;
+  font-weight: 750;
+}
+.badgeZooly {
+  background: #fff6dd;
+  color: #8a5d00;
+}
+.badgeOwn {
+  background: var(--zooly-green-light);
+  color: var(--zooly-green-dark);
+}
+.badgeArchived {
+  background: #eef0f1;
+  color: #5f6a6d;
+}
+.card h2 {
+  margin: 4px 0 0;
+  color: var(--zooly-text);
+  font-size: 17px;
+  line-height: 1.3;
+}
+.description {
+  margin: 0;
+  color: #5d6669;
+  font-size: 13px;
+}
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: #5d6669;
+  font-size: 12px;
+}
+.meta li {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.objectives {
+  margin: 0;
+  padding-left: 18px;
+  color: #5d6669;
+  font-size: 12px;
+}
+.cardActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 8px;
+}
+.cardActions .primary,
+.cardActions .secondary,
+.cardActions .danger {
+  min-height: 38px;
+  padding: 8px 14px;
+  font-size: 12px;
+}
+
+.loading,
+.empty {
+  padding: 40px 20px;
+  border: 1px dashed #dce5df;
+  border-radius: 26px;
+  color: var(--zooly-muted);
+  text-align: center;
+}
+.empty h2 {
+  margin: 0 0 6px;
+  color: var(--zooly-text);
+  font-size: 18px;
+}
+
+/* Detalhe */
+.detailHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 12px;
+  color: var(--zooly-green);
+  font-weight: 700;
+  text-decoration: none;
+}
+.detailHeader h1 {
+  margin: 6px 0 4px;
+  font-size: 26px;
+}
+.headerActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.detailGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(260px, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+.panel {
+  padding: 24px;
+  border: 1px solid var(--zooly-border);
+  border-radius: 26px;
+  background: #fff;
+  box-shadow: var(--zooly-shadow-card);
+}
+.panel + .panel {
+  margin-top: 20px;
+}
+.panel h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 14px;
+  font-size: 17px;
+}
+.facts {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+}
+.facts dt {
+  color: var(--zooly-muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+.facts dd {
+  margin: 2px 0 0;
+  font-size: 14px;
+}
+
+/* Formulário */
+.form {
+  display: grid;
+  gap: 20px;
+}
+.formGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+.field {
+  display: grid;
+  gap: 6px;
+  color: #445053;
+  font-size: 13px;
+  font-weight: 700;
+}
+.full {
+  grid-column: 1 / -1;
+}
+.field input,
+.field select,
+.field textarea {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 14px;
+  border: 1px solid #dce5df;
+  border-radius: 16px;
+  background: #fff;
+  color: var(--zooly-text);
+  font-weight: 500;
+}
+.field textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+.hint {
+  color: var(--zooly-muted);
+  font-size: 12px;
+  font-weight: 500;
+}
+.fieldError {
+  margin: 0;
+  color: #991b1b;
+  font-size: 12px;
+  font-weight: 600;
+}
+.inline {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.inline input {
+  flex: 1;
+}
+.iconButton {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 38px;
+  height: 38px;
+  border: 1px solid #e6ebe8;
+  border-radius: 50%;
+  background: #fff;
+  color: #8a3b29;
+  cursor: pointer;
+}
+.questionEditor {
+  display: grid;
+  gap: 12px;
+  padding: 18px;
+  border: 1px solid #e6ebe8;
+  border-radius: 20px;
+  background: #fcfdfc;
+}
+.questionEditor + .questionEditor {
+  margin-top: 14px;
+}
+.questionEditorTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.alternativeRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.alternativeRow input[type="text"] {
+  flex: 1;
+  min-height: 40px;
+  padding: 8px 12px;
+  border: 1px solid #dce5df;
+  border-radius: 14px;
+}
+.alternativeRow label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 700;
+}
+.formFooter {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+}
+.preview {
+  border-color: #cfe3d6;
+  background: #fbfdfb;
+}
+
+@media (max-width: 1100px) {
+  .filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .filters label:first-child {
+    grid-column: 1 / -1;
+  }
+}
+@media (max-width: 860px) {
+  .detailGrid,
+  .formGrid {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 520px) {
+  .filters {
+    grid-template-columns: 1fr;
+  }
+  .card,
+  .panel {
+    padding: 18px;
+    border-radius: 22px;
+  }
+  .toolbar .primary {
+    width: 100%;
+  }
+}
+.badgesStart {
+  justify-content: flex-start;
+}
+.field > .secondary {
+  justify-self: start;
+}
+.questionEditor textarea {
+  min-height: 72px;
+}

@@ -118,15 +118,6 @@
   color: #30383a;
   font-size: 14px;
 }
-.phoneme {
-  display: inline-flex;
-  padding: 3px 11px;
-  border-radius: 99px;
-  background: #edf0f1;
-  color: #687174;
-  font-size: 12px;
-  font-weight: 700;
-}
 .score {
   display: flex;
   align-items: center;

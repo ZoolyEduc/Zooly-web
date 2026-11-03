@@ -6,7 +6,7 @@ import { useRouter } from "next/router";
 import TeacherLayout from "../../../components/TeacherLayout";
 import Notice from "../../../components/Notice";
 import { apiRequest } from "../../../services/api";
-import { getId, formatDate } from "../../../services/session";
+import { getId, formatDate } from "../../../utils/formatacao";
 import styles from "./alunos.module.css";
 
 const vazio = {

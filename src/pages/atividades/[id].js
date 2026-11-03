@@ -16,7 +16,7 @@ import {
 import TeacherLayout from "../../components/TeacherLayout";
 import Notice from "../../components/Notice";
 import { apiRequest } from "../../services/api";
-import { formatDate, getId } from "../../services/session";
+import { formatDate, getId } from "../../utils/formatacao";
 import styles from "./atividades.module.css";
 
 const etapasMissao = {
@@ -59,8 +59,14 @@ export default function DetalhesAtividade() {
         const turma = (turmasResponse?.turmas || []).find(
           (item) => getId(item) === turmaId,
         );
-        let historiaTexto = atividadeCarregada.historia?.texto || "";
+        // A atividade guarda uma cópia da história (o que o aluno lê). Só atividades
+        // antigas, sem cópia, consultam a história no Banco de Histórias.
+        let historiaTexto =
+          atividadeCarregada.historia?.texto ||
+          atividadeCarregada.historia?.textoCopia ||
+          "";
         if (
+          !historiaTexto &&
           atividadeCarregada.historia?.tipo === "oficial" &&
           atividadeCarregada.historia.historiaId
         ) {

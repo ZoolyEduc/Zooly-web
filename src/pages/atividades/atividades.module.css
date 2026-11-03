@@ -1,106 +1,4 @@
 /* BARRA DE FERRAMENTAS E FILTROS */
-.viewTabs {
-  display: flex;
-  gap: 4px;
-  margin-bottom: 24px;
-  border-bottom: 1px solid #e1e6e3;
-}
-
-.viewTabs button {
-  min-height: 44px;
-  padding: 9px 16px;
-  border: 0;
-  border-bottom: 2px solid transparent;
-  background: transparent;
-  color: #647174;
-  font: inherit;
-  font-size: 13px;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.viewTabs .viewTabActive {
-  border-bottom-color: #168144;
-  color: #168144;
-}
-
-.storyGrid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
-}
-
-.story {
-  display: flex;
-  flex-direction: column;
-  min-height: 240px;
-  padding: 22px;
-  border: 1px solid #e4e9e6;
-  border-radius: 20px;
-  background: #fff;
-}
-
-.storyCover {
-  display: grid;
-  min-height: 94px;
-  place-items: center;
-  margin: -22px -22px 18px;
-  border-radius: 20px 20px 0 0;
-  background: linear-gradient(135deg, #eaf5ff, #eff9f0);
-  color: #3974ac;
-}
-
-.story h2 {
-  margin: 0 0 12px;
-  color: #30383a;
-  font-size: 18px;
-}
-
-.storyDetails {
-  margin-bottom: 20px;
-  color: #647174;
-  font-size: 13px;
-}
-
-.storyDetails summary {
-  color: #168144;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.storyDetails p {
-  max-height: 240px;
-  overflow: auto;
-  margin: 10px 0 0;
-  color: #647174;
-  font-size: 14px;
-  line-height: 1.6;
-  white-space: pre-wrap;
-}
-
-.story p {
-  display: -webkit-box;
-  overflow: hidden;
-  margin: 0 0 20px;
-  color: #647174;
-  font-size: 14px;
-  line-height: 1.6;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 5;
-}
-
-.story a {
-  margin-top: auto;
-  color: #168144;
-  font-size: 13px;
-  font-weight: 750;
-  text-decoration: none;
-}
-
-.story a:hover {
-  text-decoration: underline;
-}
-
 .toolbar {
   display: flex;
   align-items: center;
@@ -236,8 +134,7 @@
   color: #ba492e;
 }
 
-.status,
-.scheduled {
+.status {
   padding: 5px 13px;
   border-radius: 20px;
   background: #eaf4ed;
@@ -245,11 +142,6 @@
   font-size: 10px;
   font-weight: 800;
   text-transform: uppercase;
-}
-
-.scheduled {
-  background: #e8edef;
-  color: #657073;
 }
 
 .draftCard {
@@ -284,21 +176,6 @@
 .phoneme strong {
   color: #168144;
   font-weight: 600;
-}
-
-.progress {
-  height: 6px;
-  overflow: hidden;
-  border-radius: 9px;
-  background: #edf0f1;
-  margin-top: auto;
-}
-
-.progress i {
-  display: block;
-  height: 100%;
-  border-radius: inherit;
-  background: #168144;
 }
 
 .cardBottom {
@@ -368,16 +245,6 @@
 }
 
 /* EDITOR DE ATIVIDADES (NOVA.JS) */
-.back {
-  margin: -10px 0 22px;
-}
-
-.back a {
-  color: #168144;
-  font-size: 17px;
-  text-decoration: none;
-  font-weight: 600;
-}
 
 .activityForm {
   display: grid;
@@ -493,14 +360,6 @@
   font-size: 13px;
   color: #6b7280;
   margin: 0 0 17px;
-}
-
-.questionCard {
-  border: 1px solid #e4eae5;
-  background: #f8fbfd;
-  border-radius: 20px;
-  padding: 24px;
-  margin-top: 16px;
 }
 
 .questionTitle {
@@ -642,21 +501,6 @@
   font-weight: 650;
 }
 
-.bnccTags span {
-  background: #eef5ff;
-  border-color: #dbeaff;
-  color: #4371cc;
-}
-
-.editorTip {
-  border-radius: 18px;
-  padding: 17px;
-  background: #e9fff4;
-  color: #327253;
-  font-size: 13px;
-  line-height: 1.6;
-}
-
 .activityForm > .formBottom {
   grid-column: 1 / -1;
   display: flex;
@@ -672,50 +516,6 @@
   font-size: 13px;
   line-height: 1.5;
   margin: 0;
-}
-
-.draftSuccess {
-  max-width: 650px;
-  margin: 25px auto;
-  padding: 32px;
-  background: #ffffff;
-  border: 1px solid #d6e9da;
-  border-radius: 22px;
-  text-align: center;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
-}
-
-.draftIcon {
-  margin: auto;
-  display: grid;
-  place-items: center;
-  width: 60px;
-  height: 60px;
-  background: #eafbf0;
-  color: #168144;
-  border-radius: 50%;
-  font-size: 30px;
-  font-weight: 800;
-  margin-bottom: 15px;
-}
-
-.draftSuccess h2 {
-  font-size: 22px;
-  margin: 0 0 8px;
-}
-
-.draftSuccess p {
-  color: #6b7280;
-  font-size: 14px;
-  line-height: 1.7;
-}
-
-.draftSuccess > div:last-child {
-  display: flex;
-  justify-content: center;
-  gap: 12px;
-  margin-top: 24px;
-  flex-wrap: wrap;
 }
 
 /* RESPONSIVIDADE */
@@ -752,22 +552,6 @@
 }
 
 @media (max-width: 620px) {
-  .viewTabs {
-    gap: 0;
-  }
-  .viewTabs button {
-    flex: 1;
-    padding-right: 8px;
-    padding-left: 8px;
-    font-size: 11px;
-  }
-  .storyGrid {
-    grid-template-columns: 1fr;
-  }
-
-  .storyCover {
-    margin: -22px -22px 18px;
-  }
   .grid {
     grid-template-columns: 1fr;
   }
@@ -806,68 +590,14 @@
 }
 
 /* TELA DE DETALHES DA ATIVIDADE */
-.detailContainer {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
 
 /* Header de Título */
-.detailHero {
-  background: #ffffff;
-  padding: 32px;
-  border-radius: 24px;
-  border: 1px solid #f0f1f1;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
-}
-
-.detailHero h1 {
-  font-size: 36px;
-  color: #168144;
-  margin: 16px 0 12px;
-  line-height: 1.2;
-  letter-spacing: -0.5px;
-}
-
-.detailHero p {
-  color: #747d80;
-  font-size: 15px;
-  margin: 0;
-}
-
-.detailHero strong {
-  color: #30383a;
-}
 
 /* Bloco Branco Principal (História e Questões) */
-.detailMainBox {
-  background: #ffffff;
-  padding: 32px;
-  border-radius: 24px;
-  border: 1px solid #f0f1f1;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
-}
 
 /* Grid interno para Missão e BNCC */
-.detailTopGrid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 24px;
-  padding-bottom: 32px;
-  border-bottom: 1px solid #edf0f1;
-  margin-bottom: 32px;
-}
 
 /* Conteúdo Interno */
-.detailSection {
-  margin-top: 32px;
-}
-
-.detailSectionTitle {
-  font-size: 18px;
-  color: #30383a;
-  margin-bottom: 16px;
-}
 
 .detailHistory {
   background: #f8fbfd;
@@ -877,14 +607,6 @@
   color: #556063;
   line-height: 1.6;
   font-size: 15px;
-}
-
-.questionCard {
-  border: 1px solid #e4eae5;
-  background: #f8fbfd;
-  border-radius: 20px;
-  padding: 24px;
-  margin-top: 16px;
 }
 
 .questionEnunciado {
@@ -937,46 +659,10 @@
 }
 
 /* Rodapé do Bloco Principal */
-.detailFooter {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 40px;
-  padding-top: 24px;
-  border-top: 1px solid #edf0f1;
-}
 
 /* Botão Voltar */
-.back {
-  margin-bottom: 24px;
-}
-
-.back a {
-  color: #168144;
-  font-size: 14px;
-  text-decoration: none;
-  font-weight: 700;
-}
 
 /* Responsividade */
-@media (max-width: 760px) {
-  .detailTopGrid {
-    grid-template-columns: 1fr;
-    gap: 20px;
-  }
-  .detailHero,
-  .detailMainBox {
-    padding: 24px;
-  }
-  .detailHero h1 {
-    font-size: 28px;
-  }
-  .detailFooter {
-    justify-content: stretch;
-  }
-  .detailFooter button {
-    width: 100%;
-  }
-}
 
 .editorHeader {
   display: flex;
@@ -1284,7 +970,6 @@
   font-size: 10px;
 }
 
-.questionScore,
 .integrationNote {
   margin: 8px 0 0;
   color: #778083;
@@ -1714,5 +1399,66 @@
   .formBottom .cancel,
   .formBottom .primary {
     width: 100%;
+  }
+}
+
+.toolbarActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+/* BANCO DE HISTÓRIAS NO FORMULÁRIO */
+.bankPicker {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 10px 12px;
+  margin-bottom: 14px;
+}
+.bankPicker small {
+  grid-column: 1 / -1;
+  color: #66737a;
+  font-size: 12px;
+}
+.bankPicker small a {
+  color: #168144;
+  font-weight: 700;
+}
+.referenceText {
+  margin: 10px 0;
+  padding: 14px 16px;
+  border: 1px solid #e1e6e3;
+  border-radius: 16px;
+  background: #fafbfa;
+  color: #3f4749;
+  white-space: pre-line;
+}
+.pedagogicSupport {
+  display: grid;
+  gap: 6px;
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: #f5f8ff;
+  color: #34446b;
+  font-size: 12px;
+}
+.pedagogicSupport strong {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #22305a;
+}
+.pedagogicSupport p,
+.pedagogicSupport ul {
+  margin: 0;
+}
+.pedagogicSupport ul {
+  padding-left: 18px;
+}
+@media (max-width: 620px) {
+  .bankPicker {
+    grid-template-columns: 1fr;
   }
 }

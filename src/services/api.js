@@ -1,5 +1,6 @@
-import { demoEnabled, demoResponse } from "./demo";
 import { clearSession } from "./session";
+
+// O painel usa somente a Zooly API: não há dados de demonstração nem respostas simuladas.
 const API_BASE_URL = (
   process.env.NEXT_PUBLIC_API_URL ||
   (process.env.NODE_ENV === "production" ? "" : "http://localhost:4000")
@@ -17,7 +18,6 @@ function encerrarSessaoExpirada(path) {
 }
 
 export async function apiRequest(path, options = {}) {
-  if (demoEnabled()) return demoResponse(path, options);
   if (!API_BASE_URL) throw new Error(ERRO_API_NAO_CONFIGURADA);
   const { body, headers: customHeaders = {}, ...rest } = options;
   const headers = new Headers(customHeaders);
@@ -70,21 +70,21 @@ export async function apiRequest(path, options = {}) {
     const detalhes = Array.isArray(data?.detalhes)
       ? data.detalhes.join(" ")
       : "";
-    throw new Error(
+    const erro = new Error(
       detalhes ||
         data?.mensagem ||
         `A API respondeu com erro HTTP ${response.status}.`,
     );
+    // Status e corpo ficam disponíveis para telas que mostram erros por campo.
+    erro.status = response.status;
+    erro.dados = data;
+    throw erro;
   }
 
   return data;
 }
 
 export async function downloadApiFile(path, fileName) {
-  if (demoEnabled()) {
-    window.print();
-    return;
-  }
   if (!API_BASE_URL) throw new Error(ERRO_API_NAO_CONFIGURADA);
   const token =
     typeof window !== "undefined"
@@ -119,10 +119,4 @@ export async function downloadApiFile(path, fileName) {
   link.click();
   link.remove();
   window.URL.revokeObjectURL(url);
-}
-
-export function makeObjectId() {
-  return Array.from({ length: 24 }, () =>
-    Math.floor(Math.random() * 16).toString(16),
-  ).join("");
 }

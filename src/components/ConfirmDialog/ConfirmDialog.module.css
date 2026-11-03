@@ -1,0 +1,79 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(27, 29, 29, 0.79);
+}
+.dialog {
+  width: min(460px, 100%);
+  padding: 32px;
+  border-radius: 34px;
+  background: #fff;
+  text-align: center;
+  box-shadow: 0 22px 65px #0003;
+}
+.icon {
+  display: grid;
+  place-items: center;
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 18px;
+  border-radius: 50%;
+  background: var(--zooly-green-light);
+  color: var(--zooly-green);
+}
+.icon.danger {
+  background: #fff0ed;
+  color: #b3462e;
+}
+.dialog h2 {
+  margin: 0 0 8px;
+  color: var(--zooly-text);
+  font-size: 22px;
+}
+.dialog p {
+  max-width: 340px;
+  margin: 0 auto 24px;
+  color: #667073;
+  font-size: 15px;
+}
+.actions {
+  display: flex;
+  gap: 12px;
+}
+.actions button {
+  flex: 1;
+  min-height: 48px;
+  border-radius: 26px;
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+  border: 1px solid #d9eee0;
+  background: #fff;
+  color: #556063;
+}
+.actions button:last-child {
+  border-color: var(--zooly-green);
+  background: var(--zooly-green);
+  color: #fff;
+}
+.actions button:last-child.dangerButton {
+  border-color: #b3462e;
+  background: #b3462e;
+}
+.actions button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+@media (max-width: 520px) {
+  .dialog {
+    padding: 26px 20px;
+    border-radius: 28px;
+  }
+  .actions {
+    flex-direction: column-reverse;
+  }
+}
