@@ -501,6 +501,29 @@ O painel utiliza a Zooly API publicada no Render:
 https://zooly-api.onrender.com
 
 A variável `NEXT_PUBLIC_API_URL` deve estar configurada no ambiente de produção com o endereço correto da API.
+## Acesso para avaliação
+
+O Zooly Web está disponível para avaliação por meio do ambiente publicado.
+
+**Endereço:** https://zooly-web.vercel.app
+
+### Conta de professor para testes
+
+Uma conta exclusiva para avaliação será disponibilizada para que professores e avaliadores possam explorar as funcionalidades do painel.
+
+| Campo | Informação |
+|---|---|
+| E-mail | teste@professor.com |
+| Senha | teste2026 |
+
+**Funcionalidades disponíveis para avaliação:**
+- Painel do professor.
+- Gerenciamento de turmas e alunos.
+- Criação e publicação de atividades.
+- Banco de Histórias.
+- Acompanhamento de desempenho.
+
+> As credenciais serão disponibilizadas após a criação e validação da conta de teste. Não utilize contas pessoais ou credenciais de produção para avaliações públicas.
 
 ## Status do projeto
 
