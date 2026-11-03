@@ -55,7 +55,9 @@ export default function Desempenho() {
       setErro("");
       setRelatorio(null);
       setMostrarTodos(false);
-      apiRequest(`/api/desempenho/turmas/${turmaId}/semanal?data=${dataReferencia}`)
+      apiRequest(
+        `/api/desempenho/turmas/${turmaId}/semanal?data=${dataReferencia}`,
+      )
         .then((resposta) => {
           if (ativo) setRelatorio(resposta);
         })
@@ -107,7 +109,7 @@ export default function Desempenho() {
         subtitle="Acompanhe o progresso fonético de cada turma de forma detalhada."
       >
         {erro ? <Notice kind="error">{erro}</Notice> : null}
-        
+
         <div className={styles.controls}>
           <label>
             <span>Turma:</span>
@@ -124,7 +126,7 @@ export default function Desempenho() {
               ))}
             </select>
           </label>
-          
+
           <label>
             <span>Data de referência:</span>
             <input
@@ -149,23 +151,25 @@ export default function Desempenho() {
           <>
             <div className={styles.metrics}>
               <article>
-                <span className={`${styles.metricIcon} ${styles.green}`}>↗</span>
+                <span className={`${styles.metricIcon} ${styles.green}`}>
+                  ↗
+                </span>
                 <div>
                   <small>MÉDIA DA TURMA</small>
-                    <strong>
-                      {indicadores.percentualAcerto == null
-                        ? "—"
-                        : `${indicadores.percentualAcerto}%`}
-                    </strong>
+                  <strong>
+                    {indicadores.percentualAcerto == null
+                      ? "—"
+                      : `${indicadores.percentualAcerto}%`}
+                  </strong>
                 </div>
               </article>
               <article>
                 <span className={`${styles.metricIcon} ${styles.blue}`}>☑</span>
                 <div>
-                    <small>ATIVIDADES INICIADAS</small>
+                  <small>ATIVIDADES INICIADAS</small>
                   <strong>
                     {indicadores.atividadesIniciadas ?? 0}
-                      <em> no período</em>
+                    <em> no período</em>
                   </strong>
                 </div>
               </article>
@@ -186,7 +190,7 @@ export default function Desempenho() {
                 <h2>Lista de Alunos</h2>
                 <span>{relatorio.turma?.nome || "Turma"}</span>
               </div>
-              
+
               {alunos.length > 0 ? (
                 <div className={styles.tableWrap}>
                   <table>
@@ -204,7 +208,8 @@ export default function Desempenho() {
                       {(mostrarTodos ? alunos : alunos.slice(0, 4)).map(
                         (item, index) => {
                           const aluno = item.aluno || {};
-                          const percent = item.indicadores?.percentualAcerto ?? null;
+                          const percent =
+                            item.indicadores?.percentualAcerto ?? null;
                           return (
                             <tr key={aluno.id || aluno.ra || index}>
                               <td>
@@ -216,13 +221,26 @@ export default function Desempenho() {
                                       .slice(0, 2)
                                       .join("")}
                                   </span>
-                                  <strong>{aluno.nomeCompleto || "Aluno"}</strong>
+                                  <strong>
+                                    {aluno.nomeCompleto ||
+                                      (aluno.ra ? `RA ${aluno.ra}` : "Aluno")}
+                                  </strong>
                                 </div>
                               </td>
-                              <td>{item.indicadores?.atividadesIniciadas ?? 0}</td>
-                              <td>{item.indicadores?.atividadesConcluidas ?? 0}</td>
-                              <td>{item.indicadores?.respostasRegistradas ?? 0}</td>
-                              <td>{percent == null ? "Sem respostas" : `${percent}%`}</td>
+                              <td>
+                                {item.indicadores?.atividadesIniciadas ?? 0}
+                              </td>
+                              <td>
+                                {item.indicadores?.atividadesConcluidas ?? 0}
+                              </td>
+                              <td>
+                                {item.indicadores?.respostasRegistradas ?? 0}
+                              </td>
+                              <td>
+                                {percent == null
+                                  ? "Sem respostas"
+                                  : `${percent}%`}
+                              </td>
                               <td>
                                 <Link href={`/desempenho/alunos/${aluno.id}`}>
                                   Detalhes
@@ -230,7 +248,7 @@ export default function Desempenho() {
                               </td>
                             </tr>
                           );
-                        }
+                        },
                       )}
                     </tbody>
                   </table>
@@ -240,7 +258,7 @@ export default function Desempenho() {
                   Nenhum aluno cadastrado nesta turma.
                 </p>
               )}
-              
+
               {alunos.length > 4 ? (
                 <button
                   type="button"
@@ -256,7 +274,9 @@ export default function Desempenho() {
               <span>
                 Semana de {formatDate(relatorio.periodo?.inicio)} a{" "}
                 {formatDate(relatorio.periodo?.fim)} ({relatorio.periodo?.fuso})
-                {relatorio.periodo?.disponivel ? " · período encerrado" : " · período em andamento"}
+                {relatorio.periodo?.disponivel
+                  ? " · período encerrado"
+                  : " · período em andamento"}
               </span>
               <button
                 type="button"

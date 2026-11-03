@@ -43,7 +43,9 @@
   text-decoration: none;
   font-size: 14px;
   font-weight: 550;
-  transition: background 0.15s ease, color 0.15s ease;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
 }
 .navItem:hover,
 .active {
@@ -228,8 +230,14 @@
   color: #168144;
 }
 @keyframes fadeInDown {
-  from { opacity: 0; transform: translateY(-5px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* --- Botão de Notificação --- */

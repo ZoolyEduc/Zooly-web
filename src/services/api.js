@@ -1,11 +1,24 @@
 import { demoEnabled, demoResponse } from "./demo";
-
+import { clearSession } from "./session";
 const API_BASE_URL = (
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"
+  process.env.NEXT_PUBLIC_API_URL ||
+  (process.env.NODE_ENV === "production" ? "" : "http://localhost:4000")
 ).replace(/\/$/, "");
+const ERRO_API_NAO_CONFIGURADA =
+  "A URL da API não foi configurada nesta publicação (NEXT_PUBLIC_API_URL).";
+
+function encerrarSessaoExpirada(path) {
+  if (typeof window === "undefined" || path.startsWith("/api/auth/")) return;
+  const areaAdmin = window.location.pathname.startsWith("/admin");
+  clearSession();
+  window.location.replace(
+    `${areaAdmin ? "/admin/login" : "/login"}?sessao=expirada`,
+  );
+}
 
 export async function apiRequest(path, options = {}) {
   if (demoEnabled()) return demoResponse(path, options);
+  if (!API_BASE_URL) throw new Error(ERRO_API_NAO_CONFIGURADA);
   const { body, headers: customHeaders = {}, ...rest } = options;
   const headers = new Headers(customHeaders);
   const token =
@@ -53,11 +66,14 @@ export async function apiRequest(path, options = {}) {
   }
 
   if (!response.ok) {
-    if (response.status === 401 && typeof window !== "undefined") {
-      // Mantemos a mensagem visível na tela; cada página decide quando redirecionar.
-    }
+    if (response.status === 401) encerrarSessaoExpirada(path);
+    const detalhes = Array.isArray(data?.detalhes)
+      ? data.detalhes.join(" ")
+      : "";
     throw new Error(
-      data?.mensagem || `A API respondeu com erro HTTP ${response.status}.`,
+      detalhes ||
+        data?.mensagem ||
+        `A API respondeu com erro HTTP ${response.status}.`,
     );
   }
 
@@ -69,6 +85,7 @@ export async function downloadApiFile(path, fileName) {
     window.print();
     return;
   }
+  if (!API_BASE_URL) throw new Error(ERRO_API_NAO_CONFIGURADA);
   const token =
     typeof window !== "undefined"
       ? window.localStorage.getItem("zooly_token")
@@ -84,6 +101,7 @@ export async function downloadApiFile(path, fileName) {
   }
 
   if (!response.ok) {
+    if (response.status === 401) encerrarSessaoExpirada(path);
     let message = `Falha ao baixar o arquivo (HTTP ${response.status}).`;
     try {
       const data = await response.json();

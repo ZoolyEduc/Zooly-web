@@ -1,7 +1,12 @@
 import { CircleHelp } from "lucide-react";
 import styles from "./StatCard.module.css";
 
-export default function StatCard({ label, value, helper, icon: Icon = CircleHelp }) {
+export default function StatCard({
+  label,
+  value,
+  helper,
+  icon: Icon = CircleHelp,
+}) {
   return (
     <article className={styles.card}>
       <div className={styles.icon} aria-hidden="true">

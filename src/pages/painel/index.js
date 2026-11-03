@@ -1,7 +1,12 @@
 import { useEffect, useState } from "react";
 import Head from "next/head";
 import Link from "next/link";
-import { ClipboardList, GraduationCap, TrendingUp, UsersRound } from "lucide-react";
+import {
+  ClipboardList,
+  GraduationCap,
+  TrendingUp,
+  UsersRound,
+} from "lucide-react";
 import TeacherLayout from "../../components/TeacherLayout";
 import StatCard from "../../components/StatCard";
 import Notice from "../../components/Notice";
@@ -24,6 +29,7 @@ export default function Painel() {
   });
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState("");
+  const [falhaCarga, setFalhaCarga] = useState(false);
   const [nomeProfessor, setNomeProfessor] = useState("");
 
   useEffect(() => {
@@ -42,22 +48,34 @@ export default function Painel() {
           apiRequest("/api/atividades/publicadas"),
         ]);
         const turmas = turmasResponse?.turmas || [];
-        const relatorios = await Promise.all(
+        // Uma turma com falha não pode derrubar os indicadores das demais.
+        const resultados = await Promise.allSettled(
           turmas.map((turma) =>
             apiRequest(
               `/api/desempenho/turmas/${getId(turma)}/semanal?data=${dataLocalISO()}`,
             ),
           ),
         );
+        const relatorios = resultados
+          .filter((resultado) => resultado.status === "fulfilled")
+          .map((resultado) => resultado.value);
         if (ativo) {
           setDados({
             turmas,
             atividades: atividadesResponse?.atividades || [],
             relatorios,
           });
+          if (relatorios.length < turmas.length) {
+            setErro(
+              "Não foi possível carregar o desempenho de todas as turmas. Os totais podem estar incompletos.",
+            );
+          }
         }
       } catch (error) {
-        if (ativo) setErro(error.message);
+        if (ativo) {
+          setErro(error.message);
+          setFalhaCarga(true);
+        }
       } finally {
         if (ativo) setLoading(false);
       }
@@ -78,14 +96,17 @@ export default function Painel() {
   const ultimasAtividades = [...dados.atividades]
     .filter((atividade) => atividade.publicadoEm)
     .sort(
-      (a, b) => new Date(b.publicadoEm).getTime() - new Date(a.publicadoEm).getTime(),
+      (a, b) =>
+        new Date(b.publicadoEm).getTime() - new Date(a.publicadoEm).getTime(),
     );
   const totalIniciadas = dados.relatorios.reduce(
-    (total, relatorio) => total + (relatorio.indicadores?.atividadesIniciadas || 0),
+    (total, relatorio) =>
+      total + (relatorio.indicadores?.atividadesIniciadas || 0),
     0,
   );
   const totalRespostas = dados.relatorios.reduce(
-    (total, relatorio) => total + (relatorio.indicadores?.respostasRegistradas || 0),
+    (total, relatorio) =>
+      total + (relatorio.indicadores?.respostasRegistradas || 0),
     0,
   );
   const totalAcertos = dados.relatorios.reduce(
@@ -95,6 +116,7 @@ export default function Painel() {
   const percentualAcerto = totalRespostas
     ? Math.round((totalAcertos / totalRespostas) * 100)
     : null;
+  const semDados = loading || falhaCarga;
 
   return (
     <>
@@ -110,22 +132,26 @@ export default function Painel() {
         <section className={styles.stats} aria-label="Indicadores gerais">
           <StatCard
             label="TURMAS"
-            value={loading ? "—" : dados.turmas.length}
+            value={semDados ? "—" : dados.turmas.length}
             icon={UsersRound}
           />
           <StatCard
             label="ALUNOS MATRICULADOS"
-            value={loading ? "—" : alunos.length}
+            value={semDados ? "—" : alunos.length}
             icon={GraduationCap}
           />
           <StatCard
             label="ATIVIDADES PUBLICADAS"
-            value={loading ? "—" : dados.atividades.length}
+            value={semDados ? "—" : dados.atividades.length}
             icon={ClipboardList}
           />
           <StatCard
             label="ACERTO NA SEMANA"
-            value={loading ? "—" : percentualAcerto == null ? "—" : `${percentualAcerto}%`}
+            value={
+              semDados || percentualAcerto == null
+                ? "—"
+                : `${percentualAcerto}%`
+            }
             icon={TrendingUp}
           />
         </section>
@@ -133,7 +159,11 @@ export default function Painel() {
           <div className={styles.historyHead}>
             <div>
               <h2>Desempenho semanal</h2>
-              <p>{totalIniciadas} atividades iniciadas · {totalRespostas} respostas registradas</p>
+              <p>
+                {semDados
+                  ? "Indicadores indisponíveis"
+                  : `${totalIniciadas} atividades iniciadas · ${totalRespostas} respostas registradas`}
+              </p>
             </div>
             <Link href="/desempenho">Ver Relatório Completo</Link>
           </div>
@@ -141,62 +171,80 @@ export default function Painel() {
             <p className={styles.emptyState}>Carregando indicadores...</p>
           ) : alunos.length ? (
             <div className={styles.tableWrap}>
-            <table>
-              <thead>
-                <tr>
-                  <th>Aluno</th>
-                  <th>Turma</th>
-                  <th>Concluídas</th>
-                  <th>Acerto na semana</th>
-                  <th>Ações</th>
-                </tr>
-              </thead>
-              <tbody>
-                {alunos.slice(0, 5).map((item, index) => {
-                  const aluno = item.aluno || {};
-                  const percentual = item.indicadores?.percentualAcerto;
-                  return (
-                  <tr key={aluno.id || `${item.turmaNome}-${index}`}>
-                    <td>
-                      <div className={styles.student}>
-                        <span className={styles.studentAvatar}>
-                          {(aluno.nomeCompleto || "A").trim().charAt(0).toUpperCase()}
-                        </span>
-                        <strong>{aluno.nomeCompleto || "Aluno"}</strong>
-                      </div>
-                    </td>
-                    <td>{item.turmaNome}</td>
-                    <td>{item.indicadores?.atividadesConcluidas ?? 0}</td>
-                    <td>
-                      <div className={styles.score}>
-                        <span>
-                          {percentual != null ? <i style={{ width: `${percentual}%` }} /> : null}
-                        </span>
-                        <strong className={percentual != null && percentual < 50 ? styles.low : ""}>
-                          {percentual == null ? "Sem respostas" : `${percentual}%`}
-                        </strong>
-                      </div>
-                    </td>
-                    <td>
-                      <Link
-                        className={styles.more}
-                        href={`/desempenho/alunos/${aluno.id}`}
-                        aria-label={`Ver desempenho de ${aluno.nomeCompleto || "aluno"}`}
-                      >
-                        Ver
-                      </Link>
-                    </td>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Aluno</th>
+                    <th>Turma</th>
+                    <th>Concluídas</th>
+                    <th>Acerto na semana</th>
+                    <th>Ações</th>
                   </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {alunos.slice(0, 5).map((item, index) => {
+                    const aluno = item.aluno || {};
+                    const percentual = item.indicadores?.percentualAcerto;
+                    return (
+                      <tr key={aluno.id || `${item.turmaNome}-${index}`}>
+                        <td>
+                          <div className={styles.student}>
+                            <span className={styles.studentAvatar}>
+                              {(aluno.nomeCompleto || "A")
+                                .trim()
+                                .charAt(0)
+                                .toUpperCase()}
+                            </span>
+                            <strong>
+                              {aluno.nomeCompleto ||
+                                (aluno.ra ? `RA ${aluno.ra}` : "Aluno")}
+                            </strong>
+                          </div>
+                        </td>
+                        <td>{item.turmaNome}</td>
+                        <td>{item.indicadores?.atividadesConcluidas ?? 0}</td>
+                        <td>
+                          <div className={styles.score}>
+                            <span>
+                              {percentual != null ? (
+                                <i style={{ width: `${percentual}%` }} />
+                              ) : null}
+                            </span>
+                            <strong
+                              className={
+                                percentual != null && percentual < 50
+                                  ? styles.low
+                                  : ""
+                              }
+                            >
+                              {percentual == null
+                                ? "Sem respostas"
+                                : `${percentual}%`}
+                            </strong>
+                          </div>
+                        </td>
+                        <td>
+                          <Link
+                            className={styles.more}
+                            href={`/desempenho/alunos/${aluno.id}`}
+                            aria-label={`Ver desempenho de ${aluno.nomeCompleto || "aluno"}`}
+                          >
+                            Ver
+                          </Link>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
           ) : (
             <p className={styles.emptyState}>
-              {dados.turmas.length
-                ? "Ainda não há alunos nas turmas vinculadas."
-                : "Nenhuma turma vinculada foi retornada pela API."}
+              {falhaCarga
+                ? "Não foi possível carregar os indicadores."
+                : dados.turmas.length
+                  ? "Ainda não há alunos nas turmas vinculadas."
+                  : "Nenhuma turma vinculada foi retornada pela API."}
             </p>
           )}
         </section>

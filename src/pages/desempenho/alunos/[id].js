@@ -58,10 +58,15 @@ export default function DesempenhoAluno() {
         {loading ? (
           <p className={styles.loading}>Carregando desempenho...</p>
         ) : !dados ? (
-          <div className={styles.empty}>Não foi possível carregar o desempenho deste aluno.</div>
+          <div className={styles.empty}>
+            Não foi possível carregar o desempenho deste aluno.
+          </div>
         ) : (
           <>
-            <section className={styles.metrics} aria-label="Indicadores do aluno">
+            <section
+              className={styles.metrics}
+              aria-label="Indicadores do aluno"
+            >
               <article>
                 <div>
                   <small>ATIVIDADES INICIADAS</small>
@@ -94,14 +99,19 @@ export default function DesempenhoAluno() {
               {questoes.length ? (
                 <div className={styles.questionList}>
                   {questoes.map((questao) => (
-                    <article className={styles.questionItem} key={questao.questaoId}>
+                    <article
+                      className={styles.questionItem}
+                      key={questao.questaoId}
+                    >
                       <div>
-                        <strong>{questao.enunciado || "Questão sem enunciado"}</strong>
+                        <strong>
+                          {questao.enunciado || "Questão sem enunciado"}
+                        </strong>
                         <span>{questao.tituloAtividade || "Atividade"}</span>
                       </div>
                       <p>
-                        {questao.erros} {questao.erros === 1 ? "erro" : "erros"} em{" "}
-                        {questao.respostasRegistradas} respostas
+                        {questao.erros} {questao.erros === 1 ? "erro" : "erros"}{" "}
+                        em {questao.respostasRegistradas} respostas
                       </p>
                     </article>
                   ))}

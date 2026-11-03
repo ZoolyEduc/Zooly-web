@@ -75,11 +75,16 @@ export const atividadesDemo = [
     publicadoEm: agora,
     recompensaMoedas: 10,
     ordem: 1,
-    historia: { tipo: "propria", texto: "Uma aventura entre as pedras e os sons da caverna." },
-    questoes: [{
-      enunciado: "Qual palavra começa com o som indicado?",
-      alternativas: [{ texto: "Bola" }, { texto: "Vela" }],
-    }],
+    historia: {
+      tipo: "propria",
+      texto: "Uma aventura entre as pedras e os sons da caverna.",
+    },
+    questoes: [
+      {
+        enunciado: "Qual palavra começa com o som indicado?",
+        alternativas: [{ texto: "Bola" }, { texto: "Vela" }],
+      },
+    ],
     status: "publicada",
   },
   {
@@ -89,11 +94,16 @@ export const atividadesDemo = [
     publicadoEm: agora,
     recompensaMoedas: 15,
     ordem: 2,
-    historia: { tipo: "propria", texto: "Uma caça divertida pelas patas dos animais." },
-    questoes: [{
-      enunciado: "Qual palavra começa com o som indicado?",
-      alternativas: [{ texto: "Pato" }, { texto: "Bola" }],
-    }],
+    historia: {
+      tipo: "propria",
+      texto: "Uma caça divertida pelas patas dos animais.",
+    },
+    questoes: [
+      {
+        enunciado: "Qual palavra começa com o som indicado?",
+        alternativas: [{ texto: "Pato" }, { texto: "Bola" }],
+      },
+    ],
     status: "publicada",
   },
   {
@@ -103,11 +113,16 @@ export const atividadesDemo = [
     publicadoEm: agora,
     recompensaMoedas: 20,
     ordem: 3,
-    historia: { tipo: "propria", texto: "Uma leitura guiada para descobrir novas palavras." },
-    questoes: [{
-      enunciado: "Qual palavra começa com o som indicado?",
-      alternativas: [{ texto: "Vento" }, { texto: "Rato" }],
-    }],
+    historia: {
+      tipo: "propria",
+      texto: "Uma leitura guiada para descobrir novas palavras.",
+    },
+    questoes: [
+      {
+        enunciado: "Qual palavra começa com o som indicado?",
+        alternativas: [{ texto: "Vento" }, { texto: "Rato" }],
+      },
+    ],
     status: "publicada",
   },
   {
@@ -117,18 +132,31 @@ export const atividadesDemo = [
     publicadoEm: agora,
     recompensaMoedas: 10,
     ordem: 4,
-    historia: { tipo: "propria", texto: "Um passeio pelas vogais e seus sons." },
-    questoes: [{
-      enunciado: "Qual destas é uma vogal?",
-      alternativas: [{ texto: "A" }, { texto: "B" }],
-    }],
+    historia: {
+      tipo: "propria",
+      texto: "Um passeio pelas vogais e seus sons.",
+    },
+    questoes: [
+      {
+        enunciado: "Qual destas é uma vogal?",
+        alternativas: [{ texto: "A" }, { texto: "B" }],
+      },
+    ],
     status: "publicada",
   },
 ];
 
 export const historiasDemo = [
-  { _id: "demo-historia-1", titulo: "O passeio da capivara", conteudo: "A capivara passeou pela margem do rio e encontrou novos amigos." },
-  { _id: "demo-historia-2", titulo: "O papagaio curioso", conteudo: "Um papagaio curioso aprendeu a reconhecer palavras na floresta." },
+  {
+    _id: "demo-historia-1",
+    titulo: "O passeio da capivara",
+    conteudo: "A capivara passeou pela margem do rio e encontrou novos amigos.",
+  },
+  {
+    _id: "demo-historia-2",
+    titulo: "O papagaio curioso",
+    conteudo: "Um papagaio curioso aprendeu a reconhecer palavras na floresta.",
+  },
 ];
 
 export function demoEnabled() {
@@ -156,6 +184,27 @@ export function demoResponse(path, options = {}) {
   }
   if (route === "/api/professores" && method === "POST")
     return { mensagem: "Cadastro de demonstração concluído." };
+  if (route === "/api/professores/me" && method === "GET")
+    return {
+      professor: {
+        id: "demo-professor",
+        nome: "Helena Ferreira",
+        email: "helena.ferreira@zooly.edu.br",
+        escolas: [
+          {
+            id: "demo-escola",
+            nome: "Escola do Vale",
+            codigoPermanente: "ESCOLA-VALE",
+            municipio: "Sorocaba",
+            endereco: "Rua do Vale, 100",
+            email: "contato@escoladovale.example",
+            contato: "(15) 0000-0000",
+          },
+        ],
+      },
+    };
+  if (/^\/api\/turmas\/[^/]+\/senha-acesso$/.test(route) && method === "PATCH")
+    return { mensagem: "Senha de acesso configurada na demonstração." };
   if (route === "/api/turmas" && method === "GET")
     return { turmas: turmasDemo.filter((item) => !item.arquivada) };
   if (route === "/api/turmas" && method === "POST") {
@@ -288,7 +337,8 @@ export function demoResponse(path, options = {}) {
       (aluno) => aluno.turma === turmaId,
     );
     const alunos = alunosDaTurmaAtual.map((aluno, index) => {
-      const percentualAcerto = [95, 68, 32, 75][Number(aluno._id.slice(-1)) - 1] ?? null;
+      const percentualAcerto =
+        [95, 68, 32, 75][Number(aluno._id.slice(-1)) - 1] ?? null;
       const atividadesIniciadas = aluno.progresso > 0 ? 3 : 0;
       const atividadesConcluidas = Math.round(
         (aluno.progresso / 100) * atividadesIniciadas,
@@ -364,28 +414,34 @@ export function demoResponse(path, options = {}) {
     const acertos = respostasRegistradas
       ? Math.round((respostasRegistradas * percentualAcerto) / 100)
       : 0;
-    const questoesComMaisErros = respostasRegistradas && acertos < respostasRegistradas
-      ? [{
-          questaoId: `demo-questao-${aluno._id}`,
-          enunciado: "Qual palavra começa com o som indicado?",
-          tituloAtividade: "Atividade de leitura",
-          respostasRegistradas,
-          acertos,
-          erros: respostasRegistradas - acertos,
-        }]
-      : [];
+    const questoesComMaisErros =
+      respostasRegistradas && acertos < respostasRegistradas
+        ? [
+            {
+              questaoId: `demo-questao-${aluno._id}`,
+              enunciado: "Qual palavra começa com o som indicado?",
+              tituloAtividade: "Atividade de leitura",
+              respostasRegistradas,
+              acertos,
+              erros: respostasRegistradas - acertos,
+            },
+          ]
+        : [];
     return {
       turma: {
         id: aluno.turma,
-        nome: turmasDemo.find((item) => item._id === aluno.turma)?.nome || "Turma",
+        nome:
+          turmasDemo.find((item) => item._id === aluno.turma)?.nome || "Turma",
       },
       aluno: {
         id: aluno._id,
         ra:
           aluno.ra ||
-          `2026${alunosDemo
-            .filter((item) => item.turma === aluno.turma)
-            .findIndex((item) => item._id === aluno._id) + 1}`,
+          `2026${
+            alunosDemo
+              .filter((item) => item.turma === aluno.turma)
+              .findIndex((item) => item._id === aluno._id) + 1
+          }`,
         nomeCompleto: aluno.nomeCompleto,
       },
       indicadores: {

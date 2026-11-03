@@ -1,0 +1,131 @@
+.backRow {
+  margin: -8px 0 16px;
+}
+.backRow a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #526057;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 13px;
+}
+.backRow a:hover {
+  color: #18753e;
+}
+.loading {
+  padding: 28px;
+  color: #728077;
+}
+.formCard {
+  background: #fff;
+  border: 1px solid #e6ece8;
+  border-radius: 16px;
+  padding: 24px;
+  max-width: 880px;
+}
+.sectionTitle {
+  margin-bottom: 22px;
+}
+.sectionTitle h2 {
+  font-size: 17px;
+  margin: 0 0 5px;
+}
+.sectionTitle p {
+  font-size: 13px;
+  color: #758179;
+  margin: 0;
+}
+.fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+.fields label {
+  display: grid;
+  gap: 7px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #536158;
+}
+.fields input,
+.fields select {
+  width: 100%;
+  height: 44px;
+  border: 1px solid #dfe7e1;
+  border-radius: 10px;
+  padding: 0 12px;
+  background: #fff;
+  color: #303b34;
+  outline: none;
+}
+.fields input:focus,
+.fields select:focus {
+  border-color: #5ca574;
+  box-shadow: 0 0 0 3px #18753e18;
+}
+.fields small {
+  font-weight: 400;
+  color: #7b877f;
+}
+.full {
+  grid-column: 1/-1;
+}
+.hint {
+  color: #936c16;
+  background: #fff9e9;
+  border: 1px solid #f3e1ac;
+  padding: 12px;
+  border-radius: 10px;
+  font-size: 12px;
+}
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+  border-top: 1px solid #edf0ee;
+  padding-top: 20px;
+  margin-top: 24px;
+}
+.cancel {
+  color: #657168;
+  text-decoration: none;
+  padding: 10px 13px;
+  font-weight: 600;
+}
+.actions button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: #18753e;
+  color: white;
+  border: 0;
+  border-radius: 10px;
+  padding: 11px 15px;
+  font-weight: 700;
+}
+.actions button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+@media (max-width: 620px) {
+  .formCard {
+    padding: 18px;
+  }
+  .fields {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+  .full {
+    grid-column: auto;
+  }
+  .actions {
+    justify-content: stretch;
+  }
+  .actions > * {
+    flex: 1;
+    text-align: center;
+  }
+}

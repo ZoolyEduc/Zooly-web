@@ -35,7 +35,7 @@ export default function TeacherLayout({ title, subtitle, children }) {
   const [mostrarSaida, setMostrarSaida] = useState(false);
   const [menuMobile, setMenuMobile] = useState(false);
   const [notificacoesAbertas, setNotificacoesAbertas] = useState(false);
-  
+
   // NOVO: Estado para o menu do perfil
   const [menuPerfilAberto, setMenuPerfilAberto] = useState(false);
 
@@ -94,7 +94,10 @@ export default function TeacherLayout({ title, subtitle, children }) {
   // NOVO: Fechar o menu do perfil ao clicar fora dele
   useEffect(() => {
     function fecharMenu(event) {
-      if (menuPerfilAberto && !event.target.closest(`.${styles.profileMenuWrap}`)) {
+      if (
+        menuPerfilAberto &&
+        !event.target.closest(`.${styles.profileMenuWrap}`)
+      ) {
         setMenuPerfilAberto(false);
       }
     }
@@ -146,7 +149,11 @@ export default function TeacherLayout({ title, subtitle, children }) {
                   key={item.href}
                   className={`${styles.navItem} ${active ? styles.active : ""}`}
                 >
-                  <item.icon className={styles.navSymbol} size={18} aria-hidden="true" />
+                  <item.icon
+                    className={styles.navSymbol}
+                    size={18}
+                    aria-hidden="true"
+                  />
                   <span>{item.label}</span>
                 </Link>
               );
@@ -159,7 +166,11 @@ export default function TeacherLayout({ title, subtitle, children }) {
               router.pathname === "/configuracoes" ? styles.active : ""
             }`}
           >
-            <Settings className={styles.navSymbol} size={18} aria-hidden="true" />
+            <Settings
+              className={styles.navSymbol}
+              size={18}
+              aria-hidden="true"
+            />
             <span>Configurações</span>
           </Link>
           <button
@@ -189,7 +200,7 @@ export default function TeacherLayout({ title, subtitle, children }) {
               </span>
             ) : null}
           </form>
-          
+
           <div className={styles.profile}>
             <div className={styles.notificationWrap}>
               <button
@@ -208,13 +219,13 @@ export default function TeacherLayout({ title, subtitle, children }) {
                 </div>
               ) : null}
             </div>
-            
+
             <span className={styles.profileDivider} />
-            
+
             {/* NOVO: Menu do Perfil */}
             <div className={styles.profileMenuWrap}>
-              <button 
-                type="button" 
+              <button
+                type="button"
                 className={styles.profileButton}
                 onClick={() => setMenuPerfilAberto(!menuPerfilAberto)}
                 aria-expanded={menuPerfilAberto}
@@ -230,17 +241,17 @@ export default function TeacherLayout({ title, subtitle, children }) {
 
               {menuPerfilAberto ? (
                 <div className={styles.profileDropdown}>
-                  <Link 
-                    href="/configuracoes" 
+                  <Link
+                    href="/configuracoes"
                     className={styles.dropdownItem}
                     onClick={() => setMenuPerfilAberto(false)}
                   >
                     <Settings size={16} aria-hidden="true" />
                     Minhas Configurações
                   </Link>
-                  <button 
-                    type="button" 
-                    className={styles.dropdownItem} 
+                  <button
+                    type="button"
+                    className={styles.dropdownItem}
                     onClick={() => {
                       setMenuPerfilAberto(false);
                       setMostrarSaida(true);
@@ -254,7 +265,7 @@ export default function TeacherLayout({ title, subtitle, children }) {
             </div>
           </div>
         </header>
-        
+
         <main className={styles.content}>
           {title || subtitle ? (
             <div className={styles.pageHeading}>
