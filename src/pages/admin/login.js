@@ -6,7 +6,6 @@ import Logo from "../../components/Logo";
 import Notice from "../../components/Notice";
 import { apiRequest } from "../../services/api";
 import { clearSession, getSession, saveSession } from "../../services/session";
-import { demoEnabled } from "../../services/demo";
 import styles from "../../styles/auth.module.css";
 
 export default function AdminLogin() {
@@ -91,12 +90,6 @@ export default function AdminLogin() {
               </button>
             </div>
           ) : null}
-          {demoEnabled() ? (
-            <Notice kind="error">
-              O modo de demonstração não possui conta administrativa. Desative o
-              modo demo para autenticar pela API real.
-            </Notice>
-          ) : null}
           {erro ? (
             <div className={styles.error} role="alert">
               {erro}
@@ -128,11 +121,7 @@ export default function AdminLogin() {
             <button
               className={styles.primary}
               type="submit"
-              disabled={
-                loading ||
-                demoEnabled() ||
-                session?.usuario?.tipo === "professor"
-              }
+              disabled={loading || session?.usuario?.tipo === "professor"}
             >
               {loading ? "Verificando..." : "Entrar no painel"}
             </button>

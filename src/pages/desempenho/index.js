@@ -4,7 +4,7 @@ import Link from "next/link";
 import TeacherLayout from "../../components/TeacherLayout";
 import Notice from "../../components/Notice";
 import { apiRequest, downloadApiFile } from "../../services/api";
-import { getId, formatDate } from "../../services/session";
+import { getId, formatDate } from "../../utils/formatacao";
 import styles from "./desempenho.module.css";
 
 function dataLocalISO() {

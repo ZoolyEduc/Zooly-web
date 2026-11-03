@@ -51,8 +51,9 @@ Use o arquivo `.env.local.example` como modelo. Se o `.env.local` ainda não exi
 
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:4000
-NEXT_PUBLIC_MODO_DEMO=false
 ```
+
+Essa é a única variável do painel. As antigas `NEXT_PUBLIC_MODO_DEMO` e `NEXT_PUBLIC_AMBIENTE` foram removidas junto com o modo de demonstração e não têm mais efeito.
 
 **Importante:** o arquivo `.env.local` é local e não deve ser enviado ao GitHub. O arquivo `.env.local.example` pode ser versionado para documentar as configurações necessárias.
 
@@ -66,40 +67,39 @@ Abra [http://localhost:3000](http://localhost:3000) no navegador.
 
 Se a porta 3000 já estiver ocupada por outro processo, o Next.js poderá iniciar em outra porta disponível, como a 3001. Utilize o endereço informado no terminal.
 
-## Modo de demonstração
+## Somente dados reais
 
-O projeto possui um modo de demonstração para permitir o desenvolvimento e a validação visual das telas sem depender da integração real com o backend.
+O painel trabalha **exclusivamente com a Zooly API**. O antigo modo de demonstração foi removido, e com ele os dados fictícios no navegador, a professora fictícia, a faixa "Ambiente de demonstração" e o comando `dev:demo`. A API também recusa a configuração do antigo ambiente de demonstração.
 
-Para ativá-lo, configure a variável:
+Se a API estiver indisponível ou responder com erro, as telas mostram a mensagem do problema (com "Tentar novamente" onde faz sentido) e **nunca** substituem os dados por informações fictícias. Uma resposta `401` (sessão expirada) encerra a sessão e volta ao login.
 
-```env
-NEXT_PUBLIC_MODO_DEMO=true
-```
+## Banco de Histórias
 
-Nesse modo, a aplicação utiliza dados fictícios para demonstrar funcionalidades como turmas, alunos, atividades e desempenho.
+Em **Histórias** (`/historias`), o professor encontra:
 
-Para utilizar a autenticação e a API reais durante o desenvolvimento, configure:
+- as **seis histórias iniciais do Zooly** (adaptações infantis inspiradas no folclore e na cultura do Vale do Ribeira, com 5 perguntas cada). Elas são só para consulta e uso: não há ações de edição ou exclusão;
+- as **histórias próprias**, que só o autor vê. Ele pode cadastrar, editar, arquivar, reativar e excluir (com confirmação).
 
-```env
-NEXT_PUBLIC_MODO_DEMO=false
-```
+A tela tem busca por título, tema ou objetivo e filtros por tema, idade, origem (Zooly ou minhas) e situação (ativas ou arquivadas). O detalhe mostra o texto, as perguntas com a alternativa correta destacada, o feedback e o objetivo pedagógico de cada pergunta.
 
-Após alterar as variáveis de ambiente, reinicie o servidor de desenvolvimento.
+No cadastro, o formulário tem:
+- dados da história, faixa etária e objetivos;
+- perguntas com 2 a 6 alternativas, a correta, o feedback e o objetivo;
+- **pré-visualização** antes de salvar.
 
-O modo de demonstração é destinado ao desenvolvimento local e é desligado automaticamente em builds de produção.
+Antes de gravar, o conteúdo é conferido por `POST /api/historias/validar`, e os erros aparecem ao lado de cada campo.
 
-## Ambiente de demonstração com API
+### Criar uma atividade a partir de uma história
 
-Diferente do modo acima, que simula tudo no navegador, este ambiente usa a API e um banco separado (`zooly_demo`), para apresentações:
+1. Em **Histórias**, clique em **Usar em atividade**. Também é possível, em **Nova Atividade**, escolher **Usar o Banco de Histórias**, selecionar a história e clicar em **Carregar história e perguntas**. Se já houver conteúdo digitado, o painel pede confirmação antes de substituir.
+2. O painel chama `GET /api/historias/:id/modelo-atividade` e preenche o título, o texto, as perguntas, as alternativas e a resposta correta. O feedback e os objetivos aparecem ao lado de cada questão, como **apoio pedagógico só para o professor**.
+3. Tudo continua editável: título, texto, perguntas, alternativas, resposta correta, perguntas novas ou removidas, prazo, missão, BNCC e recompensa.
+4. **Salvar Atividade** envia `POST /api/atividades` no contrato da API: `historia: { tipo: "propria", texto, bancoHistoriaId }` e as questões com `respostasCorretas`. Feedback e objetivo **não** são enviados, porque não fazem parte do contrato da atividade e o aluno nunca os recebe.
+5. **Publicar atividade**, como antes.
 
-```bash
-cp .env.demo.example .env.demo
-npm run dev:demo
-```
+A atividade guarda uma **cópia** do texto e das perguntas. Editar ou excluir a história depois não muda a atividade. Ao reabrir uma atividade criada do banco, o painel busca de novo o feedback das perguntas que continuam iguais às da história de origem.
 
-O site aponta para a API de demonstração (porta 4001) e exibe a faixa "Ambiente de demonstração". O `.env.local` não é alterado. A faixa só aparece com `NEXT_PUBLIC_AMBIENTE=demonstracao`, que não deve ser definida em produção.
-
-A preparação completa, incluindo a API, está em `docs/publicacao.md`, no repositório Zooly-api.
+Atividades antigas que usam a história "por referência" mostram a cópia salva (o que os alunos leem). O botão **Editar o texto nesta atividade** transforma essa cópia em texto editável.
 
 ## Páginas da aplicação
 
@@ -116,6 +116,9 @@ As páginas são organizadas utilizando o **Pages Router** do Next.js.
 | `/atividades` | Listagem de atividades |
 | `/atividades/nova` | Criação e edição de atividades |
 | `/atividades/[id]` | Detalhes de uma atividade |
+| `/historias` | Banco de Histórias: busca, filtros e ações |
+| `/historias/[id]` | Texto, perguntas, feedback e dados pedagógicos de uma história |
+| `/historias/nova` | Cadastro (e, com `?id=`, edição) de história própria |
 | `/desempenho` | Relatório semanal por turma |
 | `/desempenho/alunos/[id]` | Desempenho individual |
 | `/configuracoes` | Configurações do perfil |
@@ -126,23 +129,25 @@ As páginas são organizadas utilizando o **Pages Router** do Next.js.
 | `/admin/professores/novo` | Cadastro de professor |
 | `/admin/professores/[id]` | Edição de professor |
 
-As telas usam dados fictícios apenas no modo de demonstração.
+Todas as telas usam somente dados da API.
 
 ## Estrutura de pastas
 
 ```text
 Zooly-web/
-├── design-reference/       # Referências visuais do Figma
 ├── public/
 │   └── img/                # Logo e mascotes
 ├── src/
-│   ├── components/         # Componentes reutilizáveis
+│   ├── components/         # Componentes reutilizáveis (layout, Notice, ConfirmDialog, HistoriaPreview...)
 │   ├── pages/              # Páginas e rotas
-│   ├── services/           # Serviços e dados de demonstração
-│   └── styles/             # Estilos globais e compartilhados
-├── scripts/                # Inicialização do ambiente de demonstração
+│   ├── services/           # api.js, session.js e historiasApi.js
+│   ├── styles/             # Estilos globais e compartilhados
+│   └── utils/              # formatacao.js e regras puras do Banco de Histórias (historias.js)
+├── tests/
+│   ├── unit/               # Testes unitários (node:test)
+│   └── e2e/                # Testes de ponta a ponta (Playwright + API real)
+├── playwright.config.mjs
 ├── .env.local.example      # Modelo das variáveis de ambiente
-├── .env.demo.example       # Modelo do ambiente de demonstração
 ├── .gitignore
 ├── package.json
 └── README.md
@@ -152,10 +157,10 @@ Zooly-web/
 
 - `src/pages/`: contém as páginas e define as rotas da aplicação.
 - `src/components/`: reúne componentes reutilizáveis, como menu, layout e cartões.
-- `src/services/`: centraliza serviços da aplicação e recursos utilizados no modo de demonstração.
+- `src/services/`: centraliza a comunicação com a API (token, sessão expirada e erros) e a sessão.
 - `src/styles/`: contém estilos globais e estilos compartilhados.
+- `src/utils/`: funções puras, sem chamadas à API: formatação de datas e IDs (`formatacao.js`) e regras do Banco de Histórias (`historias.js`).
 - `public/img/`: armazena imagens utilizadas na interface.
-- `design-reference/`: contém capturas de tela de referência do Figma para orientar o desenvolvimento visual.
 
 Os estilos específicos das páginas e dos componentes são organizados por meio de CSS Modules.
 
@@ -167,31 +172,37 @@ O front-end se comunica com a API por requisições HTTP. Todas as permissões s
 
 A variável `NEXT_PUBLIC_API_URL` define a URL da API. Em desenvolvimento, o padrão é `http://localhost:4000`; em produção ela é obrigatória. Sessão expirada encerra o acesso e leva de volta ao login.
 
-Variáveis e ordem de publicação: `docs/publicacao.md`, no repositório Zooly-api.
+Endpoints do Banco de Histórias usados pelo painel (todos com o token do professor; a autorização definitiva é da API): `GET /api/historias`, `GET /api/historias/:id`, `GET /api/historias/:id/perguntas`, `GET /api/historias/:id/modelo-atividade`, `POST /api/historias/validar`, `POST /api/historias`, `PUT /api/historias/:id`, `PATCH /api/historias/:id/arquivar`, `PATCH /api/historias/:id/reativar` e `DELETE /api/historias/:id`. Os contratos estão em `docs/historias.md`, no repositório Zooly-api.
 
 ## Verificações do projeto
 
-Para executar a análise de código:
-
 ```bash
-npm run lint
-```
-
-Para gerar a versão de produção:
-
-```bash
-npm run build
+npm run lint       # análise de código
+npm run build      # versão de produção
+npm test           # testes unitários (sem rede)
+npm run test:e2e   # testes de ponta a ponta (ver abaixo)
 ```
 
 Execute essas verificações após realizar alterações no projeto e corrija os erros encontrados antes de considerar a tarefa concluída.
+
+### Testes de ponta a ponta
+
+`tests/e2e` usa [Playwright](https://playwright.dev) contra a **Zooly API de verdade**: o código do repositório Zooly-api, sem alterações, servido localmente sobre um **MongoDB em memória** com dados de teste próprios e as 6 histórias iniciais do seed da API. Nenhum banco real é usado.
+
+**Preparar (uma vez):**
+1. Clone o Zooly-api ao lado deste repositório (`../Zooly-api`) e rode `npm install` nele. Para outro local, defina `ZOOLY_API_DIR`.
+2. Neste repositório: `npm install` e `npx playwright install chromium`.
+3. Na primeira execução, o `mongodb-memory-server` baixa o binário do MongoDB (cerca de 100 MB, fica em cache).
+
+O `npm run test:e2e` sobe a API de teste na porta **4200** e o painel (`next dev`) na **3200**. As duas precisam estar livres; `E2E_PORTA_API` e `E2E_PORTA_WEB` trocam as portas. O painel é iniciado de propósito com as variáveis do antigo modo demo, para provar que elas são ignoradas. Para ver o relatório da última execução: `npm run test:e2e:relatorio`.
 
 ## Desenvolvimento em equipe
 
 O desenvolvimento é realizado de forma colaborativa, utilizando GitHub para versionamento, organização das tarefas e acompanhamento das alterações.
 
-As referências do Figma disponíveis em `design-reference/` devem ser utilizadas para manter a consistência visual entre as páginas.
+As referências visuais do Figma devem ser utilizadas para manter a consistência visual entre as páginas.
 
-As alterações devem preservar a estrutura existente, os componentes reutilizáveis, o modo de demonstração e a separação entre o front-end e o backend.
+As alterações devem preservar a estrutura existente, os componentes reutilizáveis e a separação entre o front-end e o backend.
 
 ## Repositórios
 

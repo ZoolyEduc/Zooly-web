@@ -8,6 +8,8 @@ import {
   CheckCircle2,
   Clock3,
   FileText,
+  Library,
+  Lightbulb,
   Pencil,
   Plus,
   ShieldAlert,
@@ -18,8 +20,18 @@ import {
 } from "lucide-react";
 import TeacherLayout from "../../components/TeacherLayout";
 import Notice from "../../components/Notice";
-import { apiRequest, makeObjectId } from "../../services/api";
-import { getId } from "../../services/session";
+import ConfirmDialog from "../../components/ConfirmDialog";
+import { apiRequest } from "../../services/api";
+import { historiasApi } from "../../services/historiasApi";
+import {
+  anexarApoio,
+  montarCorpoAtividade,
+  novoId,
+  preservarApoio,
+  questaoPreenchida,
+  questoesDoModelo,
+} from "../../utils/historias";
+import { getId } from "../../utils/formatacao";
 import styles from "./atividades.module.css";
 
 const etapasMissao = [
@@ -30,34 +42,31 @@ const etapasMissao = [
   { id: "responder_perguntas", label: "Responder perguntas", icon: FileText },
 ];
 
+// Numa atividade já salva, alternativas novas vão sem _id: o PUT da API só aceita ids da atividade.
+function novaAlternativa(atividadeExistente) {
+  const key = novoId();
+  return { key, ...(!atividadeExistente ? { _id: key } : {}), texto: "" };
+}
+
 function novaQuestao(atividadeExistente = false) {
-  const alternativaA = makeObjectId();
-  const alternativaB = makeObjectId();
+  const alternativas = [
+    novaAlternativa(atividadeExistente),
+    novaAlternativa(atividadeExistente),
+  ];
   return {
-    key: makeObjectId(),
+    key: novoId(),
     tipo: "multipla_escolha",
     enunciado: "",
     pontos: 0,
-    alternativas: [
-      {
-        key: alternativaA,
-        ...(!atividadeExistente ? { _id: alternativaA } : {}),
-        texto: "",
-      },
-      {
-        key: alternativaB,
-        ...(!atividadeExistente ? { _id: alternativaB } : {}),
-        texto: "",
-      },
-    ],
-    respostaCorreta: alternativaA,
+    alternativas,
+    respostaCorreta: alternativas[0].key,
   };
 }
 
 function mapearQuestao(questao) {
   const alternativas = (questao.alternativas || []).map((alternativa) => ({
     ...(alternativa._id ? { _id: String(alternativa._id) } : {}),
-    key: alternativa._id ? String(alternativa._id) : makeObjectId(),
+    key: alternativa._id ? String(alternativa._id) : novoId(),
     texto: alternativa.texto || "",
   }));
   const resposta = questao.respostasCorretas?.[0];
@@ -68,12 +77,50 @@ function mapearQuestao(questao) {
           ?.key;
   return {
     ...(questao._id ? { _id: String(questao._id) } : {}),
-    key: questao._id ? String(questao._id) : makeObjectId(),
+    key: questao._id ? String(questao._id) : novoId(),
     tipo: questao.tipo || "multipla_escolha",
     enunciado: questao.enunciado || "",
     pontos: Number.isSafeInteger(questao.pontos) ? questao.pontos : 0,
     alternativas,
     respostaCorreta: respostaCorreta || alternativas[0]?.key || "",
+  };
+}
+
+/**
+ * Busca o conteúdo pronto de uma história do banco (GET /api/historias/:id/modelo-atividade)
+ * já no formato do formulário. Numa atividade já salva, as alternativas novas vão sem _id,
+ * porque o PUT da API só aceita ids que já pertencem à atividade.
+ */
+async function conteudoDoBanco(historiaId, atividadeExistente) {
+  const resposta = await historiasApi.modeloAtividade(historiaId);
+  const { modelo, apoioPedagogico } = resposta ?? {};
+  let questoes = questoesDoModelo(modelo, apoioPedagogico);
+  if (atividadeExistente) {
+    questoes = questoes.map((questao) => ({
+      ...questao,
+      alternativas: questao.alternativas.map(({ key, texto }) => ({
+        key,
+        texto,
+      })),
+    }));
+  }
+  return {
+    titulo: modelo?.titulo ?? "",
+    texto: modelo?.historia?.texto ?? "",
+    bancoHistoriaId: String(modelo?.historia?.bancoHistoriaId ?? historiaId),
+    questoes,
+    apoio: apoioPedagogico ?? null,
+  };
+}
+
+// Campos do formulário preenchidos com uma história do banco (cópia editável).
+function camposDoBanco(conteudo) {
+  return {
+    titulo: conteudo.titulo,
+    historiaTipo: "propria",
+    historiaId: "",
+    textoHistoria: conteudo.texto,
+    bancoHistoriaId: conteudo.bancoHistoriaId,
   };
 }
 
@@ -96,9 +143,16 @@ export default function NovaAtividade() {
     historiaTipo: "propria",
     historiaId: "",
     textoHistoria: "",
+    bancoHistoriaId: "",
     recompensaMoedas: "10",
     prazo: "",
   });
+  // "escrever": texto próprio; "banco": conteúdo copiado do Banco de Histórias.
+  const [origemHistoria, setOrigemHistoria] = useState("escrever");
+  const [historiaEscolhida, setHistoriaEscolhida] = useState("");
+  const [apoioHistoria, setApoioHistoria] = useState(null);
+  const [carregandoModelo, setCarregandoModelo] = useState(false);
+  const [substituirPor, setSubstituirPor] = useState("");
   const [questoes, setQuestoes] = useState(() => [novaQuestao()]);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState("");
@@ -130,45 +184,86 @@ export default function NovaAtividade() {
       atividadeId
         ? apiRequest(`/api/atividades/${encodeURIComponent(atividadeId)}`)
         : Promise.resolve(null),
+      !atividadeId && historiaInicial
+        ? conteudoDoBanco(historiaInicial, false)
+        : Promise.resolve(null),
     ])
-      .then(([turmasResponse, historiasResponse, atividadeResponse]) => {
-        if (!ativo) return;
-        const listaTurmas = turmasResponse?.turmas || [];
-        const atividade = atividadeResponse?.atividade;
-        setTurmas(listaTurmas);
-        setHistorias(historiasResponse?.historias || []);
-        if (atividade) {
-          const historia = atividade.historia || {};
-          const turmaId =
-            typeof atividade.turma === "object"
-              ? getId(atividade.turma)
-              : atividade.turma;
-          setRascunho(atividade);
-          setForm({
-            turma: turmaId || "",
-            titulo: atividade.titulo || "",
-            historiaTipo: historia.tipo || "propria",
-            historiaId: historia.historiaId ? String(historia.historiaId) : "",
-            textoHistoria: historia.texto || "",
-            recompensaMoedas:
-              atividade.recompensaMoedas == null
-                ? ""
-                : String(atividade.recompensaMoedas),
-            prazo: atividade.prazo ? valorDataLocal(atividade.prazo) : "",
-          });
-          setQuestoes((atividade.questoes || []).map(mapearQuestao));
-          setEtapasSelecionadas(atividade.missao?.etapas || []);
-          setSelecionadasBncc(atividade.habilidadesBncc || []);
-        } else {
-          setForm((atual) => ({
-            ...atual,
-            turma: atual.turma || (listaTurmas[0] ? getId(listaTurmas[0]) : ""),
-            ...(historiaInicial
-              ? { historiaTipo: "oficial", historiaId: historiaInicial }
-              : {}),
-          }));
-        }
-      })
+      .then(
+        async ([
+          turmasResponse,
+          historiasResponse,
+          atividadeResponse,
+          conteudoInicial,
+        ]) => {
+          if (!ativo) return;
+          const listaTurmas = turmasResponse?.turmas || [];
+          const atividade = atividadeResponse?.atividade;
+          setTurmas(listaTurmas);
+          setHistorias(historiasResponse?.historias || []);
+          if (atividade) {
+            const historia = atividade.historia || {};
+            const turmaId =
+              typeof atividade.turma === "object"
+                ? getId(atividade.turma)
+                : atividade.turma;
+            const origemBanco = historia.bancoHistoriaId
+              ? String(historia.bancoHistoriaId)
+              : historia.tipo === "oficial" && historia.historiaId
+                ? String(historia.historiaId)
+                : "";
+            setRascunho(atividade);
+            setForm({
+              turma: turmaId || "",
+              titulo: atividade.titulo || "",
+              historiaTipo: historia.tipo || "propria",
+              historiaId: historia.historiaId
+                ? String(historia.historiaId)
+                : "",
+              textoHistoria: historia.texto || historia.textoCopia || "",
+              bancoHistoriaId: historia.bancoHistoriaId
+                ? String(historia.bancoHistoriaId)
+                : "",
+              recompensaMoedas:
+                atividade.recompensaMoedas == null
+                  ? ""
+                  : String(atividade.recompensaMoedas),
+              prazo: atividade.prazo ? valorDataLocal(atividade.prazo) : "",
+            });
+            const questoesAtividade = (atividade.questoes || []).map(
+              mapearQuestao,
+            );
+            setQuestoes(questoesAtividade);
+            setEtapasSelecionadas(atividade.missao?.etapas || []);
+            setSelecionadasBncc(atividade.habilidadesBncc || []);
+            if (origemBanco) {
+              setOrigemHistoria("banco");
+              setHistoriaEscolhida(origemBanco);
+              // Feedback e objetivos não ficam na atividade: vêm da história de origem,
+              // se ela ainda existir. Sem ela, a atividade continua igual.
+              try {
+                const { perguntas } = await historiasApi.perguntas(origemBanco);
+                if (ativo)
+                  setQuestoes((atuais) => anexarApoio(atuais, perguntas));
+              } catch {
+                // História excluída ou indisponível: nada a anexar.
+              }
+            }
+          } else {
+            setForm((atual) => ({
+              ...atual,
+              turma:
+                atual.turma || (listaTurmas[0] ? getId(listaTurmas[0]) : ""),
+              ...(conteudoInicial ? camposDoBanco(conteudoInicial) : {}),
+            }));
+            if (conteudoInicial) {
+              setOrigemHistoria("banco");
+              setHistoriaEscolhida(conteudoInicial.bancoHistoriaId);
+              setQuestoes(conteudoInicial.questoes);
+              setApoioHistoria(conteudoInicial.apoio);
+            }
+          }
+        },
+      )
       .catch((error) => {
         if (ativo) setErro(error.message);
       })
@@ -180,106 +275,125 @@ export default function NovaAtividade() {
     };
   }, [router.isReady, router.query.historiaId, router.query.id]);
 
-  function updateQuestion(index, changes) {
-    setQuestoes((current) =>
-      current.map((question, i) =>
-        i === index ? { ...question, ...changes } : question,
-      ),
+  // Aplica `alterar` só na questão da posição `index`.
+  function alterarQuestao(index, alterar) {
+    setQuestoes((atuais) =>
+      atuais.map((questao, i) => (i === index ? alterar(questao) : questao)),
     );
   }
-  function updateAlternative(questionIndex, alternativeKey, texto) {
-    setQuestoes((current) =>
-      current.map((question, i) =>
-        i !== questionIndex
-          ? question
-          : {
-              ...question,
-              alternativas: question.alternativas.map((alt) =>
-                alt.key === alternativeKey ? { ...alt, texto } : alt,
-              ),
-            },
-      ),
-    );
+  function mudarQuestao(index, mudancas) {
+    alterarQuestao(index, (questao) => ({ ...questao, ...mudancas }));
   }
-  function addAlternative(index) {
-    const key = makeObjectId();
-    setQuestoes((current) =>
-      current.map((q, i) =>
-        i === index
-          ? {
-              ...q,
-              alternativas: [
-                ...q.alternativas,
-                {
-                  key,
-                  ...(!rascunho ? { _id: key } : {}),
-                  texto: "",
-                },
-              ],
-            }
-          : q,
+  function alterarAlternativa(index, chave, texto) {
+    alterarQuestao(index, (questao) => ({
+      ...questao,
+      alternativas: questao.alternativas.map((alt) =>
+        alt.key === chave ? { ...alt, texto } : alt,
       ),
-    );
+    }));
   }
-  function removeAlternative(index, alternativeKey) {
-    setQuestoes((current) =>
-      current.map((q, i) => {
-        if (i !== index || q.alternativas.length <= 2) return q;
-        const alternativas = q.alternativas.filter(
-          (a) => a.key !== alternativeKey,
-        );
-        return {
-          ...q,
-          alternativas,
-          respostaCorreta:
-            q.respostaCorreta === alternativeKey
-              ? alternativas[0].key
-              : q.respostaCorreta,
-        };
-      }),
-    );
+  function adicionarAlternativa(index) {
+    const alternativa = novaAlternativa(Boolean(rascunho));
+    alterarQuestao(index, (questao) => ({
+      ...questao,
+      alternativas: [...questao.alternativas, alternativa],
+    }));
+  }
+  function removerAlternativa(index, chave) {
+    alterarQuestao(index, (questao) => {
+      if (questao.alternativas.length <= 2) return questao;
+      const alternativas = questao.alternativas.filter((a) => a.key !== chave);
+      return {
+        ...questao,
+        alternativas,
+        respostaCorreta:
+          questao.respostaCorreta === chave
+            ? alternativas[0].key
+            : questao.respostaCorreta,
+      };
+    });
+  }
+
+  async function carregarModelo(historiaId) {
+    setSubstituirPor("");
+    setErro("");
+    setSucesso("");
+    setCarregandoModelo(true);
+    try {
+      const conteudo = await conteudoDoBanco(historiaId, Boolean(rascunho));
+      setForm((atual) => ({ ...atual, ...camposDoBanco(conteudo) }));
+      setQuestoes(conteudo.questoes);
+      setApoioHistoria(conteudo.apoio);
+      setOrigemHistoria("banco");
+      setSucesso(
+        "História e perguntas carregadas. Tudo pode ser editado antes de salvar: a atividade guarda uma cópia própria.",
+      );
+    } catch (error) {
+      setErro(error.message);
+    } finally {
+      setCarregandoModelo(false);
+    }
+  }
+
+  // Confirma antes de trocar um conteúdo que o professor já digitou.
+  function pedirModelo(historiaId) {
+    if (!historiaId) return;
+    const temConteudo =
+      form.titulo.trim() ||
+      form.textoHistoria.trim() ||
+      questoes.some(questaoPreenchida);
+    if (temConteudo) setSubstituirPor(historiaId);
+    else carregarModelo(historiaId);
+  }
+
+  function escolherOrigem(origem) {
+    setOrigemHistoria(origem);
+    if (origem === "escrever") {
+      // Texto próprio: mantém o que já foi digitado, mas deixa de apontar para o banco.
+      setForm((atual) => ({
+        ...atual,
+        historiaTipo: "propria",
+        historiaId: "",
+        bancoHistoriaId: "",
+      }));
+      setApoioHistoria(null);
+    }
+  }
+
+  // Atividade antiga que usa a história por referência: passa a ter o texto editável.
+  function editarTextoDaReferencia() {
+    setForm((atual) => ({
+      ...atual,
+      historiaTipo: "propria",
+      bancoHistoriaId: atual.historiaId,
+      historiaId: "",
+    }));
   }
 
   async function salvar(event) {
     event?.preventDefault();
     setErro("");
     setSucesso("");
+    if (
+      origemHistoria === "banco" &&
+      form.historiaTipo !== "oficial" &&
+      !form.bancoHistoriaId
+    ) {
+      setErro(
+        "Escolha uma história do banco e clique em “Carregar história e perguntas”, ou escreva uma história própria.",
+      );
+      return null;
+    }
     setSalvando(true);
     try {
       const atividadeId = getId(rascunho);
-      const historia =
-        form.historiaTipo === "oficial"
-          ? { tipo: "oficial", historiaId: form.historiaId }
-          : { tipo: "propria", texto: form.textoHistoria.trim() };
-      const body = {
-        // A turma é definida na criação; o PUT da API rejeita esse campo.
-        ...(atividadeId ? {} : { turma: form.turma }),
-        titulo: form.titulo.trim(),
-        recompensaMoedas: Number(form.recompensaMoedas),
-        historia,
-        missao: { etapas: etapasSelecionadas },
-        habilidadesBncc: selecionadasBncc.map(({ codigo, texto, etapa }) => ({
-          codigo,
-          texto,
-          etapa,
-        })),
-        questoes: questoes.map((q) => ({
-          ...(atividadeId && q._id ? { _id: q._id } : {}),
-          tipo: q.tipo,
-          enunciado: q.enunciado.trim(),
-          pontos: Number(q.pontos),
-          alternativas: q.alternativas.map((a) => ({
-            ...(a._id ? { _id: a._id } : {}),
-            texto: a.texto.trim(),
-          })),
-          respostasCorretas: atividadeId
-            ? [q.alternativas.findIndex((a) => a.key === q.respostaCorreta)]
-            : [q.alternativas.find((a) => a.key === q.respostaCorreta)?._id],
-        })),
-        prazo: form.prazo
-          ? new Date(`${form.prazo}T23:59:00`).toISOString()
-          : null,
-      };
+      const body = montarCorpoAtividade({
+        form,
+        questoes,
+        etapas: etapasSelecionadas,
+        habilidades: selecionadasBncc,
+        atividadeId,
+      });
       const resposta = await apiRequest(
         atividadeId
           ? `/api/atividades/${encodeURIComponent(atividadeId)}`
@@ -292,7 +406,13 @@ export default function NovaAtividade() {
       const atividadeSalva = resposta?.atividade || null;
       setRascunho(atividadeSalva);
       if (atividadeSalva) {
-        setQuestoes((atividadeSalva.questoes || []).map(mapearQuestao));
+        // O apoio pedagógico (feedback e objetivo) não é salvo na atividade: só na tela.
+        setQuestoes((anteriores) =>
+          preservarApoio(
+            anteriores,
+            (atividadeSalva.questoes || []).map(mapearQuestao),
+          ),
+        );
       }
       setSucesso(
         atividadeId
@@ -483,31 +603,84 @@ export default function NovaAtividade() {
                 <label>
                   <input
                     type="radio"
-                    name="historiaTipo"
-                    checked={form.historiaTipo === "propria"}
-                    onChange={() =>
-                      setForm({ ...form, historiaTipo: "propria" })
-                    }
+                    name="origemHistoria"
+                    checked={origemHistoria === "escrever"}
+                    onChange={() => escolherOrigem("escrever")}
                   />{" "}
                   Escrever uma história
                 </label>
                 <label>
                   <input
                     type="radio"
-                    name="historiaTipo"
-                    checked={form.historiaTipo === "oficial"}
-                    onChange={() =>
-                      setForm({ ...form, historiaTipo: "oficial" })
-                    }
+                    name="origemHistoria"
+                    checked={origemHistoria === "banco"}
+                    onChange={() => escolherOrigem("banco")}
                   />{" "}
-                  Usar história disponível
+                  Usar o Banco de Histórias
                 </label>
               </div>
-              {form.historiaTipo === "propria" ? (
+              {origemHistoria === "banco" &&
+              form.historiaTipo !== "oficial" ? (
+                <div className={styles.bankPicker}>
+                  <label className={styles.fullField}>
+                    História do banco
+                    <select
+                      value={historiaEscolhida}
+                      onChange={(e) => setHistoriaEscolhida(e.target.value)}
+                    >
+                      <option value="">Selecione uma história</option>
+                      {historias.map((h) => (
+                        <option value={getId(h)} key={getId(h)}>
+                          {h.titulo}
+                          {h.origem === "professor" ? " (minha)" : ""}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <button
+                    type="button"
+                    className={styles.secondary}
+                    onClick={() => pedirModelo(historiaEscolhida)}
+                    disabled={!historiaEscolhida || carregandoModelo}
+                  >
+                    <Library size={15} aria-hidden="true" />
+                    {carregandoModelo
+                      ? "Carregando..."
+                      : "Carregar história e perguntas"}
+                  </button>
+                  <small>
+                    O texto e as perguntas são copiados para esta atividade e
+                    podem ser editados. Mudanças futuras na história não alteram
+                    a atividade.{" "}
+                    <Link href="/historias">Abrir o Banco de Histórias</Link>
+                  </small>
+                </div>
+              ) : null}
+              {form.historiaTipo === "oficial" ? (
+                <div className={styles.fullField}>
+                  <Notice kind="info">
+                    Esta atividade usa uma história do banco por referência. O
+                    texto abaixo é a cópia salva na atividade, que é o que os
+                    alunos leem.
+                  </Notice>
+                  <p className={styles.referenceText}>
+                    {form.textoHistoria ||
+                      "A cópia será criada pela API ao salvar a atividade."}
+                  </p>
+                  <button
+                    type="button"
+                    className={styles.secondary}
+                    onClick={editarTextoDaReferencia}
+                  >
+                    <Pencil size={14} aria-hidden="true" />
+                    Editar o texto nesta atividade
+                  </button>
+                </div>
+              ) : origemHistoria === "escrever" || form.bancoHistoriaId ? (
                 <label className={styles.fullField}>
                   Texto da história
                   <textarea
-                    rows={5}
+                    rows={origemHistoria === "banco" ? 12 : 5}
                     required
                     value={form.textoHistoria}
                     onChange={(e) =>
@@ -519,31 +692,26 @@ export default function NovaAtividade() {
                     {form.textoHistoria.length} caracteres
                   </span>
                 </label>
-              ) : (
-                <label className={styles.fullField}>
-                  História
-                  <select
-                    required
-                    value={form.historiaId}
-                    onChange={(e) =>
-                      setForm({ ...form, historiaId: e.target.value })
-                    }
-                  >
-                    <option value="">Selecione uma história</option>
-                    {historias.map((h) => (
-                      <option value={getId(h)} key={getId(h)}>
-                        {h.titulo}
-                      </option>
-                    ))}
-                  </select>
-                  {!historias.length ? (
-                    <small>
-                      Nenhuma história oficial foi retornada pela API. Escolha
-                      “Escrever uma história”.
-                    </small>
+              ) : null}
+              {origemHistoria === "banco" && apoioHistoria ? (
+                <aside
+                  className={styles.pedagogicSupport}
+                  aria-label="Apoio pedagógico da história"
+                >
+                  <strong>
+                    <Lightbulb size={15} aria-hidden="true" />
+                    Apoio pedagógico · {apoioHistoria.tituloHistoria}
+                  </strong>
+                  {apoioHistoria.objetivosPedagogicos?.length ? (
+                    <ul>
+                      {apoioHistoria.objetivosPedagogicos.map((objetivo) => (
+                        <li key={objetivo}>{objetivo}</li>
+                      ))}
+                    </ul>
                   ) : null}
-                </label>
-              )}
+                  {apoioHistoria.nota ? <p>{apoioHistoria.nota}</p> : null}
+                </aside>
+              ) : null}
             </section>
             <section className={`${styles.formPanel} ${styles.questionsPanel}`}>
               <div className={styles.questionHeader}>
@@ -623,7 +791,7 @@ export default function NovaAtividade() {
                       required
                       value={q.enunciado}
                       onChange={(e) =>
-                        updateQuestion(index, { enunciado: e.target.value })
+                        mudarQuestao(index, { enunciado: e.target.value })
                       }
                       placeholder="Digite a pergunta"
                     />
@@ -638,7 +806,7 @@ export default function NovaAtividade() {
                       required
                       value={q.pontos}
                       onChange={(event) =>
-                        updateQuestion(index, {
+                        mudarQuestao(index, {
                           pontos:
                             event.target.value === ""
                               ? ""
@@ -656,7 +824,7 @@ export default function NovaAtividade() {
                             name={`correct-${q.key}`}
                             checked={q.respostaCorreta === alt.key}
                             onChange={() =>
-                              updateQuestion(index, {
+                              mudarQuestao(index, {
                                 respostaCorreta: alt.key,
                               })
                             }
@@ -668,14 +836,14 @@ export default function NovaAtividade() {
                           required
                           value={alt.texto}
                           onChange={(e) =>
-                            updateAlternative(index, alt.key, e.target.value)
+                            alterarAlternativa(index, alt.key, e.target.value)
                           }
                           placeholder={`Alternativa ${String.fromCharCode(65 + altIndex)}`}
                         />
                         {q.alternativas.length > 2 ? (
                           <button
                             type="button"
-                            onClick={() => removeAlternative(index, alt.key)}
+                            onClick={() => removerAlternativa(index, alt.key)}
                             aria-label="Remover alternativa"
                           >
                             ×
@@ -687,11 +855,32 @@ export default function NovaAtividade() {
                   <button
                     type="button"
                     className={styles.addAlternative}
-                    onClick={() => addAlternative(index)}
+                    onClick={() => adicionarAlternativa(index)}
                   >
                     <Plus size={14} aria-hidden="true" />
                     Adicionar alternativa
                   </button>
+                  {q.apoio?.feedback || q.apoio?.objetivoPedagogico ? (
+                    <aside
+                      className={styles.pedagogicSupport}
+                      aria-label={`Apoio pedagógico da questão ${index + 1}`}
+                    >
+                      <strong>
+                        <Lightbulb size={15} aria-hidden="true" />
+                        Apoio pedagógico (só para você, não vai para o aluno)
+                      </strong>
+                      {q.apoio.objetivoPedagogico ? (
+                        <p>
+                          <b>Objetivo:</b> {q.apoio.objetivoPedagogico}
+                        </p>
+                      ) : null}
+                      {q.apoio.feedback ? (
+                        <p>
+                          <b>Feedback:</b> {q.apoio.feedback}
+                        </p>
+                      ) : null}
+                    </aside>
+                  ) : null}
                 </article>
               ))}
             </section>
@@ -878,6 +1067,14 @@ export default function NovaAtividade() {
             </footer>
           </form>
         )}
+        <ConfirmDialog
+          aberto={Boolean(substituirPor)}
+          titulo="Substituir o conteúdo?"
+          mensagem="O título, o texto e as questões que você já preencheu serão trocados pelos da história escolhida."
+          confirmar="Substituir"
+          onCancelar={() => setSubstituirPor("")}
+          onConfirmar={() => carregarModelo(substituirPor)}
+        />
       </TeacherLayout>
     </>
   );

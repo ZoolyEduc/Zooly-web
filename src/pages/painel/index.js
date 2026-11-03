@@ -11,7 +11,8 @@ import TeacherLayout from "../../components/TeacherLayout";
 import StatCard from "../../components/StatCard";
 import Notice from "../../components/Notice";
 import { apiRequest } from "../../services/api";
-import { getId, getSession } from "../../services/session";
+import { getSession } from "../../services/session";
+import { getId } from "../../utils/formatacao";
 import styles from "./painel.module.css";
 
 function dataLocalISO() {
@@ -93,12 +94,6 @@ export default function Painel() {
       turmaNome: relatorio.turma?.nome || "Turma",
     })),
   );
-  const ultimasAtividades = [...dados.atividades]
-    .filter((atividade) => atividade.publicadoEm)
-    .sort(
-      (a, b) =>
-        new Date(b.publicadoEm).getTime() - new Date(a.publicadoEm).getTime(),
-    );
   const totalIniciadas = dados.relatorios.reduce(
     (total, relatorio) =>
       total + (relatorio.indicadores?.atividadesIniciadas || 0),

@@ -253,44 +253,6 @@
   }
 }
 /* ========================================= */
-
-.floatingNote {
-  position: absolute;
-  z-index: 2;
-  bottom: 26px;
-  right: 0;
-  background: #fff;
-  border: 1px solid #e5ece5;
-  border-radius: 16px;
-  padding: 13px 16px;
-  display: flex;
-  align-items: center;
-  gap: 11px;
-  box-shadow: 0 14px 35px rgba(15, 23, 42, 0.08);
-}
-.floatingNote > span {
-  display: grid;
-  place-items: center;
-  width: 34px;
-  height: 34px;
-  border-radius: 11px;
-  background: #fff2d4;
-  color: #d18a09;
-  font-size: 20px;
-}
-.floatingNote div {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-.floatingNote strong {
-  font-size: 12px;
-  color: #24392a;
-}
-.floatingNote small {
-  font-size: 10px;
-  color: #778279;
-}
 .about {
   padding: 80px 24px 88px;
   background: #f8fbf8;
@@ -452,9 +414,6 @@
   .heroVisual {
     min-height: 400px;
   }
-  .floatingNote {
-    right: 8%;
-  }
   .how {
     grid-template-columns: 1fr;
     gap: 28px;
@@ -497,11 +456,6 @@
   }
   .mascotConteudo span {
     font-size: 10px;
-  }
-
-  .floatingNote {
-    bottom: -1px;
-    right: 0;
   }
   .about {
     padding: 60px 15px;

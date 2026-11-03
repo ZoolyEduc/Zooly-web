@@ -12,7 +12,7 @@
   display: flex;
   flex-direction: column;
   position: fixed;
-  inset: var(--altura-faixa, 0px) auto 0 0;
+  inset: 0 auto 0 0;
   z-index: 20;
 }
 .brand {

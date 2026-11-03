@@ -12,6 +12,9 @@
 
 # testing
 /coverage
+/test-results/
+/playwright-report/
+/playwright/.cache/
 
 # next.js
 /.next/
@@ -33,7 +36,6 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env*
 !.env.local.example
-!.env.demo.example
 
 # vercel
 .vercel
@@ -41,8 +43,3 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-
-# Materiais de referência locais: não fazem parte do projeto
-/referencia-antigo/
-/referencia-figma/
-/referencias/

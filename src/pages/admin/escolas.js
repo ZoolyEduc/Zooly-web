@@ -12,7 +12,7 @@ import {
 import AdminLayout from "../../components/AdminLayout";
 import Notice from "../../components/Notice";
 import { apiRequest } from "../../services/api";
-import { getId } from "../../services/session";
+import { getId } from "../../utils/formatacao";
 import styles from "./escolas.module.css";
 
 const vazio = {

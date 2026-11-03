@@ -7,7 +7,6 @@ import Notice from "../components/Notice";
 import Logo from "../components/Logo";
 import { apiRequest } from "../services/api";
 import { getSession, saveSession } from "../services/session";
-import { demoEnabled } from "../services/demo";
 
 export default function Login() {
   const router = useRouter();
@@ -20,7 +19,7 @@ export default function Login() {
   const sessaoExpirada = router.query.sessao === "expirada";
 
   useEffect(() => {
-    if (!demoEnabled() && getSession().token && router.query.force !== "1") {
+    if (getSession().token && router.query.force !== "1") {
       const destino =
         getSession().usuario?.tipo === "administrador" ? "/admin" : "/painel";
       router.replace(destino);
