@@ -29,7 +29,8 @@ const etapasMissao = {
 
 export default function DetalhesAtividade() {
   const router = useRouter();
-  const atividadeId = typeof router.query.id === "string" ? router.query.id : "";
+  const atividadeId =
+    typeof router.query.id === "string" ? router.query.id : "";
   const [atividade, setAtividade] = useState(null);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState("");
@@ -203,7 +204,8 @@ export default function DetalhesAtividade() {
                 História da Atividade
               </h2>
               <div className={styles.detailHistory}>
-                {atividade.historiaTexto || "O texto desta história não está disponível."}
+                {atividade.historiaTexto ||
+                  "O texto desta história não está disponível."}
               </div>
             </section>
 
@@ -215,7 +217,10 @@ export default function DetalhesAtividade() {
                 </div>
               </div>
               {(atividade.questoes || []).map((questao, index) => (
-                <article className={styles.editorQuestionCard} key={getId(questao) || index}>
+                <article
+                  className={styles.editorQuestionCard}
+                  key={getId(questao) || index}
+                >
                   <div className={styles.questionTitle}>
                     <span className={styles.questionNumber}>{index + 1}</span>
                     <div className={styles.questionMeta}>
@@ -229,14 +234,21 @@ export default function DetalhesAtividade() {
                       </span>
                     </div>
                   </div>
-                  <p className={styles.questionEnunciado}>{questao.enunciado}</p>
+                  <p className={styles.questionEnunciado}>
+                    {questao.enunciado}
+                  </p>
                   <div className={styles.alternatives}>
                     {(questao.alternativas || []).map((alternativa, indice) => (
-                      <div className={styles.alternative} key={getId(alternativa) || indice}>
+                      <div
+                        className={styles.alternative}
+                        key={getId(alternativa) || indice}
+                      >
                         <span className={styles.alternativeLetter}>
                           {String.fromCharCode(65 + indice)}
                         </span>
-                        <div className={styles.alternativeText}>{alternativa.texto}</div>
+                        <div className={styles.alternativeText}>
+                          {alternativa.texto}
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -257,7 +269,9 @@ export default function DetalhesAtividade() {
                     ))}
                   </div>
                 ) : (
-                  <p className={styles.asideDescription}>Nenhuma etapa selecionada.</p>
+                  <p className={styles.asideDescription}>
+                    Nenhuma etapa selecionada.
+                  </p>
                 )}
               </section>
               <section className={styles.asideCard}>
@@ -266,7 +280,10 @@ export default function DetalhesAtividade() {
                   BNCC
                 </h2>
                 {atividade.habilidadesBncc?.length ? (
-                  <ul className={styles.bnccResults} aria-label="Habilidades BNCC selecionadas">
+                  <ul
+                    className={styles.bnccResults}
+                    aria-label="Habilidades BNCC selecionadas"
+                  >
                     {atividade.habilidadesBncc.map((habilidade) => (
                       <li key={habilidade.codigo}>
                         <div className={styles.bnccDetail}>
@@ -277,7 +294,9 @@ export default function DetalhesAtividade() {
                     ))}
                   </ul>
                 ) : (
-                  <p className={styles.asideDescription}>Nenhuma habilidade selecionada.</p>
+                  <p className={styles.asideDescription}>
+                    Nenhuma habilidade selecionada.
+                  </p>
                 )}
               </section>
               <section className={`${styles.asideCard} ${styles.rewardCard}`}>

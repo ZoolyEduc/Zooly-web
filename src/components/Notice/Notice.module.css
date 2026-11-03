@@ -1,4 +1,24 @@
-.notice { border: 1px solid #dbe4e0; background: #f8faf9; border-radius: 12px; padding: 12px 14px; color: #334155; font-size: 14px; line-height: 1.5; }
-.success { border-color: #bbf7d0; background: #f0fdf4; color: #166534; }
-.error { border-color: #fecaca; background: #fef2f2; color: #991b1b; }
-.info { border-color: #bfdbfe; background: #eff6ff; color: #1e40af; }
+.notice {
+  border: 1px solid #dbe4e0;
+  background: #f8faf9;
+  border-radius: 12px;
+  padding: 12px 14px;
+  color: #334155;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.success {
+  border-color: #bbf7d0;
+  background: #f0fdf4;
+  color: #166534;
+}
+.error {
+  border-color: #fecaca;
+  background: #fef2f2;
+  color: #991b1b;
+}
+.info {
+  border-color: #bfdbfe;
+  background: #eff6ff;
+  color: #1e40af;
+}

@@ -17,10 +17,14 @@ export default function Login() {
   const [carregando, setCarregando] = useState(false);
   const [mostrarSenha, setMostrarSenha] = useState(false);
   const cadastroOk = router.query.cadastro === "sucesso";
+  const sessaoExpirada = router.query.sessao === "expirada";
 
   useEffect(() => {
-    if (!demoEnabled() && getSession().token && router.query.force !== "1")
-      router.replace("/painel");
+    if (!demoEnabled() && getSession().token && router.query.force !== "1") {
+      const destino =
+        getSession().usuario?.tipo === "administrador" ? "/admin" : "/painel";
+      router.replace(destino);
+    }
   }, [router]);
 
   async function entrar(event) {
@@ -53,6 +57,7 @@ export default function Login() {
           </div>
           <nav className={styles.topLinks}>
             <Link href="/login">Entrar</Link>
+            <Link href="/admin/login">Administração</Link>
             <Link href="/cadastro" className={styles.topAction}>
               Criar Conta
             </Link>
@@ -68,6 +73,9 @@ export default function Login() {
             <Notice kind="success">
               Cadastro enviado! Entre com o e-mail e a senha que você cadastrou.
             </Notice>
+          ) : null}
+          {sessaoExpirada ? (
+            <Notice kind="info">Sua sessão expirou. Entre novamente.</Notice>
           ) : null}
           {erro ? (
             <div className={styles.error} role="alert">

@@ -51,7 +51,7 @@ Use o arquivo `.env.local.example` como modelo. Se o `.env.local` ainda não exi
 
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:4000
-NEXT_PUBLIC_MODO_DEMO=true
+NEXT_PUBLIC_MODO_DEMO=false
 ```
 
 **Importante:** o arquivo `.env.local` é local e não deve ser enviado ao GitHub. O arquivo `.env.local.example` pode ser versionado para documentar as configurações necessárias.
@@ -86,7 +86,20 @@ NEXT_PUBLIC_MODO_DEMO=false
 
 Após alterar as variáveis de ambiente, reinicie o servidor de desenvolvimento.
 
-O modo de demonstração é destinado ao desenvolvimento local e não deve ser utilizado como substituto da autenticação real em produção.
+O modo de demonstração é destinado ao desenvolvimento local e é desligado automaticamente em builds de produção.
+
+## Ambiente de demonstração com API
+
+Diferente do modo acima, que simula tudo no navegador, este ambiente usa a API e um banco separado (`zooly_demo`), para apresentações:
+
+```bash
+cp .env.demo.example .env.demo
+npm run dev:demo
+```
+
+O site aponta para a API de demonstração (porta 4001) e exibe a faixa "Ambiente de demonstração". O `.env.local` não é alterado. A faixa só aparece com `NEXT_PUBLIC_AMBIENTE=demonstracao`, que não deve ser definida em produção.
+
+A preparação completa, incluindo a API, está em `docs/publicacao.md`, no repositório Zooly-api.
 
 ## Páginas da aplicação
 
@@ -101,11 +114,19 @@ As páginas são organizadas utilizando o **Pages Router** do Next.js.
 | `/turmas` | Gerenciamento de turmas |
 | `/turmas/[id]/alunos` | Alunos de uma turma |
 | `/atividades` | Listagem de atividades |
-| `/atividades/nova` | Criação de atividades |
-| `/desempenho` | Indicadores de desempenho |
+| `/atividades/nova` | Criação e edição de atividades |
+| `/atividades/[id]` | Detalhes de uma atividade |
+| `/desempenho` | Relatório semanal por turma |
+| `/desempenho/alunos/[id]` | Desempenho individual |
 | `/configuracoes` | Configurações do perfil |
+| `/admin/login` | Acesso administrativo |
+| `/admin` | Visão geral da administração |
+| `/admin/escolas` | Gerenciamento de escolas |
+| `/admin/professores` | Gerenciamento de professores |
+| `/admin/professores/novo` | Cadastro de professor |
+| `/admin/professores/[id]` | Edição de professor |
 
-As telas utilizam dados fictícios quando necessário no modo de demonstração. A disponibilidade de cada funcionalidade deve ser validada conforme sua implementação atual.
+As telas usam dados fictícios apenas no modo de demonstração.
 
 ## Estrutura de pastas
 
@@ -119,7 +140,9 @@ Zooly-web/
 │   ├── pages/              # Páginas e rotas
 │   ├── services/           # Serviços e dados de demonstração
 │   └── styles/             # Estilos globais e compartilhados
+├── scripts/                # Inicialização do ambiente de demonstração
 ├── .env.local.example      # Modelo das variáveis de ambiente
+├── .env.demo.example       # Modelo do ambiente de demonstração
 ├── .gitignore
 ├── package.json
 └── README.md
@@ -140,11 +163,11 @@ Os estilos específicos das páginas e dos componentes são organizados por meio
 
 O backend do Zooly é mantido separadamente no repositório [Zooly-api](https://github.com/ZoolyEdu/Zooly-api).
 
-A arquitetura prevê a comunicação entre o front-end e a API por requisições HTTP. A integração completa deve respeitar os contratos dos endpoints, a autenticação, as permissões e as regras de negócio implementadas no backend.
+O front-end se comunica com a API por requisições HTTP. Todas as permissões são verificadas no backend.
 
-A variável `NEXT_PUBLIC_API_URL` define a URL da API utilizada pelo front-end. Durante o desenvolvimento local, o valor de referência é `http://localhost:4000`.
+A variável `NEXT_PUBLIC_API_URL` define a URL da API. Em desenvolvimento, o padrão é `http://localhost:4000`; em produção ela é obrigatória. Sessão expirada encerra o acesso e leva de volta ao login.
 
-A integração real deve ser validada separadamente do modo de demonstração.
+Variáveis e ordem de publicação: `docs/publicacao.md`, no repositório Zooly-api.
 
 ## Verificações do projeto
 

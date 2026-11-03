@@ -39,8 +39,16 @@ function novaQuestao(atividadeExistente = false) {
     enunciado: "",
     pontos: 0,
     alternativas: [
-      { key: alternativaA, ...(!atividadeExistente ? { _id: alternativaA } : {}), texto: "" },
-      { key: alternativaB, ...(!atividadeExistente ? { _id: alternativaB } : {}), texto: "" },
+      {
+        key: alternativaA,
+        ...(!atividadeExistente ? { _id: alternativaA } : {}),
+        texto: "",
+      },
+      {
+        key: alternativaB,
+        ...(!atividadeExistente ? { _id: alternativaB } : {}),
+        texto: "",
+      },
     ],
     respostaCorreta: alternativaA,
   };
@@ -56,7 +64,8 @@ function mapearQuestao(questao) {
   const respostaCorreta =
     typeof resposta === "number"
       ? alternativas[resposta]?.key
-      : alternativas.find((alternativa) => alternativa.key === String(resposta))?.key;
+      : alternativas.find((alternativa) => alternativa.key === String(resposta))
+          ?.key;
   return {
     ...(questao._id ? { _id: String(questao._id) } : {}),
     key: questao._id ? String(questao._id) : makeObjectId(),
@@ -95,7 +104,6 @@ export default function NovaAtividade() {
   const [erro, setErro] = useState("");
   const [sucesso, setSucesso] = useState("");
   const [salvando, setSalvando] = useState(false);
-  const [alteracoesPendentes, setAlteracoesPendentes] = useState(false);
   const [rascunho, setRascunho] = useState(null);
   const [publicando, setPublicando] = useState(false);
   const [temaBncc, setTemaBncc] = useState("");
@@ -151,7 +159,6 @@ export default function NovaAtividade() {
           setQuestoes((atividade.questoes || []).map(mapearQuestao));
           setEtapasSelecionadas(atividade.missao?.etapas || []);
           setSelecionadasBncc(atividade.habilidadesBncc || []);
-          setAlteracoesPendentes(false);
         } else {
           setForm((atual) => ({
             ...atual,
@@ -218,7 +225,9 @@ export default function NovaAtividade() {
     setQuestoes((current) =>
       current.map((q, i) => {
         if (i !== index || q.alternativas.length <= 2) return q;
-        const alternativas = q.alternativas.filter((a) => a.key !== alternativeKey);
+        const alternativas = q.alternativas.filter(
+          (a) => a.key !== alternativeKey,
+        );
         return {
           ...q,
           alternativas,
@@ -243,7 +252,8 @@ export default function NovaAtividade() {
           ? { tipo: "oficial", historiaId: form.historiaId }
           : { tipo: "propria", texto: form.textoHistoria.trim() };
       const body = {
-        turma: form.turma,
+        // A turma é definida na criação; o PUT da API rejeita esse campo.
+        ...(atividadeId ? {} : { turma: form.turma }),
         titulo: form.titulo.trim(),
         recompensaMoedas: Number(form.recompensaMoedas),
         historia,
@@ -264,19 +274,19 @@ export default function NovaAtividade() {
           })),
           respostasCorretas: atividadeId
             ? [q.alternativas.findIndex((a) => a.key === q.respostaCorreta)]
-            : [
-                q.alternativas.find((a) => a.key === q.respostaCorreta)?._id,
-              ],
+            : [q.alternativas.find((a) => a.key === q.respostaCorreta)?._id],
         })),
         prazo: form.prazo
           ? new Date(`${form.prazo}T23:59:00`).toISOString()
           : null,
       };
       const resposta = await apiRequest(
-        atividadeId ? `/api/atividades/${encodeURIComponent(atividadeId)}` : "/api/atividades",
+        atividadeId
+          ? `/api/atividades/${encodeURIComponent(atividadeId)}`
+          : "/api/atividades",
         {
-        method: atividadeId ? "PUT" : "POST",
-        body,
+          method: atividadeId ? "PUT" : "POST",
+          body,
         },
       );
       const atividadeSalva = resposta?.atividade || null;
@@ -285,9 +295,10 @@ export default function NovaAtividade() {
         setQuestoes((atividadeSalva.questoes || []).map(mapearQuestao));
       }
       setSucesso(
-        atividadeId ? "Alterações salvas." : "Rascunho salvo. Você pode continuar editando ou publicar.",
+        atividadeId
+          ? "Alterações salvas."
+          : "Rascunho salvo. Você pode continuar editando ou publicar.",
       );
-      setAlteracoesPendentes(false);
       return atividadeSalva;
     } catch (error) {
       setErro(error.message);
@@ -299,11 +310,9 @@ export default function NovaAtividade() {
 
   async function publicar() {
     if (!getId(rascunho) || rascunho?.status !== "rascunho") return;
-    let atividadeAtual = rascunho;
-    if (alteracoesPendentes) {
-      atividadeAtual = await salvar();
-      if (!atividadeAtual) return;
-    }
+    // Sempre salva antes: botões (nova questão, BNCC...) também alteram o formulário.
+    const atividadeAtual = await salvar();
+    if (!atividadeAtual) return;
     const id = getId(atividadeAtual);
     if (!id) return;
     setErro("");
@@ -363,7 +372,9 @@ export default function NovaAtividade() {
   return (
     <>
       <Head>
-        <title>{rascunho ? "Editar Atividade | Zooly" : "Nova Atividade | Zooly"}</title>
+        <title>
+          {rascunho ? "Editar Atividade | Zooly" : "Nova Atividade | Zooly"}
+        </title>
       </Head>
       <TeacherLayout>
         <div className={styles.editorHeader}>
@@ -374,6 +385,12 @@ export default function NovaAtividade() {
         </div>
         {erro ? <Notice kind="error">{erro}</Notice> : null}
         {sucesso ? <Notice kind="success">{sucesso}</Notice> : null}
+        {rascunho?.status === "publicada" ? (
+          <Notice kind="info">
+            Esta atividade já está publicada. Trocar ou remover questões pode
+            afetar o progresso e os relatórios de alunos que já responderam.
+          </Notice>
+        ) : null}
         {loading ? (
           <p className={styles.loading}>Carregando turmas e histórias...</p>
         ) : !turmas.length ? (
@@ -383,11 +400,7 @@ export default function NovaAtividade() {
             escola.
           </Notice>
         ) : (
-          <form
-            className={styles.activityForm}
-            onSubmit={salvar}
-            onChange={() => setAlteracoesPendentes(true)}
-          >
+          <form className={styles.activityForm} onSubmit={salvar}>
             <section className={`${styles.formPanel} ${styles.generalPanel}`}>
               <h2>
                 <span className={styles.sectionIcon}>
@@ -423,6 +436,12 @@ export default function NovaAtividade() {
                   <select
                     required
                     value={form.turma}
+                    disabled={Boolean(rascunho)}
+                    title={
+                      rascunho
+                        ? "A turma não pode ser alterada depois da criação."
+                        : undefined
+                    }
                     onChange={(e) =>
                       setForm({ ...form, turma: e.target.value })
                     }
@@ -557,7 +576,8 @@ export default function NovaAtividade() {
               </button>
               {mensagemIa ? (
                 <p className={styles.integrationNote} role="status">
-                  A geração por IA ainda não está disponível. Crie as questões manualmente.
+                  A geração por IA ainda não está disponível. Crie as questões
+                  manualmente.
                 </p>
               ) : null}
               {questoes.map((q, index) => (
@@ -574,9 +594,7 @@ export default function NovaAtividade() {
                         aria-label={`Editar questão ${index + 1}`}
                         title="Editar enunciado"
                         onClick={() =>
-                          document
-                            .getElementById(`enunciado-${q.key}`)
-                            ?.focus()
+                          document.getElementById(`enunciado-${q.key}`)?.focus()
                         }
                       >
                         <Pencil size={15} aria-hidden="true" />
@@ -621,9 +639,10 @@ export default function NovaAtividade() {
                       value={q.pontos}
                       onChange={(event) =>
                         updateQuestion(index, {
-                          pontos: event.target.value === ""
-                            ? ""
-                            : Number(event.target.value),
+                          pontos:
+                            event.target.value === ""
+                              ? ""
+                              : Number(event.target.value),
                         })
                       }
                     />
@@ -710,18 +729,26 @@ export default function NovaAtividade() {
                   BNCC
                 </h2>
                 {selecionadasBncc.length ? (
-                  <ul className={styles.bnccSelected} aria-label="Habilidades selecionadas">
+                  <ul
+                    className={styles.bnccSelected}
+                    aria-label="Habilidades selecionadas"
+                  >
                     {selecionadasBncc.map((item) => (
                       <li key={item.codigo} title={item.texto}>
                         <strong>{item.codigo}</strong>
-                        <button type="button" onClick={() => alternarHabilidade(item)}>
+                        <button
+                          type="button"
+                          onClick={() => alternarHabilidade(item)}
+                        >
                           Remover
                         </button>
                       </li>
                     ))}
                   </ul>
                 ) : (
-                  <p className={styles.asideDescription}>Nenhuma habilidade selecionada.</p>
+                  <p className={styles.asideDescription}>
+                    Nenhuma habilidade selecionada.
+                  </p>
                 )}
                 <button
                   type="button"
@@ -735,7 +762,9 @@ export default function NovaAtividade() {
                 {buscaBnccAberta ? (
                   <>
                     <div className={styles.bnccSearch}>
-                      <label className={styles.srOnly} htmlFor="bncc-tema">Tema da habilidade</label>
+                      <label className={styles.srOnly} htmlFor="bncc-tema">
+                        Tema da habilidade
+                      </label>
                       <input
                         id="bncc-tema"
                         value={temaBncc}
@@ -758,9 +787,16 @@ export default function NovaAtividade() {
                         {buscandoBncc ? "Buscando" : "Buscar"}
                       </button>
                     </div>
-                    {erroBncc ? <p className={styles.bnccError} role="alert">{erroBncc}</p> : null}
+                    {erroBncc ? (
+                      <p className={styles.bnccError} role="alert">
+                        {erroBncc}
+                      </p>
+                    ) : null}
                     {habilidadesBncc.length ? (
-                      <ul className={styles.bnccResults} aria-label="Resultados da BNCC">
+                      <ul
+                        className={styles.bnccResults}
+                        aria-label="Resultados da BNCC"
+                      >
                         {habilidadesBncc.map((item) => {
                           const marcada = selecionadasBncc.some(
                             (selecionada) => selecionada.codigo === item.codigo,

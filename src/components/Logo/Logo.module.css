@@ -14,13 +14,25 @@
 }
 
 /* Tamanhos */
-.sm { height: 36px; }
-.md { height: 52px; }
-.lg { height: 80px; }
+.sm {
+  height: 36px;
+}
+.md {
+  height: 52px;
+}
+.lg {
+  height: 80px;
+}
 
 /* Ajuste automático para mobile */
 @media (max-width: 640px) {
-  .sm { height: 28px; }
-  .md { height: 40px; }
-  .lg { height: 60px; }
+  .sm {
+    height: 28px;
+  }
+  .md {
+    height: 40px;
+  }
+  .lg {
+    height: 60px;
+  }
 }

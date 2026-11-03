@@ -53,21 +53,9 @@ export default function Configuracoes() {
       setNotificacoesSalvas(preferencias);
     });
 
-    apiRequest("/api/turmas")
+    apiRequest("/api/professores/me")
       .then((resposta) => {
-        if (!ativo) return;
-        const escolasUnicas = [
-          ...new Map(
-            (resposta?.turmas || [])
-              .map((turma) => turma.escola)
-              .filter((escola) => escola && typeof escola === "object")
-              .map((escola) => [
-                escola._id || escola.codigoPermanente || escola.nome,
-                escola,
-              ]),
-          ).values(),
-        ];
-        setEscolas(escolasUnicas);
+        if (ativo) setEscolas(resposta?.professor?.escolas || []);
       })
       .catch((error) => {
         if (ativo) setErro(error.message);
@@ -97,12 +85,15 @@ export default function Configuracoes() {
       setNotificacoesSalvas(notificacoes);
       setMensagem("Preferências salvas neste navegador.");
     } catch (error) {
-      setErro(`Não foi possível salvar as preferências neste navegador: ${error.message}`);
+      setErro(
+        `Não foi possível salvar as preferências neste navegador: ${error.message}`,
+      );
     }
   }
 
-  const nomeEscola = escolas[0]?.nome || "";
-  const codigoEscola = escolas[0]?.codigo_escola || "";
+  const escola = escolas[0];
+  const nomeEscola = escola?.nome || "";
+  const codigoEscola = escola?.codigoPermanente || "";
   const iniciais = (usuario?.nome || "")
     .trim()
     .split(/\s+/)
@@ -156,7 +147,8 @@ export default function Configuracoes() {
                 Solicitar alteração de senha
               </button>
               <p className={styles.unavailable}>
-                Alteração de dados e senha ainda não disponível na API integrada.
+                Alteração de dados e senha ainda não disponível na API
+                integrada.
               </p>
             </section>
 
@@ -186,21 +178,21 @@ export default function Configuracoes() {
                     />
                   </label>
                   <label htmlFor="telefone-escola">
-                    Telefone
+                    Contato
                     <input
                       id="telefone-escola"
-                      value=""
+                      value={escola?.contato || ""}
                       readOnly
-                      placeholder="Não disponível na API"
+                      placeholder="Não informado pela API"
                     />
                   </label>
                   <label className={styles.fullField} htmlFor="endereco-escola">
                     Endereço
                     <input
                       id="endereco-escola"
-                      value=""
+                      value={escola?.endereco || ""}
                       readOnly
-                      placeholder="Não disponível na API"
+                      placeholder="Não informado pela API"
                     />
                   </label>
                   <label className={styles.fullField} htmlFor="email-escola">
@@ -208,15 +200,15 @@ export default function Configuracoes() {
                     <input
                       id="email-escola"
                       type="email"
-                      value=""
+                      value={escola?.email || ""}
                       readOnly
-                      placeholder="Não disponível na API"
+                      placeholder="Não informado pela API"
                     />
                   </label>
                 </div>
                 {!escolas.length ? (
                   <p className={styles.unavailable}>
-                    Nenhuma escola foi retornada pelas turmas desta conta.
+                    Nenhuma escola está vinculada a esta conta.
                   </p>
                 ) : null}
               </div>
@@ -229,7 +221,9 @@ export default function Configuracoes() {
                 {iniciais || <CircleUserRound size={42} aria-hidden="true" />}
               </div>
               <h3>Foto de perfil</h3>
-              <p>JPG ou PNG. A API integrada ainda não oferece envio de imagem.</p>
+              <p>
+                JPG ou PNG. A API integrada ainda não oferece envio de imagem.
+              </p>
               <button
                 type="button"
                 className={styles.upload}

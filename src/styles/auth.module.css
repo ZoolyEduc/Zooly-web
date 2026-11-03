@@ -227,7 +227,8 @@
   .topLinks .topAction {
     padding: 8px 13px;
   }
-  .card, .registerPage .card {
+  .card,
+  .registerPage .card {
     width: 100%;
     min-height: 0;
     margin-top: 6px;

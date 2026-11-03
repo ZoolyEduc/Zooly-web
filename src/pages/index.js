@@ -136,9 +136,7 @@ export default function Home() {
             <div className={styles.feature}>
               <div className={styles.featureIcon}>📊</div>
               <h3>Dados para o professor</h3>
-              <p>
-                Relatórios claros sobre o avanço de cada aluno e da turma.
-              </p>
+              <p>Relatórios claros sobre o avanço de cada aluno e da turma.</p>
             </div>
           </div>
         </section>
@@ -163,9 +161,7 @@ export default function Home() {
             <div>
               <span>2</span>
               <strong>Monte suas turmas</strong>
-              <p>
-                Adicione seus alunos e escolha os mascotes de cada grupo.
-              </p>
+              <p>Adicione seus alunos e escolha os mascotes de cada grupo.</p>
             </div>
             <div>
               <span>3</span>
@@ -180,7 +176,7 @@ export default function Home() {
         <section className={styles.cta}>
           <div>
             <h2>Pronto para transformar a leitura em uma aventura?</h2>
-            <p>Junte-se a centenas de professores que já usam o Zooly.</p>
+            <p>Crie sua conta e leve o Zooly para as suas turmas.</p>
           </div>
           <Link href="/cadastro" className={styles.primary}>
             Criar conta gratuita
@@ -189,7 +185,10 @@ export default function Home() {
       </main>
 
       <footer className={styles.footer}>
-        <span>© {new Date().getFullYear()} Zooly Education. Todos os direitos reservados.</span>
+        <span>
+          © {new Date().getFullYear()} Zooly Education. Todos os direitos
+          reservados.
+        </span>
         <span>Feito com carinho para educadores e crianças.</span>
       </footer>
     </div>

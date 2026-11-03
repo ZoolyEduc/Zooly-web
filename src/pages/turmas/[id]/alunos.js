@@ -34,11 +34,13 @@ export default function AlunosDaTurma() {
     const id = router.query.id;
     if (!id) return;
     try {
-      const [turmaResposta, alunosResposta, turmasResposta] = await Promise.all([
-        apiRequest(`/api/turmas/${id}`),
-        apiRequest(`/api/alunos/turma/${id}`),
-        apiRequest("/api/turmas"),
-      ]);
+      const [turmaResposta, alunosResposta, turmasResposta] = await Promise.all(
+        [
+          apiRequest(`/api/turmas/${id}`),
+          apiRequest(`/api/alunos/turma/${id}`),
+          apiRequest("/api/turmas"),
+        ],
+      );
       setTurma(turmaResposta?.turma || null);
       setAlunos(alunosResposta?.alunos || []);
       setTurmas(turmasResposta?.turmas || []);
@@ -79,6 +81,22 @@ export default function AlunosDaTurma() {
     }
   }
 
+  function abrirNovoAluno() {
+    setErro("");
+    setSucesso("");
+    setMostrarForm(true);
+  }
+
+  function fecharNovoAluno() {
+    setErro("");
+    setMostrarForm(false);
+  }
+
+  function fecharEdicao() {
+    setErro("");
+    setAlunoEmEdicao(null);
+  }
+
   function iniciarEdicao(aluno) {
     setAlunoSelecionado(null);
     setAlunoEmEdicao(aluno);
@@ -100,10 +118,10 @@ export default function AlunosDaTurma() {
 
     setSalvandoEdicao(true);
     try {
-      const resposta = await apiRequest(
-        `/api/alunos/${getId(alunoEmEdicao)}`,
-        { method: "PUT", body },
-      );
+      const resposta = await apiRequest(`/api/alunos/${getId(alunoEmEdicao)}`, {
+        method: "PUT",
+        body,
+      });
       setSucesso(resposta?.mensagem || "Aluno atualizado com sucesso.");
       setAlunoEmEdicao(null);
       await carregar();
@@ -120,7 +138,7 @@ export default function AlunosDaTurma() {
         <title>Alunos da turma | Zooly</title>
       </Head>
       <TeacherLayout
-        title={turma?.nome || "Turma 1º Ano A"}
+        title={turma?.nome || "Alunos da turma"}
         subtitle="Gestão de alunos e progresso de missões acadêmicas."
       >
         <div className={styles.back}>
@@ -128,12 +146,14 @@ export default function AlunosDaTurma() {
           <button
             type="button"
             className={styles.primary}
-            onClick={() => setMostrarForm(true)}
+            onClick={abrirNovoAluno}
           >
             ＋ Novo Aluno
           </button>
         </div>
-        {erro ? <Notice kind="error">{erro}</Notice> : null}
+        {erro && !mostrarForm && !alunoEmEdicao ? (
+          <Notice kind="error">{erro}</Notice>
+        ) : null}
         {sucesso ? <Notice kind="success">{sucesso}</Notice> : null}
         <section className={styles.metrics}>
           <article>
@@ -148,7 +168,10 @@ export default function AlunosDaTurma() {
             <div>
               <span>CADASTROS PENDENTES</span>
               <strong>
-                {alunos.filter((aluno) => !aluno.cadastroInicialConcluido).length}
+                {
+                  alunos.filter((aluno) => !aluno.cadastroInicialConcluido)
+                    .length
+                }
               </strong>
               <small>Precisam concluir o primeiro acesso</small>
             </div>
@@ -164,7 +187,10 @@ export default function AlunosDaTurma() {
               onClick={() =>
                 setAlunos((list) =>
                   [...list].sort((a, b) =>
-                    a.nomeCompleto.localeCompare(b.nomeCompleto),
+                    (a.nomeCompleto || "").localeCompare(
+                      b.nomeCompleto || "",
+                      "pt-BR",
+                    ),
                   ),
                 )
               }
@@ -203,6 +229,7 @@ export default function AlunosDaTurma() {
                                 {aluno.nomeCompleto ||
                                   "Cadastro inicial pendente"}
                               </strong>
+                              {aluno.ra ? <small>RA {aluno.ra}</small> : null}
                             </div>
                           </div>
                         </td>
@@ -213,9 +240,7 @@ export default function AlunosDaTurma() {
                               : "PENDENTE"}
                           </span>
                         </td>
-                        <td>
-                          {formatDate(aluno.createdAt)}
-                        </td>
+                        <td>{formatDate(aluno.createdAt)}</td>
                         <td>
                           <button
                             className={styles.more}
@@ -248,7 +273,7 @@ export default function AlunosDaTurma() {
               <button
                 type="button"
                 className={styles.primary}
-                onClick={() => setMostrarForm(true)}
+                onClick={abrirNovoAluno}
               >
                 ＋ Novo Aluno
               </button>
@@ -268,7 +293,7 @@ export default function AlunosDaTurma() {
             className={styles.modalBackdrop}
             role="presentation"
             onMouseDown={(event) => {
-              if (event.target === event.currentTarget) setMostrarForm(false);
+              if (event.target === event.currentTarget) fecharNovoAluno();
             }}
           >
             <section
@@ -278,14 +303,13 @@ export default function AlunosDaTurma() {
               aria-labelledby="student-modal-title"
             >
               <h2 id="student-modal-title">Novo Aluno</h2>
+              {erro ? <Notice kind="error">{erro}</Notice> : null}
               <form onSubmit={cadastrar}>
                 <label>
                   RA do aluno
                   <input
                     value={form.ra}
-                    onChange={(e) =>
-                      setForm({ ...form, ra: e.target.value })
-                    }
+                    onChange={(e) => setForm({ ...form, ra: e.target.value })}
                     placeholder="RA informado pela escola"
                     required
                   />
@@ -294,7 +318,7 @@ export default function AlunosDaTurma() {
                   <button
                     type="button"
                     className={styles.cancel}
-                    onClick={() => setMostrarForm(false)}
+                    onClick={fecharNovoAluno}
                   >
                     Cancelar
                   </button>
@@ -335,8 +359,10 @@ export default function AlunosDaTurma() {
               <span className={styles.studentAvatar}>
                 {(alunoSelecionado.nomeCompleto || "A").slice(0, 1)}
               </span>
-              <h2>{alunoSelecionado.nomeCompleto}</h2>
-              <p>{alunoSelecionado.email || "E-mail não informado"}</p>
+              <h2>
+                {alunoSelecionado.nomeCompleto || "Nome ainda não informado"}
+              </h2>
+              {alunoSelecionado.ra ? <p>RA {alunoSelecionado.ra}</p> : null}
               <p>Cadastro criado em {formatDate(alunoSelecionado.createdAt)}</p>
               <strong>
                 {alunoSelecionado.cadastroInicialConcluido
@@ -358,7 +384,7 @@ export default function AlunosDaTurma() {
             className={styles.modalBackdrop}
             role="presentation"
             onMouseDown={(event) => {
-              if (event.target === event.currentTarget) setAlunoEmEdicao(null);
+              if (event.target === event.currentTarget) fecharEdicao();
             }}
           >
             <section
@@ -368,6 +394,7 @@ export default function AlunosDaTurma() {
               aria-labelledby="student-edit-title"
             >
               <h2 id="student-edit-title">Editar aluno</h2>
+              {erro ? <Notice kind="error">{erro}</Notice> : null}
               <form onSubmit={atualizarAluno}>
                 <label>
                   Novo RA
@@ -376,7 +403,11 @@ export default function AlunosDaTurma() {
                     onChange={(event) =>
                       setFormEdicao({ ...formEdicao, ra: event.target.value })
                     }
-                    placeholder="Deixe em branco para manter"
+                    placeholder={
+                      alunoEmEdicao.ra
+                        ? `Atual: ${alunoEmEdicao.ra}`
+                        : "Deixe em branco para manter"
+                    }
                   />
                 </label>
                 <label>
@@ -404,7 +435,7 @@ export default function AlunosDaTurma() {
                   <button
                     type="button"
                     className={styles.cancel}
-                    onClick={() => setAlunoEmEdicao(null)}
+                    onClick={fecharEdicao}
                   >
                     Cancelar
                   </button>
