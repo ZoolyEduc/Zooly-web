@@ -33,6 +33,15 @@ O Zooly faz parte de um conjunto de três aplicações independentes que trabalh
 | Zooly Game | Jogo educativo para os alunos. | https://zooly-game.vercel.app |
 | Zooly API | Backend e gerenciamento dos dados. | https://zooly-api.onrender.com |
 
+### Conta de professor para testes
+
+Uma conta exclusiva para avaliação será disponibilizada para que professores e avaliadores possam explorar as funcionalidades do painel.
+
+| Campo | Informação |
+|---|---|
+| E-mail | teste@professor.com |
+| Senha | teste2026 |
+
 ## Funcionalidades
 
 ### Área do professor
@@ -506,15 +515,6 @@ A variável `NEXT_PUBLIC_API_URL` deve estar configurada no ambiente de produç�
 O Zooly Web está disponível para avaliação por meio do ambiente publicado.
 
 **Endereço:** https://zooly-web.vercel.app
-
-### Conta de professor para testes
-
-Uma conta exclusiva para avaliação será disponibilizada para que professores e avaliadores possam explorar as funcionalidades do painel.
-
-| Campo | Informação |
-|---|---|
-| E-mail | teste@professor.com |
-| Senha | teste2026 |
 
 **Funcionalidades disponíveis para avaliação:**
 - Painel do professor.
