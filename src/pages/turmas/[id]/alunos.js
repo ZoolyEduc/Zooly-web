@@ -140,9 +140,7 @@ export default function AlunosDaTurma() {
       <TeacherLayout
         title={turma?.nome || "Alunos da turma"}
         subtitle="Gestão de alunos e progresso de missões acadêmicas."
-      >
-        <div className={styles.back}>
-          <Link href="/turmas">← Voltar para Turmas</Link>
+        actions={
           <button
             type="button"
             className={styles.primary}
@@ -150,6 +148,10 @@ export default function AlunosDaTurma() {
           >
             ＋ Novo Aluno
           </button>
+        }
+      >
+        <div className={styles.back}>
+          <Link href="/turmas">← Voltar para Turmas</Link>
         </div>
         {erro && !mostrarForm && !alunoEmEdicao ? (
           <Notice kind="error">{erro}</Notice>
@@ -215,7 +217,7 @@ export default function AlunosDaTurma() {
                   {alunos.map((aluno, index) => {
                     return (
                       <tr key={getId(aluno)}>
-                        <td>
+                        <td data-label="Aluno">
                           <div className={styles.student}>
                             <span
                               className={`${styles.studentAvatar} ${styles[`avatar${index % 4}`]}`}
@@ -233,15 +235,17 @@ export default function AlunosDaTurma() {
                             </div>
                           </div>
                         </td>
-                        <td>
+                        <td data-label="Cadastro">
                           <span className={styles.activeBadge}>
                             {aluno.cadastroInicialConcluido
                               ? "ATIVO"
                               : "PENDENTE"}
                           </span>
                         </td>
-                        <td>{formatDate(aluno.createdAt)}</td>
-                        <td>
+                        <td data-label="Data do cadastro">
+                          {formatDate(aluno.createdAt)}
+                        </td>
+                        <td data-label="Ações">
                           <button
                             className={styles.more}
                             type="button"

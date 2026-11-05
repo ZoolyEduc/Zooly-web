@@ -120,7 +120,7 @@ export default function Painel() {
       </Head>
       <TeacherLayout>
         <section className={styles.welcome}>
-          <h2>Olá, {nomeProfessor || "professor(a)"}!</h2>
+          <h1>Olá, {nomeProfessor || "professor(a)"}!</h1>
           <p>Aqui está um resumo das suas turmas e atividades.</p>
         </section>
         {erro ? <Notice kind="error">{erro}</Notice> : null}

@@ -1,14 +1,16 @@
 /* BARRA DE FERRAMENTAS E FILTROS */
 .toolbar {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  margin: -5px 0 35px;
+  gap: 14px 16px;
+  margin: 0 0 clamp(18px, 2.5vh, 26px);
 }
 
 .filters {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 10px;
 }
@@ -35,8 +37,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 55px;
-  padding: 11px 27px;
+  min-height: 48px;
+  padding: 11px 24px;
   border: 0;
   border-radius: 28px;
   background: #168144;
@@ -1070,6 +1072,26 @@
   font-weight: 500;
 }
 
+.bnccToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 6px 12px;
+  border: 1px dashed #b9d9c3;
+  border-radius: 18px;
+  background: #f4faf6;
+  color: #168144;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.bnccToggle:hover {
+  background: #e8f5ed;
+}
+
 .bnccSearch {
   display: flex;
   gap: 6px;
@@ -1079,11 +1101,12 @@
 .bnccSearch input {
   min-width: 0;
   flex: 1;
+  min-height: 36px;
   border: 1px solid #e3e9e7;
   border-radius: 10px;
   padding: 8px 10px;
   font: inherit;
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .bnccSearch button {
@@ -1092,11 +1115,11 @@
   gap: 5px;
   border: 0;
   border-radius: 10px;
-  padding: 7px 9px;
+  padding: 7px 10px;
   background: #eef7f0;
   color: #168144;
   font: inherit;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   cursor: pointer;
 }
@@ -1129,7 +1152,7 @@
   gap: 7px;
   padding: 8px;
   color: #58666d;
-  font-size: 10px;
+  font-size: 12px;
   line-height: 1.45;
   cursor: pointer;
 }

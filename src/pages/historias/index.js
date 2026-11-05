@@ -140,6 +140,12 @@ export default function BancoDeHistorias() {
       <TeacherLayout
         title="Banco de Histórias"
         subtitle="Histórias do Zooly e as suas, prontas para virar atividades."
+        actions={
+          <Link href="/historias/nova" className={styles.primary}>
+            <Plus size={16} aria-hidden="true" />
+            Nova história
+          </Link>
+        }
       >
         <div className={styles.toolbar}>
           <div
@@ -207,10 +213,6 @@ export default function BancoDeHistorias() {
               </select>
             </label>
           </div>
-          <Link href="/historias/nova" className={styles.primary}>
-            <Plus size={16} aria-hidden="true" />
-            Nova história
-          </Link>
         </div>
 
         {erro ? (

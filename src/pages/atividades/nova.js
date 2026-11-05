@@ -165,6 +165,8 @@ export default function NovaAtividade() {
   const [selecionadasBncc, setSelecionadasBncc] = useState([]);
   const [buscandoBncc, setBuscandoBncc] = useState(false);
   const [erroBncc, setErroBncc] = useState("");
+  // Termo da última busca concluída: evita "nenhuma encontrada" antes de buscar.
+  const [termoBuscadoBncc, setTermoBuscadoBncc] = useState("");
   const [mensagemIa, setMensagemIa] = useState(false);
   const [buscaBnccAberta, setBuscaBnccAberta] = useState(false);
   const [etapasSelecionadas, setEtapasSelecionadas] = useState([]);
@@ -452,12 +454,29 @@ export default function NovaAtividade() {
     if (!tema) return;
     setBuscandoBncc(true);
     setErroBncc("");
+    setTermoBuscadoBncc("");
     try {
       const params = new URLSearchParams({ tema, limite: "10" });
-      const resultado = await apiRequest(`/api/bncc/busca?${params}`);
-      setHabilidadesBncc(resultado?.itens || []);
+      const resultado = await apiRequest(`/api/bncc/busca?${params}`, {
+        timeoutMs: 60000,
+      });
+      // Contrato atual: { itens: [{ codigo, texto, etapa }] }. Qualquer outro
+      // formato é mostrado como erro, em vez de virar "nenhum resultado".
+      if (!Array.isArray(resultado?.itens)) {
+        throw new Error(
+          "A API respondeu à busca da BNCC em um formato inesperado (campo \"itens\" ausente).",
+        );
+      }
+      setHabilidadesBncc(
+        resultado.itens.filter((item) => item && item.codigo),
+      );
+      setTermoBuscadoBncc(tema);
     } catch (error) {
-      setErroBncc(error.message);
+      setErroBncc(
+        error.status
+          ? `Busca da BNCC falhou (HTTP ${error.status}): ${error.message}`
+          : error.message,
+      );
       setHabilidadesBncc([]);
     } finally {
       setBuscandoBncc(false);
@@ -941,7 +960,7 @@ export default function NovaAtividade() {
                 )}
                 <button
                   type="button"
-                  className={styles.unavailableButton}
+                  className={styles.bnccToggle}
                   onClick={() => setBuscaBnccAberta((aberta) => !aberta)}
                   aria-expanded={buscaBnccAberta}
                 >
@@ -1007,9 +1026,16 @@ export default function NovaAtividade() {
                           );
                         })}
                       </ul>
-                    ) : temaBncc.trim() && !buscandoBncc && !erroBncc ? (
-                      <p className={styles.asideDescription}>
-                        Nenhuma habilidade encontrada para esta busca.
+                    ) : termoBuscadoBncc && !buscandoBncc && !erroBncc ? (
+                      <p className={styles.asideDescription} role="status">
+                        Nenhuma habilidade encontrada para &quot;
+                        {termoBuscadoBncc}&quot;.
+                      </p>
+                    ) : null}
+                    {buscandoBncc ? (
+                      <p className={styles.asideDescription} role="status">
+                        Buscando na BNCC... a primeira busca pode demorar se a
+                        API estiver iniciando.
                       </p>
                     ) : null}
                   </>

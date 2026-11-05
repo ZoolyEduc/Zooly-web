@@ -19,7 +19,12 @@ function encerrarSessaoExpirada(path) {
 
 export async function apiRequest(path, options = {}) {
   if (!API_BASE_URL) throw new Error(ERRO_API_NAO_CONFIGURADA);
-  const { body, headers: customHeaders = {}, ...rest } = options;
+  const {
+    body,
+    headers: customHeaders = {},
+    timeoutMs,
+    ...rest
+  } = options;
   const headers = new Headers(customHeaders);
   const token =
     typeof window !== "undefined"
@@ -40,17 +45,37 @@ export async function apiRequest(path, options = {}) {
     requestBody = JSON.stringify(body);
   }
 
+  // Timeout opcional: sem ele, uma API "dormindo" deixa a tela carregando sem fim.
+  const controller =
+    timeoutMs && typeof AbortController !== "undefined"
+      ? new AbortController()
+      : null;
+  const timer = controller
+    ? setTimeout(() => controller.abort(), timeoutMs)
+    : null;
+
   let response;
   try {
     response = await fetch(`${API_BASE_URL}${path}`, {
       ...rest,
+      ...(controller ? { signal: controller.signal } : {}),
       headers,
       body: requestBody,
     });
-  } catch {
+  } catch (error) {
+    if (controller?.signal.aborted) {
+      const erro = new Error(
+        `A API em ${API_BASE_URL} não respondeu em ${Math.round(timeoutMs / 1000)} segundos. Se o servidor estava inativo, aguarde alguns instantes e tente de novo.`,
+      );
+      erro.timeout = true;
+      throw erro;
+    }
     throw new Error(
       `Não consegui conectar à API em ${API_BASE_URL}. Confira se o backend está rodando e se a URL está correta.`,
+      { cause: error },
     );
+  } finally {
+    if (timer) clearTimeout(timer);
   }
 
   if (response.status === 204) return null;

@@ -1,18 +1,18 @@
 /* BANCO DE HISTÓRIAS — mesmo vocabulário visual de atividades.module.css */
 
+/* Painel de busca e filtros: ocupa toda a largura da página de Histórias. */
 .toolbar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 16px;
-  margin: -5px 0 20px;
+  margin: 0 0 18px;
+  padding: clamp(14px, 1.6vw, 20px);
+  border: 1px solid var(--zooly-border);
+  border-radius: 24px;
+  background: #fff;
+  box-shadow: var(--zooly-shadow-card);
 }
 .filters {
   display: grid;
-  grid-template-columns: minmax(220px, 2fr) repeat(4, minmax(140px, 1fr));
-  gap: 10px;
-  flex: 1;
+  grid-template-columns: minmax(200px, 2fr) repeat(4, minmax(0, 1fr));
+  gap: 12px;
 }
 .filters label {
   display: grid;
@@ -116,14 +116,15 @@
 /* Cards */
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
-  gap: 18px;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+  gap: clamp(14px, 1.4vw, 18px);
 }
 .card {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  min-height: 300px;
+  min-width: 0;
+  min-height: 260px;
   padding: 22px;
   border: 1px solid var(--zooly-border);
   border-radius: 26px;
@@ -261,9 +262,17 @@
   font-weight: 700;
   text-decoration: none;
 }
+.detailHeader > div:first-child {
+  flex: 1 1 360px;
+  min-width: 0;
+}
 .detailHeader h1 {
   margin: 6px 0 4px;
-  font-size: 26px;
+  color: var(--zooly-green);
+  font-size: clamp(24px, 2.6vw, 32px);
+  line-height: 1.2;
+  letter-spacing: -0.6px;
+  overflow-wrap: anywhere;
 }
 .headerActions {
   display: flex;
@@ -275,6 +284,11 @@
   grid-template-columns: minmax(0, 2fr) minmax(260px, 1fr);
   gap: 20px;
   align-items: start;
+}
+/* Dados pedagógicos acompanham a leitura em vez de ficarem soltos ao lado. */
+.detailGrid > aside {
+  position: sticky;
+  top: 20px;
 }
 .panel {
   padding: 24px;
@@ -424,7 +438,7 @@
 
 @media (max-width: 1100px) {
   .filters {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
   .filters label:first-child {
     grid-column: 1 / -1;
@@ -435,10 +449,24 @@
   .formGrid {
     grid-template-columns: 1fr;
   }
+  .detailGrid > aside {
+    position: static;
+  }
+  .filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 @media (max-width: 520px) {
-  .filters {
-    grid-template-columns: 1fr;
+  .toolbar {
+    padding: 14px;
+    border-radius: 20px;
+  }
+  .headerActions,
+  .headerActions > * {
+    flex: 1 1 auto;
+  }
+  .alternativeRow {
+    flex-wrap: wrap;
   }
   .card,
   .panel {

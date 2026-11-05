@@ -212,7 +212,7 @@ export default function Desempenho() {
                             item.indicadores?.percentualAcerto ?? null;
                           return (
                             <tr key={aluno.id || aluno.ra || index}>
-                              <td>
+                              <td data-label="Aluno">
                                 <div className={styles.student}>
                                   <span>
                                     {(aluno.nomeCompleto || "A")
@@ -227,21 +227,21 @@ export default function Desempenho() {
                                   </strong>
                                 </div>
                               </td>
-                              <td>
+                              <td data-label="Iniciadas">
                                 {item.indicadores?.atividadesIniciadas ?? 0}
                               </td>
-                              <td>
+                              <td data-label="Concluídas">
                                 {item.indicadores?.atividadesConcluidas ?? 0}
                               </td>
-                              <td>
+                              <td data-label="Respostas">
                                 {item.indicadores?.respostasRegistradas ?? 0}
                               </td>
-                              <td>
+                              <td data-label="Acerto">
                                 {percent == null
                                   ? "Sem respostas"
                                   : `${percent}%`}
                               </td>
-                              <td>
+                              <td data-label="Ações">
                                 <Link href={`/desempenho/alunos/${aluno.id}`}>
                                   Detalhes
                                 </Link>

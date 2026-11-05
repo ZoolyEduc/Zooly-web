@@ -39,7 +39,7 @@ function semAcento(texto) {
     .toLocaleLowerCase("pt-BR");
 }
 
-export default function TeacherLayout({ title, subtitle, children }) {
+export default function TeacherLayout({ title, subtitle, actions, children }) {
   const router = useRouter();
   const [mostrarSaida, setMostrarSaida] = useState(false);
   const [menuMobile, setMenuMobile] = useState(false);
@@ -266,10 +266,15 @@ export default function TeacherLayout({ title, subtitle, children }) {
         </header>
 
         <main className={styles.content}>
-          {title || subtitle ? (
+          {title || subtitle || actions ? (
             <div className={styles.pageHeading}>
-              {title ? <h1>{title}</h1> : null}
-              {subtitle ? <p>{subtitle}</p> : null}
+              <div className={styles.pageHeadingText}>
+                {title ? <h1>{title}</h1> : null}
+                {subtitle ? <p>{subtitle}</p> : null}
+              </div>
+              {actions ? (
+                <div className={styles.pageActions}>{actions}</div>
+              ) : null}
             </div>
           ) : null}
           {children}

@@ -11,17 +11,22 @@
   display: flex;
   flex-direction: column;
   width: 245px;
-  padding: 42px 16px 24px;
+  padding: 26px 16px 20px;
+  overflow-y: auto;
   background: #f8fbfd;
   border-radius: 0 0 32px 0;
 }
 .brand {
   display: flex;
   justify-content: center;
-  padding: 0 5px 27px;
+  padding: 0 5px 14px;
+}
+/* Logo da sidebar um pouco maior que o tamanho "lg" padrão (proporção preservada). */
+.sidebar .brand {
+  height: 84px;
 }
 .sideCaption {
-  margin: 18px 12px 10px;
+  margin: 10px 12px 10px;
   color: #a2a8aa;
   font-size: 10px;
   font-weight: 800;
@@ -96,8 +101,8 @@
   align-items: center;
   justify-content: space-between;
   gap: 24px;
-  min-height: 108px;
-  padding: 20px clamp(26px, 5vw, 74px);
+  min-height: 76px;
+  padding: 14px clamp(20px, 3vw, 44px);
   background: #f8fbfd;
 }
 
@@ -291,15 +296,30 @@
 
 /* --- Conteúdo Principal --- */
 .content {
-  width: min(100%, 1200px);
+  width: min(100%, 1360px);
   margin: 0 auto;
-  padding: 34px clamp(26px, 5vw, 74px) 54px;
+  padding: clamp(20px, 3vh, 30px) clamp(20px, 3vw, 44px) 44px;
 }
 .pageHeading {
   display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px 24px;
+  margin: 0 0 clamp(18px, 2.5vh, 26px);
+}
+.pageHeadingText {
+  display: flex;
+  flex: 1 1 360px;
   flex-direction: column;
   gap: 2px;
-  margin: 0 0 28px;
+  min-width: 0;
+}
+.pageActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
 }
 .pageHeading h1 {
   margin: 0;
@@ -399,20 +419,39 @@
 }
 
 /* --- Responsividade --- */
+@media (max-height: 760px) and (min-width: 961px) {
+  .sidebar {
+    padding-top: 18px;
+  }
+  .sidebar .brand {
+    height: 74px;
+    padding-bottom: 8px;
+  }
+  .navItem {
+    min-height: 40px;
+    padding-block: 8px;
+  }
+}
+
 @media (max-width: 960px) {
   .sidebar {
-    position: relative;
+    position: sticky;
+    top: 0;
     width: 100%;
-    min-height: 70px;
+    min-height: 64px;
     flex-direction: row;
     flex-wrap: wrap;
     align-items: center;
     gap: 0 16px;
-    padding: 10px 18px;
+    padding: 8px 18px;
+    overflow: visible;
     border-radius: 0;
+    border-bottom: 1px solid #e8eeec;
   }
-  .brand {
+  .brand,
+  .sidebar .brand {
     justify-content: flex-start;
+    height: 48px;
     padding: 0;
   }
   .sideCaption {
@@ -434,23 +473,21 @@
     display: none;
     order: 3;
     width: 100%;
-    flex-direction: row;
-    overflow-x: auto;
-    padding-top: 9px;
+    flex-direction: column;
+    gap: 4px;
+    padding-top: 8px;
   }
   .navOpen {
     display: flex;
-  }
-  .navItem {
-    flex-shrink: 0;
   }
   .sidebarBottom {
     display: none;
     order: 4;
     width: 100%;
     flex-direction: row;
-    margin-top: 5px;
-    padding-top: 6px;
+    flex-wrap: wrap;
+    margin-top: 6px;
+    padding: 6px 0 8px;
   }
   .navOpen ~ .sidebarBottom {
     display: flex;
@@ -458,24 +495,30 @@
   .sidebarBottom > a,
   .logout {
     width: auto;
+    flex: 1 1 140px;
   }
   .mainArea {
     margin-left: 0;
   }
   .topbar {
-    min-height: 78px;
-    padding: 15px 24px;
-  }
-  .content {
-    padding-top: 28px;
+    min-height: 64px;
+    padding: 12px 24px;
   }
 }
 
 @media (max-width: 560px) {
+  .sidebar {
+    padding: 8px 15px;
+  }
+  .brand,
+  .sidebar .brand {
+    height: 42px;
+  }
   .topbar {
-    align-items: flex-start;
-    gap: 12px;
-    padding: 13px 15px;
+    align-items: center;
+    gap: 10px;
+    min-height: 58px;
+    padding: 10px 15px;
   }
   .search {
     width: auto;
@@ -506,7 +549,7 @@
     width: 28px;
   }
   .content {
-    padding: 23px 15px 36px;
+    padding: 20px 15px 36px;
   }
   .pageHeading {
     margin-bottom: 20px;
@@ -516,6 +559,15 @@
   }
   .pageHeading p {
     font-size: 14px;
+  }
+  .pageHeadingText {
+    flex-basis: 100%;
+  }
+  .pageActions {
+    width: 100%;
+  }
+  .pageActions > * {
+    flex: 1 1 auto;
   }
   .exitModal {
     padding: 27px 21px;

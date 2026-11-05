@@ -1,14 +1,14 @@
 /* --- Estrutura da Página --- */
 .page {
   min-height: 100vh;
-  padding: 28px 32px 42px;
+  padding: clamp(14px, 2.5vh, 28px) 32px clamp(24px, 4vh, 42px);
   background: #fff;
 }
 
 /* Topo (Header) */
 .top {
   position: relative;
-  min-height: 108px;
+  min-height: clamp(76px, 11vh, 108px);
   margin-bottom: 5px;
   display: flex;
   justify-content: flex-end; /* Empurra os links para a direita */
@@ -44,10 +44,9 @@
 
 /* --- Card Principal --- */
 .card {
-  width: min(100%, 690px);
-  min-height: 675px;
+  width: min(100%, 640px);
   margin: 0 auto;
-  padding: 42px 48px;
+  padding: clamp(28px, 4.5vh, 42px) clamp(28px, 4vw, 48px);
   border: 1px solid #f0f1f1;
   border-radius: 48px;
   box-shadow:
@@ -208,12 +207,13 @@
   }
   .top {
     min-height: 80px;
+    flex-wrap: wrap;
     justify-content: center; /* Centraliza os links no mobile */
   }
   .logoWrapper {
     position: static; /* Tira o absoluto para não sobrepor */
     transform: none;
-    margin-bottom: 20px;
+    margin-bottom: 12px;
     width: 100%;
     display: flex;
     justify-content: center;
