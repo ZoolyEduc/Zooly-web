@@ -499,6 +499,126 @@ export default function NovaAtividade() {
     );
   }
 
+  // A busca BNCC não depende de turma: aparece no formulário e também para quem
+  // ainda não tem turma (só consulta; nada é salvo sem uma atividade).
+  function renderSecaoBncc({ semTurma = false } = {}) {
+    return (
+      <section className={styles.asideCard}>
+        <h2>
+          <ShieldAlert size={17} aria-hidden="true" />
+          BNCC
+        </h2>
+        {semTurma ? (
+          <p className={styles.asideDescription}>
+            Pesquise e selecione habilidades para planejar suas atividades. A
+            seleção fica apenas nesta tela e não é salva.
+          </p>
+        ) : null}
+        {selecionadasBncc.length ? (
+          <ul
+            className={styles.bnccSelected}
+            aria-label="Habilidades selecionadas"
+          >
+            {selecionadasBncc.map((item) => (
+              <li key={item.codigo} title={item.texto}>
+                <strong>{item.codigo}</strong>
+                <button type="button" onClick={() => alternarHabilidade(item)}>
+                  Remover
+                </button>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className={styles.asideDescription}>
+            Nenhuma habilidade selecionada.
+          </p>
+        )}
+        <button
+          type="button"
+          className={styles.bnccToggle}
+          onClick={() => setBuscaBnccAberta((aberta) => !aberta)}
+          aria-expanded={buscaBnccAberta}
+        >
+          <Plus size={14} aria-hidden="true" />
+          {buscaBnccAberta ? "Fechar busca" : "Adicionar habilidade"}
+        </button>
+        {buscaBnccAberta ? (
+          <>
+            <div className={styles.bnccSearch}>
+              <label className={styles.srOnly} htmlFor="bncc-tema">
+                Tema da habilidade
+              </label>
+              <input
+                id="bncc-tema"
+                value={temaBncc}
+                onChange={(event) => setTemaBncc(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") {
+                    event.preventDefault();
+                    buscarHabilidades();
+                  }
+                }}
+                placeholder="Pesquisar habilidades"
+                maxLength={100}
+              />
+              <button
+                type="button"
+                onClick={buscarHabilidades}
+                disabled={buscandoBncc || !temaBncc.trim()}
+              >
+                <Search size={14} aria-hidden="true" />
+                {buscandoBncc ? "Buscando" : "Buscar"}
+              </button>
+            </div>
+            {erroBncc ? (
+              <p className={styles.bnccError} role="alert">
+                {erroBncc}
+              </p>
+            ) : null}
+            {habilidadesBncc.length ? (
+              <ul
+                className={styles.bnccResults}
+                aria-label="Resultados da BNCC"
+              >
+                {habilidadesBncc.map((item) => {
+                  const marcada = selecionadasBncc.some(
+                    (selecionada) => selecionada.codigo === item.codigo,
+                  );
+                  return (
+                    <li key={item.codigo}>
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={marcada}
+                          onChange={() => alternarHabilidade(item)}
+                        />
+                        <span>
+                          <strong>{item.codigo}</strong>
+                          {item.texto}
+                        </span>
+                      </label>
+                    </li>
+                  );
+                })}
+              </ul>
+            ) : termoBuscadoBncc && !buscandoBncc && !erroBncc ? (
+              <p className={styles.asideDescription} role="status">
+                Nenhuma habilidade encontrada para &quot;
+                {termoBuscadoBncc}&quot;.
+              </p>
+            ) : null}
+            {buscandoBncc ? (
+              <p className={styles.asideDescription} role="status">
+                Buscando na BNCC... a primeira busca pode demorar se a API
+                estiver iniciando.
+              </p>
+            ) : null}
+          </>
+        ) : null}
+      </section>
+    );
+  }
+
   const pontuacaoTotalCalculada = questoes.reduce(
     (total, questao) =>
       total + (Number.isSafeInteger(questao.pontos) ? questao.pontos : 0),
@@ -533,11 +653,19 @@ export default function NovaAtividade() {
         {loading ? (
           <p className={styles.loading}>Carregando turmas e histórias...</p>
         ) : !turmas.length ? (
-          <Notice kind="info">
-            Você precisa ter uma turma ativa vinculada à sua conta antes de
-            criar uma atividade. Verifique a área de turmas e o vínculo com a
-            escola.
-          </Notice>
+          <>
+            <Notice kind="info">
+              Você precisa cadastrar uma turma ativa vinculada à sua conta para
+              criar e salvar atividades. Enquanto isso, você já pode consultar
+              as habilidades da BNCC abaixo.
+            </Notice>
+            <aside
+              className={styles.editorAside}
+              style={{ maxWidth: 460, marginTop: 16 }}
+            >
+              {renderSecaoBncc({ semTurma: true })}
+            </aside>
+          </>
         ) : (
           <form className={styles.activityForm} onSubmit={salvar}>
             <section className={`${styles.formPanel} ${styles.generalPanel}`}>
@@ -931,116 +1059,7 @@ export default function NovaAtividade() {
                   ))}
                 </div>
               </section>
-              <section className={styles.asideCard}>
-                <h2>
-                  <ShieldAlert size={17} aria-hidden="true" />
-                  BNCC
-                </h2>
-                {selecionadasBncc.length ? (
-                  <ul
-                    className={styles.bnccSelected}
-                    aria-label="Habilidades selecionadas"
-                  >
-                    {selecionadasBncc.map((item) => (
-                      <li key={item.codigo} title={item.texto}>
-                        <strong>{item.codigo}</strong>
-                        <button
-                          type="button"
-                          onClick={() => alternarHabilidade(item)}
-                        >
-                          Remover
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p className={styles.asideDescription}>
-                    Nenhuma habilidade selecionada.
-                  </p>
-                )}
-                <button
-                  type="button"
-                  className={styles.bnccToggle}
-                  onClick={() => setBuscaBnccAberta((aberta) => !aberta)}
-                  aria-expanded={buscaBnccAberta}
-                >
-                  <Plus size={14} aria-hidden="true" />
-                  {buscaBnccAberta ? "Fechar busca" : "Adicionar habilidade"}
-                </button>
-                {buscaBnccAberta ? (
-                  <>
-                    <div className={styles.bnccSearch}>
-                      <label className={styles.srOnly} htmlFor="bncc-tema">
-                        Tema da habilidade
-                      </label>
-                      <input
-                        id="bncc-tema"
-                        value={temaBncc}
-                        onChange={(event) => setTemaBncc(event.target.value)}
-                        onKeyDown={(event) => {
-                          if (event.key === "Enter") {
-                            event.preventDefault();
-                            buscarHabilidades();
-                          }
-                        }}
-                        placeholder="Pesquisar habilidades"
-                        maxLength={100}
-                      />
-                      <button
-                        type="button"
-                        onClick={buscarHabilidades}
-                        disabled={buscandoBncc || !temaBncc.trim()}
-                      >
-                        <Search size={14} aria-hidden="true" />
-                        {buscandoBncc ? "Buscando" : "Buscar"}
-                      </button>
-                    </div>
-                    {erroBncc ? (
-                      <p className={styles.bnccError} role="alert">
-                        {erroBncc}
-                      </p>
-                    ) : null}
-                    {habilidadesBncc.length ? (
-                      <ul
-                        className={styles.bnccResults}
-                        aria-label="Resultados da BNCC"
-                      >
-                        {habilidadesBncc.map((item) => {
-                          const marcada = selecionadasBncc.some(
-                            (selecionada) => selecionada.codigo === item.codigo,
-                          );
-                          return (
-                            <li key={item.codigo}>
-                              <label>
-                                <input
-                                  type="checkbox"
-                                  checked={marcada}
-                                  onChange={() => alternarHabilidade(item)}
-                                />
-                                <span>
-                                  <strong>{item.codigo}</strong>
-                                  {item.texto}
-                                </span>
-                              </label>
-                            </li>
-                          );
-                        })}
-                      </ul>
-                    ) : termoBuscadoBncc && !buscandoBncc && !erroBncc ? (
-                      <p className={styles.asideDescription} role="status">
-                        Nenhuma habilidade encontrada para &quot;
-                        {termoBuscadoBncc}&quot;.
-                      </p>
-                    ) : null}
-                    {buscandoBncc ? (
-                      <p className={styles.asideDescription} role="status">
-                        Buscando na BNCC... a primeira busca pode demorar se a
-                        API estiver iniciando.
-                      </p>
-                    ) : null}
-                  </>
-                ) : null}
-              </section>
+              {renderSecaoBncc()}
               <section className={`${styles.asideCard} ${styles.rewardCard}`}>
                 <h2>Recompensa</h2>
                 <label>
