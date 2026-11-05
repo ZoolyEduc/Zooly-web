@@ -263,12 +263,7 @@ export default function Turmas() {
       <TeacherLayout
         title="Turmas"
         subtitle="Gerencie suas turmas e mascotes. Acompanhe o progresso de cada grupo de forma intuitiva."
-      >
-        {erro && !modalAberto ? <Notice kind="error">{erro}</Notice> : null}
-        {sucesso ? <Notice kind="success">{sucesso}</Notice> : null}
-
-        <div className={styles.toolbar}>
-          <span />{" "}
+        actions={
           <button
             type="button"
             className={styles.primary}
@@ -277,7 +272,10 @@ export default function Turmas() {
             <UserPlus size={18} aria-hidden="true" />
             Nova Turma
           </button>
-        </div>
+        }
+      >
+        {erro && !modalAberto ? <Notice kind="error">{erro}</Notice> : null}
+        {sucesso ? <Notice kind="success">{sucesso}</Notice> : null}
 
         {loading ? (
           <p className={styles.loading}>Carregando turmas...</p>

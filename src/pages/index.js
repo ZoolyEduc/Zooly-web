@@ -108,7 +108,7 @@ export default function Home() {
           </div>
         </section>
 
-        <section className={styles.about}>
+        <section id="sobre" className={styles.about}>
           <div className={styles.sectionIntro}>
             <span className={styles.eyebrow}>CONHEÇA O ZOOLY</span>
             <h2>Uma jornada educativa que respeita o ritmo de cada criança</h2>
@@ -141,7 +141,7 @@ export default function Home() {
           </div>
         </section>
 
-        <section className={styles.how}>
+        <section id="como-funciona" className={styles.how}>
           <div>
             <span className={styles.eyebrow}>COMO FUNCIONA</span>
             <h2>Pronto para começar a aventura?</h2>
