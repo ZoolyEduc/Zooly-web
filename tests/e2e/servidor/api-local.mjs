@@ -101,7 +101,7 @@ const turma = await Turma.create({
   senhaAcessoHash: await bcrypt.hash("senha-turma-e2e", 4),
 });
 await Aluno.create({
-  ra: "WEB-E2E-0001",
+  ra: "0000000000001",
   nomeCompleto: "Aluno Teste",
   turma: turma._id,
 });
