@@ -1,7 +1,8 @@
 .menu {
   position: relative;
   z-index: 30;
-  width: min(1180px, calc(100% - 48px));
+  /* No desktop, a landing define --largura-landing; fora dela vale a largura original. */
+  width: var(--largura-landing, min(1180px, calc(100% - 48px)));
   margin: 0 auto;
   min-height: 86px;
   display: flex;
@@ -49,6 +50,15 @@
 .navigation .login:hover {
   color: #fff;
   background: #185629;
+}
+
+@media (min-width: 1200px) {
+  .navigation a {
+    font-size: clamp(14px, calc(0.25vw + 10.6px), 16px);
+  }
+  .navigation .login {
+    padding: clamp(12px, 0.9vw, 15px) clamp(24px, 2vw, 32px);
+  }
 }
 
 @media (max-width: 640px) {

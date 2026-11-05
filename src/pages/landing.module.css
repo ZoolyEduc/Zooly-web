@@ -499,3 +499,154 @@
     justify-content: center;
   }
 }
+
+/* =========================================
+   DESKTOP (a partir de 1200px)
+   Conteúdo fluido entre notebook (1366) e Full HD (1920).
+   Celular e tablet (até 1199px) continuam com as regras acima.
+   ========================================= */
+@media (min-width: 1200px) {
+  /* Uma largura única para menu, hero, seções e rodapé. O Menu lê a mesma variável. */
+  .site {
+    --largura-landing: min(1480px, calc(100% - clamp(96px, 10vw, 220px)));
+  }
+
+  /* Hero aproveita a altura da tela, deixando o início da próxima seção visível. */
+  .hero {
+    width: var(--largura-landing);
+    min-height: clamp(560px, calc(100svh - 150px), 840px);
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+    gap: clamp(32px, 4vw, 88px);
+    padding: clamp(12px, 3vh, 40px) 0 clamp(40px, 7vh, 88px);
+  }
+  .eyebrow {
+    font-size: clamp(10px, calc(0.2vw + 7.5px), 12px);
+  }
+  .hero h1 {
+    margin: clamp(17px, 2vh, 24px) 0 clamp(18px, 2.4vh, 28px);
+    font-size: clamp(56px, calc(2.6vw + 30px), 82px);
+    letter-spacing: -0.04em;
+    max-width: 11.5em;
+  }
+  .heroCopy > p {
+    font-size: clamp(16px, calc(0.45vw + 10px), 19px);
+    max-width: 33em;
+  }
+  .actions {
+    margin-top: clamp(29px, 3.5vh, 40px);
+  }
+  .primary,
+  .secondary {
+    min-height: clamp(48px, calc(1vw + 34px), 56px);
+    padding: 0 clamp(23px, 1.8vw, 32px);
+    font-size: clamp(13px, calc(0.25vw + 9.6px), 15px);
+  }
+  .microcopy {
+    font-size: clamp(11px, calc(0.2vw + 8.3px), 13px);
+    margin-top: clamp(24px, 3vh, 32px);
+  }
+
+  /* Roda dos mascotes cresce com a largura, limitada pela altura da tela. */
+  .heroVisual {
+    min-height: 0;
+  }
+  .containerCirculo {
+    width: min(clamp(440px, 34vw, 620px), 100%, calc(100svh - 190px));
+  }
+  /* Cards proporcionais ao círculo (29% x 30,5%): não se sobrepõem em nenhum ângulo do giro. */
+  .mascotPonto {
+    width: 29%;
+    height: 30.5%;
+  }
+  .mascotConteudo {
+    border-radius: clamp(22px, 1.6vw, 30px);
+    padding: clamp(7px, 0.6vw, 12px);
+  }
+  .mascotConteudo img {
+    width: 72%;
+    height: auto;
+  }
+  .mascotConteudo span {
+    font-size: clamp(12px, calc(0.3vw + 7.5px), 14px);
+  }
+
+  /* Seções seguintes alinhadas à mesma largura e com respiro proporcional. */
+  .about {
+    padding: clamp(64px, 10vh, 120px) 0 clamp(68px, 10vh, 124px);
+  }
+  .sectionIntro {
+    max-width: clamp(650px, 46vw, 820px);
+    margin-bottom: clamp(35px, 4.5vh, 56px);
+  }
+  .sectionIntro h2,
+  .how h2 {
+    font-size: clamp(40px, calc(1.6vw + 20px), 54px);
+    letter-spacing: -0.035em;
+  }
+  .sectionIntro p,
+  .how > div:first-child p {
+    font-size: clamp(14px, calc(0.45vw + 8.5px), 17.5px);
+  }
+  .featureGrid {
+    width: var(--largura-landing);
+    gap: clamp(18px, 1.6vw, 28px);
+  }
+  .feature {
+    border-radius: clamp(20px, 1.5vw, 26px);
+    padding: clamp(25px, 2.2vw, 40px);
+  }
+  .featureIcon {
+    width: clamp(45px, 3.2vw, 58px);
+    height: clamp(45px, 3.2vw, 58px);
+    font-size: clamp(24px, 1.6vw, 30px);
+  }
+  .feature h3 {
+    font-size: clamp(17px, calc(0.35vw + 12.3px), 20.5px);
+  }
+  .feature p {
+    font-size: clamp(13px, calc(0.3vw + 9px), 15.5px);
+  }
+  .how {
+    width: var(--largura-landing);
+    padding: clamp(64px, 11vh, 128px) 0;
+    grid-template-columns: 0.85fr 1.15fr;
+    gap: clamp(40px, 5vw, 96px);
+  }
+  .steps {
+    gap: clamp(15px, 1.2vw, 22px);
+  }
+  .steps > div {
+    grid-template-columns: clamp(48px, 3.4vw, 62px) 1fr;
+    column-gap: clamp(15px, 1.2vw, 22px);
+    padding: clamp(17px, 1.5vw, 26px) clamp(17px, 1.6vw, 28px);
+    border-radius: clamp(16px, 1.2vw, 22px);
+  }
+  .steps span {
+    width: clamp(42px, 3vw, 54px);
+    height: clamp(42px, 3vw, 54px);
+    font-size: clamp(16px, 1.1vw, 20px);
+  }
+  .steps strong {
+    font-size: clamp(14px, calc(0.4vw + 8.6px), 17.5px);
+  }
+  .steps p {
+    font-size: clamp(12px, calc(0.32vw + 7.6px), 14.5px);
+  }
+  .cta {
+    width: var(--largura-landing);
+    margin-bottom: clamp(70px, 9vh, 110px);
+    padding: clamp(32px, 4vh, 52px) clamp(36px, 3.4vw, 64px);
+    border-radius: clamp(24px, 1.8vw, 32px);
+  }
+  .cta h2 {
+    font-size: clamp(25px, calc(0.9vw + 13px), 32px);
+  }
+  .cta p {
+    font-size: clamp(13px, calc(0.3vw + 9px), 16px);
+  }
+  .footer {
+    width: var(--largura-landing);
+    min-height: clamp(68px, 8vh, 88px);
+    font-size: clamp(11px, calc(0.2vw + 8.3px), 13px);
+  }
+}
