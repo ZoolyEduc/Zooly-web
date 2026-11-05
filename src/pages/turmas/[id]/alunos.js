@@ -61,6 +61,10 @@ export default function AlunosDaTurma() {
     event.preventDefault();
     setErro("");
     setSucesso("");
+    if (!/^\d{13}$/.test(form.ra.trim())) {
+      setErro("O RA deve conter exatamente 13 dígitos.");
+      return;
+    }
     setSalvando(true);
     try {
       const resposta = await apiRequest("/api/alunos", {
@@ -109,7 +113,13 @@ export default function AlunosDaTurma() {
     setErro("");
     setSucesso("");
     const body = {};
-    if (formEdicao.ra.trim()) body.ra = formEdicao.ra.trim();
+    if (formEdicao.ra.trim()) {
+      if (!/^\d{13}$/.test(formEdicao.ra.trim())) {
+        setErro("O RA deve conter exatamente 13 dígitos.");
+        return;
+      }
+      body.ra = formEdicao.ra.trim();
+    }
     if (formEdicao.turmaId) body.turmaId = formEdicao.turmaId;
     if (Object.keys(body).length === 0) {
       setErro("Informe um novo RA ou escolha uma turma de destino.");
@@ -312,9 +322,13 @@ export default function AlunosDaTurma() {
                 <label>
                   RA do aluno
                   <input
+                    type="text"
                     value={form.ra}
                     onChange={(e) => setForm({ ...form, ra: e.target.value })}
-                    placeholder="RA informado pela escola"
+                    placeholder="RA com 13 dígitos"
+                    inputMode="numeric"
+                    maxLength={13}
+                    pattern="[0-9]{13}"
                     required
                   />
                 </label>
@@ -403,6 +417,7 @@ export default function AlunosDaTurma() {
                 <label>
                   Novo RA
                   <input
+                    type="text"
                     value={formEdicao.ra}
                     onChange={(event) =>
                       setFormEdicao({ ...formEdicao, ra: event.target.value })
@@ -412,6 +427,9 @@ export default function AlunosDaTurma() {
                         ? `Atual: ${alunoEmEdicao.ra}`
                         : "Deixe em branco para manter"
                     }
+                    inputMode="numeric"
+                    maxLength={13}
+                    pattern="[0-9]{13}"
                   />
                 </label>
                 <label>
